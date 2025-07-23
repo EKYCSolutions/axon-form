@@ -40,7 +40,7 @@ export enum GraphSheetType {
   AddNode = 'add_node',
   EditNode = 'edit_node',
   ShowNode = 'show_node',
-  AddRelationship = 'add_relationship',
-  EditRelationship = 'edit_relationship',
-  ShowRelationship = 'show_relationship',
+  AddEdge = 'add_edge',
+  EditEdge = 'edit_edge',
+  ShowEdge = 'show_edge',
 }

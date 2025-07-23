@@ -1,4 +1,5 @@
-import type { Node, NVL, NvlOptions, Relationship } from '@neo4j-nvl/base';
+import type { GraphEdge, GraphNode } from '@/types/Graph';
+import type { NVL, NvlOptions } from '@neo4j-nvl/base';
 import {
   InteractiveNvlWrapper,
   type MouseEventCallbacks,
@@ -8,8 +9,8 @@ export interface IProps {
   className?: string;
   nvlRef: React.RefObject<NVL | null>;
   options: NvlOptions;
-  nodes: Node[];
-  relationships: Relationship[];
+  nodes: GraphNode[];
+  edges: GraphEdge[];
   mouseEventCallbacks: MouseEventCallbacks;
 }
 
@@ -18,7 +19,7 @@ export default function GraphVisualizationWrapper({
   nvlRef,
   options,
   nodes,
-  relationships,
+  edges,
   mouseEventCallbacks,
 }: IProps) {
   return (
@@ -27,7 +28,7 @@ export default function GraphVisualizationWrapper({
       className={className}
       nvlOptions={options}
       nodes={nodes}
-      rels={relationships}
+      rels={edges}
       mouseEventCallbacks={mouseEventCallbacks}
     />
   );

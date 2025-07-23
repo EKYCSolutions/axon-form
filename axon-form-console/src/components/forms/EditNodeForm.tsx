@@ -18,9 +18,11 @@ import { NodeFieldType, NodeType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
 import {
   AddNodeFormSchema,
-  AddNodeFormSchemaDefaultValue,
+  convertGraphNodeToNodeForm,
+  convertNodeFormSchemaToGraphNode,
   type AddNodeFormSchemaData,
 } from '@/validations/AddNodeValidation';
+import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import {
   Select,
@@ -34,17 +36,19 @@ interface IProps {
   className?: string;
 }
 
-export default function AddNodeForm({ className }: IProps) {
-  const { addNode } = useGraph();
+export default function EditNodeForm({ className }: IProps) {
+  const { selectedNode, updateNode, setSheetOpen } = useGraph();
 
   const form = useForm<AddNodeFormSchemaData>({
     resolver: zodResolver(AddNodeFormSchema),
-    defaultValues: AddNodeFormSchemaDefaultValue,
+    defaultValues: convertGraphNodeToNodeForm(selectedNode),
   });
 
   function onSubmit(data: AddNodeFormSchemaData) {
-    addNode(data);
-    form.reset();
+    updateNode(selectedNode?.id, convertNodeFormSchemaToGraphNode(data));
+    //
+    setSheetOpen(false);
+    toast.success('Update node successfully');
   }
 
   return (
@@ -115,7 +119,7 @@ export default function AddNodeForm({ className }: IProps) {
             </FormItem>
           )}
         />
-        <Button type='submit'>Submit</Button>
+        <Button type='submit'>Update</Button>
       </form>
     </Form>
   );
