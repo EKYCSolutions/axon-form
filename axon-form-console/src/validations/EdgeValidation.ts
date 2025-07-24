@@ -1,7 +1,7 @@
 import { EdgeType } from '@/configs/graph';
 import z from 'zod';
 
-export const AddEdgeFormSchema = z.object({
+export const EdgeFormSchema = z.object({
   source_node: z.string().min(1, {
     message: 'Source node must be selected',
   }),
@@ -11,9 +11,9 @@ export const AddEdgeFormSchema = z.object({
   edge_type: z.enum(EdgeType),
 });
 
-export type AddEdgeFormSchemaData = z.infer<typeof AddEdgeFormSchema>;
+export type EdgeFormSchemaData = z.infer<typeof EdgeFormSchema>;
 
-export const AddEdgeFormSchemaDefaultValue: AddEdgeFormSchemaData = {
+export const EdgeFormSchemaDefaultValue: EdgeFormSchemaData = {
   source_node: '',
   target_node: '',
   edge_type: EdgeType.HasOption,

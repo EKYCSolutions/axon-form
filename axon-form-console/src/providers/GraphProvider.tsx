@@ -5,12 +5,19 @@ import {
   NodeType,
 } from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
+import {
+  createEdge as createEdgeService,
+  createNode as createNodeService,
+  updateEdge as updateEdgeService,
+  updateNode as updateNodeService,
+} from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
-import type { AddEdgeFormSchemaData } from '@/validations/AddEdgeValidation';
-import type { AddNodeFormSchemaData } from '@/validations/AddNodeValidation';
+import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
+import { type NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
-import { useRef, useState, type ReactNode } from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 interface GraphProviderProps {
@@ -18,6 +25,8 @@ interface GraphProviderProps {
   initialNodes?: GraphNode[];
   initialEdges?: GraphEdge[];
 }
+
+const DEFAULT_ZOOM_LEVEL = 0.75;
 
 export function GraphProvider({
   children,
@@ -27,28 +36,28 @@ export function GraphProvider({
       label: 'graphs',
       caption: 'graphs',
       nodeType: NodeType.Input,
-      fieldType: NodeFieldType.Button,
+      fieldType: NodeFieldType.Checkbox,
     },
     {
       id: '1',
       label: 'input',
       caption: 'input',
       nodeType: NodeType.Input,
-      fieldType: NodeFieldType.Button,
+      fieldType: NodeFieldType.Checkbox,
     },
     {
       id: '2',
       label: 'option',
       caption: 'option',
-      nodeType: NodeType.Option,
-      fieldType: NodeFieldType.Button,
+      nodeType: NodeType.Options,
+      fieldType: NodeFieldType.Dropdown,
     },
     {
       id: '3',
       label: 'value',
       caption: 'value',
-      nodeType: NodeType.Value,
-      fieldType: NodeFieldType.Button,
+      nodeType: NodeType.Values,
+      fieldType: NodeFieldType.File,
     },
     {
       id: '4',
@@ -71,8 +80,8 @@ export function GraphProvider({
       to: '1',
       id: '10',
       caption: 'are',
-      source_node: '1',
-      target_node: '3',
+      sourceNode: '1',
+      targetNode: '3',
       edgeType: EdgeType.HasOption,
     },
     {
@@ -80,169 +89,316 @@ export function GraphProvider({
       to: '3',
       id: '11',
       caption: 'child',
-      source_node: '1',
-      target_node: '3',
+      sourceNode: '1',
+      targetNode: '3',
       edgeType: EdgeType.HasOption,
     },
   ],
 }: GraphProviderProps) {
   const nvlRef = useRef<NVL | null>(null);
 
+  // Graph data state
   const [nodes, setNodes] = useState<GraphNode[]>(initialNodes);
-  const [selectedNode, setSelectedNode] = useState<GraphNode>();
-  const [sourceNode, setSourceNode] = useState<GraphNode | undefined>();
-  const [targetNode, setTargetNode] = useState<GraphNode | undefined>();
-  //
   const [edges, setEdges] = useState<GraphEdge[]>(initialEdges);
-  //
+
+  // UI state
+  const [selectedNode, setSelectedNode] = useState<GraphNode | undefined>();
+  const [selectedEdge, setSelectedEdge] = useState<GraphEdge | undefined>();
   const [zoom, setZoom] = useState<number>(100);
-  //
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
   const [sheetType, setSheetType] = useState<GraphSheetType>(
     GraphSheetType.AddNode,
   );
+
+  // Edge creation state
   const [isEdgeMode, setIsEdgeMode] = useState<boolean>(false);
+  const [sourceNode, setSourceNode] = useState<GraphNode | undefined>();
+  const [targetNode, setTargetNode] = useState<GraphNode | undefined>();
 
-  const mouseEventCallbacks: MouseEventCallbacks = {
-    onNodeClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) => {
-      console.log('onNodeClick', node, hitTargets, evt);
-      //
-      const foundNode = nodes.find((n) => n.id == node.id);
-      setSelectedNode(foundNode);
+  // Helper function to update graph visualization
+  const updateGraphVisualization = useCallback(
+    (newNodes: GraphNode[], newEdges: GraphEdge[]) => {
+      nvlRef.current?.addElementsToGraph(newNodes, newEdges);
+    },
+    [],
+  );
 
-      if (isEdgeMode) {
-        if (!sourceNode) {
-          console.log('in source node');
-          setSourceNode(foundNode);
-          return;
-        }
+  // Helper function to handle errors
+  const handleError = useCallback((error: unknown) => {
+    const errorMessage =
+      error instanceof Error ? error.message : 'An unknown error occurred';
+    toast.error(errorMessage);
+    console.error('Graph operation error:', error);
+  }, []);
 
-        if (!targetNode) {
-          console.log('in target node node');
-          setTargetNode(foundNode);
-          setSheetOpen(true);
-          setIsEdgeMode(false);
-        }
+  // Edge creation helpers
+  const resetEdgeCreation = useCallback(() => {
+    setSourceNode(undefined);
+    setTargetNode(undefined);
+    setIsEdgeMode(false);
+  }, []);
 
+  const handleEdgeModeNodeClick = useCallback(
+    (foundNode: GraphNode | undefined) => {
+      if (!foundNode) return;
+
+      if (!sourceNode) {
+        console.log('Setting source node:', foundNode);
+        setSourceNode(foundNode);
         return;
       }
 
-      // Only open node detail sheet when in normal mode
-      setSheetOpen(true);
-      setSheetType(GraphSheetType.ShowNode);
+      if (!targetNode && foundNode.id !== sourceNode.id) {
+        console.log('Setting target node:', foundNode);
+        setTargetNode(foundNode);
+        setSheetOpen(true);
+        return;
+      }
     },
-    onRelationshipClick: (
-      rel: Relationship,
-      hitTargets: HitTargets,
-      evt: MouseEvent,
-    ) => console.log('onRelationshipClick', rel, hitTargets, evt),
-    onDrag: (nodes: Node[]) => console.log('onDrag', nodes),
-    onPan: (_panning: { x: number; y: number }, evt: MouseEvent) =>
-      console.log('onPan', _panning, evt),
-    onZoom: (zoomLevel: number) => {
+    [sourceNode, targetNode],
+  );
+
+  // Mouse event callbacks
+  const mouseEventCallbacks: MouseEventCallbacks = {
+    onHover: useCallback(
+      (
+        element: Node | Relationship,
+        hitElements: HitTargets,
+        event: MouseEvent,
+      ) => {},
+      [],
+    ),
+    onNodeClick: useCallback(
+      (node: Node, hitTargets: HitTargets, evt: MouseEvent) => {
+        console.log('onNodeClick', node, hitTargets, evt);
+
+        const foundNode = nodes.find((n) => n.id === node.id);
+        setSelectedNode(foundNode);
+
+        if (isEdgeMode) {
+          handleEdgeModeNodeClick(foundNode);
+          return;
+        }
+
+        // Open node detail sheet in normal mode
+        setSheetOpen(true);
+        setSheetType(GraphSheetType.ShowNode);
+      },
+      [nodes, isEdgeMode, handleEdgeModeNodeClick],
+    ),
+
+    onRelationshipClick: useCallback(
+      (rel: Relationship, hitTargets: HitTargets, evt: MouseEvent) => {
+        console.log('onRelationshipClick', rel, hitTargets, evt);
+
+        const foundEdge = edges.find((e) => e.id === rel.id);
+        setSelectedEdge(foundEdge);
+
+        //
+        setSheetOpen(true);
+        setSheetType(GraphSheetType.ShowEdge);
+      },
+      [],
+    ),
+
+    onDrag: useCallback((draggedNodes: Node[]) => {
+      console.log('onDrag', draggedNodes);
+    }, []),
+
+    onPan: useCallback(
+      (_panning: { x: number; y: number }, evt: MouseEvent) => {
+        console.log('onPan', _panning, evt);
+      },
+      [],
+    ),
+
+    onZoom: useCallback((zoomLevel: number) => {
       console.log('onZoom', zoomLevel);
       const zoomLevelCleaned = Math.ceil(zoomLevel * 100);
       setZoom(zoomLevelCleaned);
+    }, []),
+  };
+
+  // Graph operations
+  const addNode = useCallback(
+    async (data: NodeFormSchemaData) => {
+      const tempId = uuidv4();
+      let newNode: GraphNode = {
+        id: tempId,
+        caption: data.label,
+        label: data.label,
+        fieldType: data.field_type,
+        nodeType: data.type,
+      };
+
+      try {
+        const addNodeRes = await createNodeService(data);
+        console.log('Node created successfully:', addNodeRes);
+
+        newNode = {
+          ...newNode,
+          id: addNodeRes.id,
+        };
+
+        const newNodes = [...nodes, newNode];
+        setNodes(newNodes);
+        updateGraphVisualization(newNodes, edges);
+      } catch (error) {
+        handleError(error);
+      }
     },
-  };
+    [nodes, edges, updateGraphVisualization, handleError],
+  );
 
-  const addNode = (data: AddNodeFormSchemaData) => {
-    const newNode: GraphNode = {
-      id: uuidv4(),
-      caption: data.label,
-      label: data.label,
-      fieldType: data.field_type,
-      nodeType: data.type,
-    };
-    const newNodes = [...nodes, newNode];
-    setNodes(newNodes);
-    nvlRef.current?.addElementsToGraph(newNodes, edges);
-  };
+  const addEdge = useCallback(
+    async (data: EdgeFormSchemaData) => {
+      const newEdge: GraphEdge = {
+        id: uuidv4(),
+        from: data.source_node,
+        to: data.target_node,
+        sourceNode: data.source_node,
+        targetNode: data.target_node,
+        edgeType: EdgeType.HasOption,
+        caption: data.edge_type || '',
+      };
 
-  const addEdge = (data: AddEdgeFormSchemaData) => {
-    const newEdge: GraphEdge = {
-      id: uuidv4(),
-      from: data.source_node,
-      to: data.target_node,
-      source_node: data.source_node,
-      target_node: data.target_node,
-      edgeType: EdgeType.HasOption,
-      caption: data.edge_type || '',
-    };
-    const newEdges = [...edges, newEdge];
-    setEdges(newEdges);
+      try {
+        await createEdgeService(data);
+        console.log('Edge created successfully');
 
-    nvlRef.current?.addElementsToGraph(nodes, newEdges);
+        const newEdges = [...edges, newEdge];
+        setEdges(newEdges);
+        updateGraphVisualization(nodes, newEdges);
+        resetEdgeCreation();
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [edges, nodes, updateGraphVisualization, handleError, resetEdgeCreation],
+  );
 
-    setSourceNode(undefined);
-    setTargetNode(undefined);
-  };
+  const removeNode = useCallback(
+    (nodeId: string) => {
+      const newNodes = nodes.filter((node) => node.id !== nodeId);
+      const newEdges = edges.filter(
+        (edge) => edge.from !== nodeId && edge.to !== nodeId,
+      );
 
-  const removeNode = (nodeId: string) => {
-    const newNodes = nodes.filter((node) => node.id !== nodeId);
-    const newEdges = edges.filter(
-      (rel) => rel.from !== nodeId && rel.to !== nodeId,
-    );
-    setNodes(newNodes);
-    setEdges(newEdges);
-    nvlRef.current?.addElementsToGraph(newNodes, newEdges);
-  };
+      setNodes(newNodes);
+      setEdges(newEdges);
+      updateGraphVisualization(newNodes, newEdges);
+    },
+    [nodes, edges, updateGraphVisualization],
+  );
 
-  const removeEdge = (edgeId: string) => {
-    const newEdges = edges.filter((rel) => rel.id !== edgeId);
-    setEdges(newEdges);
-    nvlRef.current?.addElementsToGraph(nodes, newEdges);
-  };
+  const removeEdge = useCallback(
+    (edgeId: string) => {
+      const newEdges = edges.filter((edge) => edge.id !== edgeId);
+      setEdges(newEdges);
+      updateGraphVisualization(nodes, newEdges);
+    },
+    [edges, nodes, updateGraphVisualization],
+  );
 
-  const updateNode = (nodeId: string, updates: Partial<GraphNode>) => {
-    const newNodes = nodes.map((node) =>
-      node.id === nodeId ? { ...node, ...updates } : node,
-    );
-    setNodes(newNodes);
-    nvlRef.current?.addElementsToGraph(newNodes, edges);
-  };
+  const updateNode = useCallback(
+    async (nodeId: string, updates: NodeFormSchemaData) => {
+      const newNodes = nodes.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              ...updates,
+              //
+              // This is applied to update the label display on the graph (NVL Library uses caption)
+              caption: updates.label,
+            }
+          : node,
+      );
 
-  const updateEdge = (edgeId: string, updates: Partial<GraphEdge>) => {
-    const newEdges = edges.map((rel) =>
-      rel.id === edgeId ? { ...rel, ...updates } : rel,
-    );
-    setEdges(newEdges);
-    nvlRef.current?.addElementsToGraph(nodes, newEdges);
-  };
+      try {
+        await updateNodeService(nodeId, updates);
+        console.log('Edge updated successfully');
+      } catch (error) {
+        handleError(error);
+      }
 
-  const clearGraph = () => {
+      setNodes(newNodes);
+      updateGraphVisualization(newNodes, edges);
+    },
+    [nodes, edges, updateGraphVisualization, handleError],
+  );
+
+  const updateEdge = useCallback(
+    async (edgeId: string, updates: EdgeFormSchemaData) => {
+      // const newEdges = edges.map((edge) =>
+      //   edge.id === edgeId ? { ...edge, ...updates } : edge,
+      // );
+      const newEdges = edges.map((edge) =>
+        edge.id === edgeId
+          ? {
+              ...edge,
+              ...updates,
+              //
+              // This is applied to update the label display on the graph (NVL Library uses caption)
+              caption: updates.edge_type,
+            }
+          : edge,
+      );
+
+      try {
+        await updateEdgeService(edgeId, updates);
+        console.log('Edge updated successfully');
+      } catch (error) {
+        handleError(error);
+      }
+
+      setEdges(newEdges);
+      updateGraphVisualization(nodes, newEdges);
+    },
+    [edges, nodes, updateGraphVisualization, handleError],
+  );
+
+  const clearGraph = useCallback(() => {
     setNodes([]);
     setEdges([]);
-    nvlRef.current?.addElementsToGraph([], []);
-  };
+    updateGraphVisualization([], []);
+  }, [updateGraphVisualization]);
 
-  const resetZoom = () => {
+  const resetZoom = useCallback(() => {
     nvlRef.current?.resetZoom();
-    //
-    const zoomLevel = 0.75; // Default resetZoom value is 0.75
-    const zoomLevelCleaned = Math.ceil(zoomLevel * 100);
+    const zoomLevelCleaned = Math.ceil(DEFAULT_ZOOM_LEVEL * 100);
     setZoom(zoomLevelCleaned);
-  };
+  }, []);
 
-  const updateZoom = (zoomLevel: number) => {
+  const updateZoom = useCallback((zoomLevel: number) => {
     nvlRef.current?.setZoom(zoomLevel);
-    //
     const zoomLevelCleaned = Math.ceil(zoomLevel * 100);
     setZoom(zoomLevelCleaned);
-  };
+  }, []);
 
+  // Context value
   const value: GraphContextType = {
+    // Refs
     nvlRef,
+
+    // Data
     nodes,
-    selectedNode,
-    setSelectedNode,
-    sourceNode,
-    targetNode,
-    zoom,
     edges,
+
+    // UI state
+    selectedNode,
+    selectedEdge,
+    zoom,
     sheetOpen,
     sheetType,
+
+    // Edge creation state
     isEdgeMode,
+    sourceNode,
+    targetNode,
+
+    // Setters
+    setSelectedNode,
+    setSelectedEdge,
     setSheetOpen,
     setSheetType,
     setIsEdgeMode,
@@ -250,6 +406,8 @@ export function GraphProvider({
     setTargetNode,
     setNodes,
     setEdges,
+
+    // Operations
     addNode,
     addEdge,
     removeNode,
@@ -259,6 +417,8 @@ export function GraphProvider({
     clearGraph,
     resetZoom,
     updateZoom,
+
+    // Event handlers
     mouseEventCallbacks,
   };
 

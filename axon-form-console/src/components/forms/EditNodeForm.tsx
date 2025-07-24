@@ -1,5 +1,3 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
@@ -17,11 +15,10 @@ import { Input } from '@/components/ui/input';
 import { NodeFieldType, NodeType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
 import {
-  AddNodeFormSchema,
+  NodeFormSchema,
   convertGraphNodeToNodeForm,
-  convertNodeFormSchemaToGraphNode,
-  type AddNodeFormSchemaData,
-} from '@/validations/AddNodeValidation';
+  type NodeFormSchemaData,
+} from '@/validations/NodeValidation.js';
 import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import {
@@ -39,13 +36,21 @@ interface IProps {
 export default function EditNodeForm({ className }: IProps) {
   const { selectedNode, updateNode, setSheetOpen } = useGraph();
 
-  const form = useForm<AddNodeFormSchemaData>({
-    resolver: zodResolver(AddNodeFormSchema),
+  if (!selectedNode) {
+    return;
+  }
+
+  const form = useForm<NodeFormSchemaData>({
+    resolver: zodResolver(NodeFormSchema),
     defaultValues: convertGraphNodeToNodeForm(selectedNode),
   });
 
-  function onSubmit(data: AddNodeFormSchemaData) {
-    updateNode(selectedNode?.id, convertNodeFormSchemaToGraphNode(data));
+  function onSubmit(data: NodeFormSchemaData) {
+    if (!selectedNode?.id) {
+      return;
+    }
+
+    updateNode(selectedNode?.id, data);
     //
     setSheetOpen(false);
     toast.success('Update node successfully');
@@ -119,7 +124,13 @@ export default function EditNodeForm({ className }: IProps) {
             </FormItem>
           )}
         />
-        <Button type='submit'>Update</Button>
+        <Button
+          className='w-full'
+          type='submit'
+          disabled={!form.formState.isDirty}
+        >
+          Update
+        </Button>
       </form>
     </Form>
   );

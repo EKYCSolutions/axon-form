@@ -1,5 +1,3 @@
-'use client';
-
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
@@ -17,10 +15,10 @@ import { Input } from '@/components/ui/input';
 import { NodeFieldType, NodeType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
 import {
-  AddNodeFormSchema,
-  AddNodeFormSchemaDefaultValue,
-  type AddNodeFormSchemaData,
-} from '@/validations/AddNodeValidation';
+  NodeFormSchema,
+  NodeFormSchemaDefaultValue,
+  type NodeFormSchemaData,
+} from '@/validations/NodeValidation.js';
 import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import {
@@ -38,12 +36,12 @@ interface IProps {
 export default function AddNodeForm({ className }: IProps) {
   const { addNode, setSheetOpen } = useGraph();
 
-  const form = useForm<AddNodeFormSchemaData>({
-    resolver: zodResolver(AddNodeFormSchema),
-    defaultValues: AddNodeFormSchemaDefaultValue,
+  const form = useForm<NodeFormSchemaData>({
+    resolver: zodResolver(NodeFormSchema),
+    defaultValues: NodeFormSchemaDefaultValue,
   });
 
-  function onSubmit(data: AddNodeFormSchemaData) {
+  function onSubmit(data: NodeFormSchemaData) {
     addNode(data);
     //
     form.reset();
@@ -119,7 +117,11 @@ export default function AddNodeForm({ className }: IProps) {
             </FormItem>
           )}
         />
-        <Button className='w-full' type='submit'>
+        <Button
+          className='w-full'
+          type='submit'
+          disabled={!form.formState.isValid}
+        >
           Submit
         </Button>
       </form>

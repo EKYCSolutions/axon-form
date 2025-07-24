@@ -10,15 +10,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { EdgeType } from '@/configs/graph';
+import { EdgeType } from '@/configs/graph.js';
 import { cn } from '@/lib/utils';
 import { convertPascalCaseToTitleCase } from '@/utils/string.js';
 import {
   EdgeFormSchema,
-  EdgeFormSchemaDefaultValue,
   type EdgeFormSchemaData,
 } from '@/validations/EdgeValidation.js';
-import { useEffect } from 'react';
+import { convertGraphEdgeToEdgeForm } from '@/validations/NodeValidation.js';
 import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph.js';
 import {
@@ -33,39 +32,35 @@ interface IProps {
   className?: string;
 }
 
-export default function AddEdgeForm({ className }: IProps) {
+export default function EditEdgeForm({ className }: IProps) {
   const {
-    sourceNode,
-    targetNode,
-    addEdge,
+    selectedEdge,
+    updateEdge,
     setSheetOpen,
     setIsEdgeMode,
     setSourceNode,
     setTargetNode,
   } = useGraph();
 
+  if (!selectedEdge) {
+    return;
+  }
+
   const form = useForm<EdgeFormSchemaData>({
     resolver: zodResolver(EdgeFormSchema),
-    defaultValues: EdgeFormSchemaDefaultValue,
+    defaultValues: convertGraphEdgeToEdgeForm(selectedEdge),
   });
 
   function onSubmit(data: EdgeFormSchemaData) {
-    addEdge(data);
-    form.reset();
+    if (!selectedEdge?.id) {
+      return;
+    }
+
+    updateEdge(selectedEdge?.id, data);
     //
     setSheetOpen(false);
-    toast.success('Added edge successfully');
+    toast.success('Update node successfully');
   }
-
-  useEffect(() => {
-    if (sourceNode) {
-      form.setValue('source_node', sourceNode.id);
-    }
-    //
-    if (targetNode) {
-      form.setValue('target_node', targetNode.id);
-    }
-  }, [sourceNode, targetNode]);
 
   return (
     <Form {...form}>
@@ -91,7 +86,7 @@ export default function AddEdgeForm({ className }: IProps) {
                     setSheetOpen(false);
                   }}
                 >
-                  {sourceNode ? sourceNode.id : 'Select source node'}
+                  {field.value}
                 </Button>
               </FormControl>
               <FormMessage />
@@ -106,7 +101,7 @@ export default function AddEdgeForm({ className }: IProps) {
               <FormLabel>Target Node</FormLabel>
               <FormControl>
                 <Button type='button' variant='secondary' className=''>
-                  {targetNode ? targetNode.id : 'Select target node'}
+                  {field.value}
                 </Button>
               </FormControl>
               <FormMessage />
@@ -125,7 +120,7 @@ export default function AddEdgeForm({ className }: IProps) {
                     <SelectValue placeholder='Select a verified email to display' />
                   </SelectTrigger>
                 </FormControl>
-                <SelectContent className='w-full'>
+                <SelectContent className='w-full' defaultValue={field.value}>
                   {Object.entries(EdgeType).map(([key, value]) => (
                     <SelectItem key={value} value={value}>
                       {convertPascalCaseToTitleCase(key)}
@@ -137,12 +132,8 @@ export default function AddEdgeForm({ className }: IProps) {
             </FormItem>
           )}
         />
-        <Button
-          className='w-full'
-          type='submit'
-          disabled={!form.formState.isValid}
-        >
-          Submit
+        <Button type='submit' className='w-full'>
+          Update
         </Button>
       </form>
     </Form>

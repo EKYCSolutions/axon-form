@@ -11,8 +11,8 @@ export interface GraphNode extends Node {
 }
 
 export interface GraphEdge extends Relationship {
-  source_node: string;
-  target_node: string;
+  sourceNode: string;
+  targetNode: string;
   //
   edgeType: EdgeType;
 }

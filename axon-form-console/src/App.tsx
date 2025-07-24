@@ -10,13 +10,13 @@ export default function App() {
   return (
     <div className='w-dvw h-dvh'>
       <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
-        <GraphProvider>
-          <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <GraphProvider>
             <MainPage />
-          </QueryClientProvider>
-        </GraphProvider>
+          </GraphProvider>
+        </QueryClientProvider>
       </ThemeProvider>
-      <Toaster />
+      <Toaster richColors />
     </div>
   );
 }

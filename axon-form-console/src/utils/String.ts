@@ -37,3 +37,18 @@ export function capitalize(input: string | undefined): string | undefined {
 
   return input.charAt(0).toUpperCase() + input.slice(1);
 }
+
+/**
+ * Converts a PascalCase string to a Title Case string with spaces.
+ *
+ * @param input - The PascalCase string to convert.
+ * @returns The converted Title Case string.
+ *
+ * @example
+ * ```typescript
+ * convertPascalCaseToTitleCase('HasOptions'); // "Has Options"
+ * ```
+ */
+export function convertPascalCaseToTitleCase(input: string): string {
+  return input.replace(/([A-Z][a-z])/g, ' $1').trim();
+}
