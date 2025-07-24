@@ -1,69 +1,58 @@
-# React + TypeScript + Vite
+# Axon Form Console
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is the console application for managing Axon Forms. It provides a command-line interface for various operations related to form creation, management, and data handling within the Axon ecosystem.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Form Definition Management**: Create, update, and delete form definitions.
+- **Form Instance Management**: View and manage instances of submitted forms.
+- **Data Export**: Export form data in various formats.
+- **User and Role Management**: (Planned) Manage users and their permissions within the console.
+- **Integration with Axon Core**: Seamlessly interacts with the core Axon Form services.
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Before you begin, ensure you have the following installed:
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **Node.js**: Version 14 or higher.
+- **npm** or **yarn**: Package manager for Node.js.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/your-username/axon-form-console.git
+   cd axon-form-console
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+### Configuration
+
+The console application requires configuration to connect to the Axon Form backend services. Create a `.env` file in the root directory of the project and add the following environment variables:
+
+```
+AXON_API_BASE_URL=http://localhost:3000/api
+AXON_AUTH_TOKEN=your_secret_auth_token_if_required
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Replace `http://localhost:3000/api` with the actual URL of your Axon Form API. The `AXON_AUTH_TOKEN` is optional and only required if your Axon API uses token-based authentication.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Running the Console
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+To start the console application, run:
+
+```bash
+npm start
+# or
+yarn start
 ```
