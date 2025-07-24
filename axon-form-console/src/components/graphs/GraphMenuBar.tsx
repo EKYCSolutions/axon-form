@@ -11,16 +11,21 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
+import { cn } from '@/lib/utils.js';
 import { ChevronUp, Crop, Pencil, Plus } from 'lucide-react';
-import { useGraph } from '../hooks/useGraph';
-import { Separator } from '../ui/separator';
+import { useGraph } from '../hooks/useGraph.js';
+import { Separator } from '../ui/separator.js';
 
-export default function GraphMenubar() {
+interface IProps {
+  className?: string;
+}
+
+export default function GraphMenuBar({ className }: IProps) {
   const { nvlRef, zoom, resetZoom, updateZoom, setSheetOpen, setSheetType } =
     useGraph();
 
   return (
-    <Menubar className='h-10 w-fit gap-2 px-2 rounded-xl'>
+    <Menubar className={cn('h-10 w-fit gap-2 px-2 rounded-xl', className)}>
       <MenubarMenu>
         <MenubarTrigger
           onClick={() => {
@@ -31,6 +36,16 @@ export default function GraphMenubar() {
         >
           <Plus size={20} />
           Node
+        </MenubarTrigger>
+        <MenubarTrigger
+          onClick={() => {
+            setSheetOpen(true);
+            setSheetType(GraphSheetType.AddEdge);
+          }}
+          className='w-fit items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-2 py-1  font-normal'
+        >
+          <Plus size={20} />
+          Edge
         </MenubarTrigger>
       </MenubarMenu>
       <Separator orientation='vertical' />

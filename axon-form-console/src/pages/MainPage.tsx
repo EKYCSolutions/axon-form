@@ -1,9 +1,11 @@
+import AddEdgeForm from '@/components/forms/AddEdgeForm';
 import AddNodeForm from '@/components/forms/AddNodeForm';
 import EditNodeForm from '@/components/forms/EditNodeForm';
+import GraphMenubar from '@/components/graphs/GraphMenuBar.js';
 import GraphVisualizationWrapper from '@/components/graphs/GraphVisualizationWrapper';
-import GraphMenubar from '@/components/graphs/MenuBar';
 import { useGraph } from '@/components/hooks/useGraph';
 import NodeDetail from '@/components/NodeDetail';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
@@ -15,6 +17,9 @@ export default function MainPage() {
   const { data, status } = useQuery({ queryKey: ['peeps'], queryFn: allPeeps });
   const {
     nvlRef,
+    isEdgeMode,
+    sourceNode,
+    targetNode,
     nodes,
     edges,
     sheetOpen,
@@ -59,6 +64,13 @@ export default function MainPage() {
             <EditNodeForm />
           </>
         );
+      case GraphSheetType.AddEdge:
+        return (
+          <>
+            <SheetTitle className='text-xl font-medium'>Add Edge</SheetTitle>
+            <AddEdgeForm />
+          </>
+        );
 
       default:
         return;
@@ -76,12 +88,27 @@ export default function MainPage() {
           </SheetContent>
         </Sheet>
       </div>
-      <div className='absolute bottom-4 left-1/2 -translate-x-1/2 z-50'>
-        <GraphMenubar />
+      <div className='absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-4'>
+        {isEdgeMode ? (
+          <Alert className='dark:opacity-80 hover:cursor-default'>
+            <AlertDescription>
+              Please select a {sourceNode ? 'target' : 'source'} node to
+              continue
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <GraphMenubar />
+        )}
       </div>
       <GraphVisualizationWrapper
         nvlRef={nvlRef}
-        options={{ initialZoom: 1 }}
+        options={{
+          initialZoom: 1,
+          styling: {
+            selectedBorderColor: '#',
+            selectedInnerBorderColor: 'black',
+          },
+        }}
         nodes={nodes}
         edges={edges}
         mouseEventCallbacks={mouseEventCallbacks}

@@ -21,6 +21,7 @@ import {
   AddNodeFormSchemaDefaultValue,
   type AddNodeFormSchemaData,
 } from '@/validations/AddNodeValidation';
+import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import {
   Select,
@@ -35,7 +36,7 @@ interface IProps {
 }
 
 export default function AddNodeForm({ className }: IProps) {
-  const { addNode } = useGraph();
+  const { addNode, setSheetOpen } = useGraph();
 
   const form = useForm<AddNodeFormSchemaData>({
     resolver: zodResolver(AddNodeFormSchema),
@@ -44,7 +45,10 @@ export default function AddNodeForm({ className }: IProps) {
 
   function onSubmit(data: AddNodeFormSchemaData) {
     addNode(data);
+    //
     form.reset();
+    setSheetOpen(false);
+    toast.success('Added node successfully');
   }
 
   return (
@@ -115,7 +119,9 @@ export default function AddNodeForm({ className }: IProps) {
             </FormItem>
           )}
         />
-        <Button type='submit'>Submit</Button>
+        <Button className='w-full' type='submit'>
+          Submit
+        </Button>
       </form>
     </Form>
   );

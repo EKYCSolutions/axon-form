@@ -6,6 +6,7 @@ import {
 } from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import type { AddEdgeFormSchemaData } from '@/validations/AddEdgeValidation';
 import type { AddNodeFormSchemaData } from '@/validations/AddNodeValidation';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
@@ -89,6 +90,8 @@ export function GraphProvider({
 
   const [nodes, setNodes] = useState<GraphNode[]>(initialNodes);
   const [selectedNode, setSelectedNode] = useState<GraphNode>();
+  const [sourceNode, setSourceNode] = useState<GraphNode | undefined>();
+  const [targetNode, setTargetNode] = useState<GraphNode | undefined>();
   //
   const [edges, setEdges] = useState<GraphEdge[]>(initialEdges);
   //
@@ -98,38 +101,41 @@ export function GraphProvider({
   const [sheetType, setSheetType] = useState<GraphSheetType>(
     GraphSheetType.AddNode,
   );
+  const [isEdgeMode, setIsEdgeMode] = useState<boolean>(false);
 
   const mouseEventCallbacks: MouseEventCallbacks = {
-    onRelationshipRightClick: (
-      rel: Relationship,
-      hitTargets: HitTargets,
-      evt: MouseEvent,
-    ) => console.log('onRelationshipRightClick', rel, hitTargets, evt),
     onNodeClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) => {
       console.log('onNodeClick', node, hitTargets, evt);
       //
       const foundNode = nodes.find((n) => n.id == node.id);
       setSelectedNode(foundNode);
+
+      if (isEdgeMode) {
+        if (!sourceNode) {
+          console.log('in source node');
+          setSourceNode(foundNode);
+          return;
+        }
+
+        if (!targetNode) {
+          console.log('in target node node');
+          setTargetNode(foundNode);
+          setSheetOpen(true);
+          setIsEdgeMode(false);
+        }
+
+        return;
+      }
+
+      // Only open node detail sheet when in normal mode
       setSheetOpen(true);
       setSheetType(GraphSheetType.ShowNode);
     },
-    onNodeRightClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) =>
-      console.log('onNodeRightClick', node, hitTargets, evt),
-    onNodeDoubleClick: (node: Node, hitTargets: HitTargets, evt: MouseEvent) =>
-      console.log('onNodeDoubleClick', node, hitTargets, evt),
     onRelationshipClick: (
       rel: Relationship,
       hitTargets: HitTargets,
       evt: MouseEvent,
     ) => console.log('onRelationshipClick', rel, hitTargets, evt),
-    onRelationshipDoubleClick: (
-      rel: Relationship,
-      hitTargets: HitTargets,
-      evt: MouseEvent,
-    ) => console.log('onRelationshipDoubleClick', rel, hitTargets, evt),
-    onCanvasClick: (evt: MouseEvent) => console.log('onCanvasClick', evt),
-    onCanvasDoubleClick: (evt: MouseEvent) =>
-      console.log('onCanvasDoubleClick', evt),
     onDrag: (nodes: Node[]) => console.log('onDrag', nodes),
     onPan: (_panning: { x: number; y: number }, evt: MouseEvent) =>
       console.log('onPan', _panning, evt),
@@ -153,19 +159,23 @@ export function GraphProvider({
     nvlRef.current?.addElementsToGraph(newNodes, edges);
   };
 
-  const addEdge = (from: string, to: string, caption?: string) => {
+  const addEdge = (data: AddEdgeFormSchemaData) => {
     const newEdge: GraphEdge = {
       id: uuidv4(),
-      from,
-      to,
-      source_node: from,
-      target_node: to,
+      from: data.source_node,
+      to: data.target_node,
+      source_node: data.source_node,
+      target_node: data.target_node,
       edgeType: EdgeType.HasOption,
-      caption: caption || '',
+      caption: data.edge_type || '',
     };
     const newEdges = [...edges, newEdge];
     setEdges(newEdges);
+
     nvlRef.current?.addElementsToGraph(nodes, newEdges);
+
+    setSourceNode(undefined);
+    setTargetNode(undefined);
   };
 
   const removeNode = (nodeId: string) => {
@@ -226,12 +236,18 @@ export function GraphProvider({
     nodes,
     selectedNode,
     setSelectedNode,
+    sourceNode,
+    targetNode,
     zoom,
     edges,
     sheetOpen,
     sheetType,
+    isEdgeMode,
     setSheetOpen,
     setSheetType,
+    setIsEdgeMode,
+    setSourceNode,
+    setTargetNode,
     setNodes,
     setEdges,
     addNode,

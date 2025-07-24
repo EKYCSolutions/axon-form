@@ -7,21 +7,22 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { NodeFieldType, NodeType } from '@/configs/graph';
+import { EdgeType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
 import {
-  AddNodeFormSchema,
-  AddNodeFormSchemaDefaultValue,
-  type AddNodeFormSchemaData,
-} from '@/validations/AddNodeValidation';
-import { DialogTitle } from '@radix-ui/react-dialog';
+  AddEdgeFormSchema,
+  AddEdgeFormSchemaDefaultValue,
+  type AddEdgeFormSchemaData,
+} from '@/validations/AddEdgeValidation.js';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { useGraph } from '../hooks/useGraph.js';
+import ReadonlyContainer from '../ReadonlyContainer.js';
 import {
   Select,
   SelectContent,
@@ -31,20 +32,42 @@ import {
 } from '../ui/select.js';
 
 interface IProps {
-  className: string;
-  addNode: (data: AddNodeFormSchemaData) => void;
+  className?: string;
 }
 
-export default function AddNodeForm({ className, addNode }: IProps) {
-  const form = useForm<AddNodeFormSchemaData>({
-    resolver: zodResolver(AddNodeFormSchema),
-    defaultValues: AddNodeFormSchemaDefaultValue,
+export default function AddEdgeForm({ className }: IProps) {
+  const {
+    sourceNode,
+    targetNode,
+    addEdge,
+    setSheetOpen,
+    setIsEdgeMode,
+    setSourceNode,
+    setTargetNode,
+  } = useGraph();
+
+  const form = useForm<AddEdgeFormSchemaData>({
+    resolver: zodResolver(AddEdgeFormSchema),
+    defaultValues: AddEdgeFormSchemaDefaultValue,
   });
 
-  function onSubmit(data: AddNodeFormSchemaData) {
-    addNode(data);
+  function onSubmit(data: AddEdgeFormSchemaData) {
+    addEdge(data);
     form.reset();
+    //
+    setSheetOpen(false);
+    toast.success('Added edge successfully');
   }
+
+  useEffect(() => {
+    if (sourceNode) {
+      form.setValue('source_node', sourceNode.id);
+    }
+    //
+    if (targetNode) {
+      form.setValue('target_node', targetNode.id);
+    }
+  }, [sourceNode, targetNode]);
 
   return (
     <Form {...form}>
@@ -52,51 +75,60 @@ export default function AddNodeForm({ className, addNode }: IProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className={cn('space-y-6', className)}
       >
-        <DialogTitle className='text-xl font-medium'>Add Node</DialogTitle>
         <FormField
           control={form.control}
-          name='label'
+          name='source_node'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Node Label</FormLabel>
+              <FormLabel>Source Node</FormLabel>
               <FormControl>
-                <Input placeholder='Enter the label' {...field} />
+                {targetNode ? (
+                  <ReadonlyContainer text={sourceNode?.id} />
+                ) : (
+                  <Button
+                    type='button'
+                    variant='secondary'
+                    onClick={() => {
+                      setIsEdgeMode(true);
+                      setSourceNode(undefined);
+                      setTargetNode(undefined);
+                      //
+                      setSheetOpen(false);
+                    }}
+                  >
+                    Select source node
+                  </Button>
+                )}
               </FormControl>
-              <FormDescription>This is the label for your node</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name='type'
+          name='target_node'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Node Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl className='w-full'>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.entries(NodeType).map(([key, value]) => (
-                    <SelectItem key={value} value={value}>
-                      {key}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormLabel>Target Node</FormLabel>
+              <FormControl>
+                {targetNode ? (
+                  <ReadonlyContainer text={targetNode.id} />
+                ) : (
+                  <Button type='button' variant='secondary' className=''>
+                    Select target node
+                  </Button>
+                )}
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name='field_type'
+          name='edge_type'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Field Type</FormLabel>
+              <FormLabel>Edge Type</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl className='w-full'>
                   <SelectTrigger>
@@ -104,7 +136,7 @@ export default function AddNodeForm({ className, addNode }: IProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className='w-full'>
-                  {Object.entries(NodeFieldType).map(([key, value]) => (
+                  {Object.entries(EdgeType).map(([key, value]) => (
                     <SelectItem key={value} value={value}>
                       {key}
                     </SelectItem>
@@ -115,7 +147,9 @@ export default function AddNodeForm({ className, addNode }: IProps) {
             </FormItem>
           )}
         />
-        <Button type='submit'>Submit</Button>
+        <Button className='w-fullad' type='submit'>
+          Submit
+        </Button>
       </form>
     </Form>
   );

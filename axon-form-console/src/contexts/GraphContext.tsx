@@ -1,5 +1,6 @@
 import type { GraphSheetType } from '@/configs/graph';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import type { AddEdgeFormSchemaData } from '@/validations/AddEdgeValidation';
 import type { AddNodeFormSchemaData } from '@/validations/AddNodeValidation';
 import type NVL from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
@@ -12,11 +13,14 @@ export interface GraphContextType {
   // State
   nodes: GraphNode[];
   selectedNode: GraphNode;
+  sourceNode: GraphNode | undefined;
+  targetNode: GraphNode | undefined;
   edges: GraphEdge[];
   zoom: number;
   //
   sheetOpen: boolean;
   sheetType: GraphSheetType;
+  isEdgeMode: boolean;
 
   // Actions
   setNodes: React.Dispatch<React.SetStateAction<GraphNode[]>>;
@@ -26,11 +30,15 @@ export interface GraphContextType {
   setSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setSheetType: React.Dispatch<React.SetStateAction<GraphSheetType>>;
   //
+  setIsEdgeMode: React.Dispatch<React.SetStateAction<boolean>>;
+  setSourceNode: React.Dispatch<React.SetStateAction<GraphNode | undefined>>;
+  setTargetNode: React.Dispatch<React.SetStateAction<GraphNode | undefined>>;
+  //
   addNode: (data: AddNodeFormSchemaData) => void;
   updateNode: (nodeId: string, updates: Partial<GraphNode>) => void;
   removeNode: (nodeId: string) => void;
   //
-  addEdge: (from: string, to: string, caption?: string) => void;
+  addEdge: (data: AddEdgeFormSchemaData) => void;
   updateEdge: (edgeId: string, updates: Partial<GraphEdge>) => void;
   removeEdge: (edgeId: string) => void;
   //
@@ -38,7 +46,8 @@ export interface GraphContextType {
   //
   resetZoom: () => void;
   updateZoom: (zoomLevel: number) => void;
-
+  //
+  resetEdgeMode: () => void;
   // Mouse event callbacks
   mouseEventCallbacks: MouseEventCallbacks;
 }
