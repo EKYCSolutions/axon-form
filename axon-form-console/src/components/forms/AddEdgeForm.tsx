@@ -20,6 +20,7 @@ import {
 } from '@/validations/EdgeValidation.js';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
+import FormHeader from '../FormHeader.js';
 import { useGraph } from '../hooks/useGraph.js';
 import {
   Select,
@@ -28,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select.js';
+import { Separator } from '../ui/separator.js';
 
 interface IProps {
   className?: string;
@@ -115,7 +117,7 @@ export default function AddEdgeForm({ className }: IProps) {
         />
         <FormField
           control={form.control}
-          name='edge_type'
+          name='type'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Edge Type</FormLabel>
@@ -137,6 +139,24 @@ export default function AddEdgeForm({ className }: IProps) {
             </FormItem>
           )}
         />
+        <Separator />
+        <FormHeader title='Node' />
+        <FormField
+          control={form.control}
+          name='target_node'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Target Node</FormLabel>
+              <FormControl>
+                <Button type='button' variant='secondary' className=''>
+                  {targetNode ? targetNode.id : 'Select target node'}
+                </Button>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button
           className='w-full'
           type='submit'

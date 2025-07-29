@@ -1,9 +1,4 @@
-import {
-  EdgeType,
-  GraphSheetType,
-  NodeFieldType,
-  NodeType,
-} from '@/configs/graph';
+import { EdgeType, GraphSheetType } from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
 import {
   createEdge as createEdgeService,
@@ -30,70 +25,8 @@ const DEFAULT_ZOOM_LEVEL = 0.75;
 
 export function GraphProvider({
   children,
-  initialNodes = [
-    {
-      id: '0',
-      label: 'graphs',
-      caption: 'graphs',
-      nodeType: NodeType.Input,
-      fieldType: NodeFieldType.Checkbox,
-    },
-    {
-      id: '1',
-      label: 'input',
-      caption: 'input',
-      nodeType: NodeType.Input,
-      fieldType: NodeFieldType.Checkbox,
-    },
-    {
-      id: '2',
-      label: 'option',
-      caption: 'option',
-      nodeType: NodeType.Options,
-      fieldType: NodeFieldType.Dropdown,
-    },
-    {
-      id: '3',
-      label: 'value',
-      caption: 'value',
-      nodeType: NodeType.Values,
-      fieldType: NodeFieldType.File,
-    },
-    {
-      id: '4',
-      label: 'checkbox',
-      caption: 'checkbox',
-      nodeType: NodeType.Input,
-      fieldType: NodeFieldType.Checkbox,
-    },
-    {
-      id: '5',
-      label: 'text',
-      caption: 'text',
-      nodeType: NodeType.Input,
-      fieldType: NodeFieldType.Text,
-    },
-  ],
-  initialEdges = [
-    {
-      from: '0',
-      to: '1',
-      id: '10',
-      caption: 'are',
-      sourceNode: '1',
-      targetNode: '3',
-      edgeType: EdgeType.HasOption,
-    },
-    {
-      from: '2',
-      to: '3',
-      id: '11',
-      caption: 'child',
-      sourceNode: '1',
-      targetNode: '3',
-      edgeType: EdgeType.HasOption,
-    },
-  ],
+  initialNodes = [],
+  initialEdges = [],
 }: GraphProviderProps) {
   const nvlRef = useRef<NVL | null>(null);
 
@@ -189,16 +122,16 @@ export function GraphProvider({
 
     onRelationshipClick: useCallback(
       (rel: Relationship, hitTargets: HitTargets, evt: MouseEvent) => {
+        //
         console.log('onRelationshipClick', rel, hitTargets, evt);
 
         const foundEdge = edges.find((e) => e.id === rel.id);
         setSelectedEdge(foundEdge);
-
         //
         setSheetOpen(true);
         setSheetType(GraphSheetType.ShowEdge);
       },
-      [],
+      [edges],
     ),
 
     onDrag: useCallback((draggedNodes: Node[]) => {
@@ -228,8 +161,12 @@ export function GraphProvider({
         caption: data.label,
         label: data.label,
         fieldType: data.field_type,
+        is_visible: data.is_visible,
         nodeType: data.type,
+        validations: data.validation_rules,
       };
+
+      console.log('object >>', newNode);
 
       try {
         const addNodeRes = await createNodeService(data);
@@ -259,7 +196,7 @@ export function GraphProvider({
         sourceNode: data.source_node,
         targetNode: data.target_node,
         edgeType: EdgeType.HasOption,
-        caption: data.edge_type || '',
+        caption: data.type || '',
       };
 
       try {
@@ -308,12 +245,17 @@ export function GraphProvider({
               ...node,
               ...updates,
               //
-              // This is applied to update the label display on the graph (NVL Library uses caption)
+              label: updates.label,
               caption: updates.label,
+              fieldType: updates.field_type,
+              nodeType: updates.type,
+              is_visible: updates.is_visible,
+              validations: updates.validation_rules,
             }
           : node,
       );
 
+      console.log('nodes >>', newNodes);
       try {
         await updateNodeService(nodeId, updates);
         console.log('Edge updated successfully');
@@ -336,10 +278,13 @@ export function GraphProvider({
         edge.id === edgeId
           ? {
               ...edge,
-              ...updates,
               //
-              // This is applied to update the label display on the graph (NVL Library uses caption)
-              caption: updates.edge_type,
+              from: updates.source_node,
+              to: updates.target_node,
+              sourceNode: updates.source_node,
+              targetNode: updates.target_node,
+              edgeType: updates.type,
+              caption: updates.type?.toString(),
             }
           : edge,
       );

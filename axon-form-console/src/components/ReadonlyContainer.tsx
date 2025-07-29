@@ -18,7 +18,7 @@ export default function ReadonlyContainer({
       {title && <h2 className='text-sm'>{title}</h2>}
       <div
         className={cn(
-          'dark:bg-input/30 border-input flex items-center justify-between h-10 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none',
+          'dark:bg-input/30 border-input flex items-center justify-between w-full min-w-0 rounded-md border bg-transparent px-3 py-2 text-sm shadow-xs outline-none',
         )}
       >
         <p className='text-white/70'>{text}</p>

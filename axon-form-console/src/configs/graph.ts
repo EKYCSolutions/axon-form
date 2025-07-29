@@ -46,3 +46,25 @@ export enum GraphSheetType {
   EditEdge = 'edit_edge',
   ShowEdge = 'show_edge',
 }
+
+export enum ConditionExpression {
+  Equal = 'equal',
+  MoreThan = 'more_than',
+  LessThan = 'less_than',
+  MoreThanOrEqual = 'more_than_or_equal',
+  LessThanOrEqual = 'less_than_or_equal',
+  NotEqual = 'not_equal',
+  Contains = 'contains',
+  StartsWith = 'starts_with',
+  EndsWith = 'ends_with',
+}
+
+export enum ValidationRuleType {
+  Required = 'required',
+  Email = 'email',
+  MinLength = 'minLength',
+  MaxLength = 'maxLength',
+  Pattern = 'pattern',
+  Min = 'min',
+  Max = 'max',
+}

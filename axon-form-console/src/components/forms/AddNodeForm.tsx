@@ -1,19 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { NodeFieldType, NodeType } from '@/configs/graph';
-import { cn } from '@/lib/utils';
 import {
   NodeFormSchema,
   NodeFormSchemaDefaultValue,
@@ -21,13 +8,7 @@ import {
 } from '@/validations/NodeValidation.js';
 import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
+import NodeForm from './NodeForm';
 
 interface IProps {
   className?: string;
@@ -39,92 +20,28 @@ export default function AddNodeForm({ className }: IProps) {
   const form = useForm<NodeFormSchemaData>({
     resolver: zodResolver(NodeFormSchema),
     defaultValues: NodeFormSchemaDefaultValue,
+    mode: 'onChange',
+  });
+
+  const fieldArray = useFieldArray({
+    control: form.control,
+    name: 'validation_rules',
   });
 
   function onSubmit(data: NodeFormSchemaData) {
     addNode(data);
-    //
+
     form.reset();
     setSheetOpen(false);
     toast.success('Added node successfully');
   }
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('space-y-6', className)}
-      >
-        <FormField
-          control={form.control}
-          name='label'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Node Label</FormLabel>
-              <FormControl>
-                <Input placeholder='Enter the label' {...field} />
-              </FormControl>
-              <FormDescription>This is the label for your node</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='type'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Node Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl className='w-full'>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.entries(NodeType).map(([key, value]) => (
-                    <SelectItem key={value} value={value}>
-                      {key}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='field_type'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Field Type</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl className='w-full'>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent className='w-full'>
-                  {Object.entries(NodeFieldType).map(([key, value]) => (
-                    <SelectItem key={value} value={value}>
-                      {key}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          className='w-full'
-          type='submit'
-          disabled={!form.formState.isValid}
-        >
-          Submit
-        </Button>
-      </form>
-    </Form>
+    <NodeForm
+      form={form}
+      fieldArray={fieldArray}
+      onSubmit={onSubmit}
+      className={className}
+    />
   );
 }

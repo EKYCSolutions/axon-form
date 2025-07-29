@@ -50,5 +50,10 @@ export function capitalize(input: string | undefined): string | undefined {
  * ```
  */
 export function convertPascalCaseToTitleCase(input: string): string {
-  return input.replace(/([A-Z][a-z])/g, ' $1').trim();
+  return input
+    .replace(/([A-Z])/g, ' $1')
+    .trim()
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }

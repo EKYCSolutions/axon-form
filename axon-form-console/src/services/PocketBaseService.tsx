@@ -22,6 +22,10 @@ export const createNode = async (data: NodeFormSchemaData): Promise<any> => {
     label: data.label,
     type: data.type,
     field_type: data.field_type,
+    fieldType: data.field_type,
+    is_visible: data.is_visible,
+    nodeType: data.type,
+    validation_rules: data.validation_rules,
   });
 };
 
@@ -44,7 +48,7 @@ export const createEdge = async (data: EdgeFormSchemaData): Promise<any> => {
   return await client.collection(PocketBaseCollection.EDGES).create({
     source_node: data.source_node,
     target_node: data.target_node,
-    type: data.edge_type,
+    type: data.type,
   });
 };
 
@@ -65,4 +69,37 @@ export const updateEdge = async (
 
 export const deleteEdge = async (id: string): Promise<any> => {
   return await client.collection(PocketBaseCollection.EDGES).delete(id);
+};
+
+export const createCondition = async (
+  data: ConditionFormSchemaData,
+): Promise<any> => {
+  return await client.collection(PocketBaseCollection.CONDITIONS).create({
+    source_node: data.source_node,
+    target_node: data.target_node,
+    type: data.type,
+  });
+};
+
+export const getAllConditions = async (): Promise<any> => {
+  return await client
+    .collection(PocketBaseCollection.CONDITIONS)
+    .getList(1, 50, {});
+};
+
+export const getCondition = async (id: string): Promise<any> => {
+  return await client.collection(PocketBaseCollection.CONDITIONS).getOne(id);
+};
+
+export const updateCondition = async (
+  id: string,
+  data: Partial<ConditionFormSchemaData>,
+): Promise<any> => {
+  return await client
+    .collection(PocketBaseCollection.CONDITIONS)
+    .update(id, data);
+};
+
+export const deleteCondition = async (id: string): Promise<any> => {
+  return await client.collection(PocketBaseCollection.CONDITIONS).delete(id);
 };

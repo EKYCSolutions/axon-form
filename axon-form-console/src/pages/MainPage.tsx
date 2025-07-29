@@ -4,7 +4,13 @@ import { useGraph } from '@/components/hooks/useGraph';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
+import { getAllEdges, getAllNodes } from '@/services/PocketBaseService';
+import type { GraphEdge, GraphNode } from '@/types/Graph';
 import { renderSheetContent } from '@/utils/Graph';
+import { convertEdgeFormSchemaToGraphEdge } from '@/validations/EdgeValidation';
+import { convertNodeFormSchemaToGraphNode } from '@/validations/NodeValidation';
+import { useQueries } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 export default function MainPage() {
   const {
@@ -17,16 +23,48 @@ export default function MainPage() {
     sheetOpen,
     sheetType,
     mouseEventCallbacks,
+    setNodes,
+    setEdges,
     setSheetOpen,
     setSheetType,
   } = useGraph();
 
+  const [nodesQuery, edgesQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ['nodes'],
+        queryFn: getAllNodes,
+      },
+      {
+        queryKey: ['edges'],
+        queryFn: getAllEdges,
+      },
+    ],
+  });
+
+  useEffect(() => {
+    if (nodesQuery.status == 'success' && nodes.length === 0) {
+      const nodeRes: GraphNode[] = nodesQuery.data.items.map((node) =>
+        convertNodeFormSchemaToGraphNode(node),
+      );
+
+      setNodes(nodeRes);
+    }
+    if (edgesQuery.status == 'success' && edges.length === 0) {
+      const edgeRes: GraphEdge[] = edgesQuery.data.items.map((edge) =>
+        convertEdgeFormSchemaToGraphEdge(edge),
+      );
+
+      setEdges(edgeRes);
+    }
+  }, [nodesQuery, edgesQuery]);
+
   return (
-    <div className='relative w-full h-full p-4 dark:bg-slate-100'>
+    <div className='relative w-full h-full dark:bg-slate-100'>
       <div className='space-x-2'>
         <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
           <SheetContent className='h-full p-4 dark:outline-none dark:bg-transparent dark:shadow-none dark:border-none [&>button:first-of-type]:hidden border-l-0'>
-            <div className='h-full p-4 rounded-lg bg-black space-y-6'>
+            <div className='h-full p-4 rounded-lg bg-black space-y-6 overflow-y-auto'>
               {renderSheetContent({
                 sheetType: sheetType,
                 //,

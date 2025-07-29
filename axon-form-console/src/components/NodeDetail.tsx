@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { capitalize } from '@/utils/string';
+import { capitalize, convertPascalCaseToTitleCase } from '@/utils/string';
 import { useGraph } from './hooks/useGraph';
 import ReadonlyContainer from './ReadonlyContainer';
 
@@ -30,10 +30,25 @@ export default function NodeDetail({ className }: IProps) {
             title='Node type'
             text={capitalize(selectedNode?.nodeType)}
           />
-          <ReadonlyContainer
-            title='Field type'
-            text={capitalize(selectedNode?.fieldType)}
-          />
+          {selectedNode?.fieldType && (
+            <ReadonlyContainer
+              title='Field type'
+              text={capitalize(selectedNode?.fieldType)}
+            />
+          )}
+          {selectedNode?.validations &&
+            selectedNode.validations.map((validation, idx) => (
+              <div key={idx} className='space-y-2'>
+                <h2 className='text-sm'>Validation {idx + 1}</h2>
+                <ReadonlyContainer
+                  text={convertPascalCaseToTitleCase(validation.type)}
+                />
+                {validation?.value && (
+                  <ReadonlyContainer text={validation.value?.toString()} />
+                )}
+                <ReadonlyContainer text={validation.message} />
+              </div>
+            ))}
         </div>
       </CardContent>
     </Card>

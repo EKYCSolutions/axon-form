@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { capitalize, convertSnakeCaseToTitleCase } from '@/utils/string';
 import { useGraph } from './hooks/useGraph';
 import ReadonlyContainer from './ReadonlyContainer';
+import { Button } from './ui/button';
 
 interface IProps {
   className?: string;
@@ -38,6 +39,7 @@ export default function EdgeDetail({ className }: IProps) {
           />
         </div>
       </CardContent>
+      <Button variant='outline'>Add Condition</Button>
     </Card>
   );
 }

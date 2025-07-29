@@ -14,10 +14,10 @@ import { EdgeType } from '@/configs/graph.js';
 import { cn } from '@/lib/utils';
 import { convertPascalCaseToTitleCase } from '@/utils/string.js';
 import {
+  convertGraphEdgeToEdgeForm,
   EdgeFormSchema,
   type EdgeFormSchemaData,
 } from '@/validations/EdgeValidation.js';
-import { convertGraphEdgeToEdgeForm } from '@/validations/NodeValidation.js';
 import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph.js';
 import {
@@ -110,7 +110,7 @@ export default function EditEdgeForm({ className }: IProps) {
         />
         <FormField
           control={form.control}
-          name='edge_type'
+          name='type'
           render={({ field }) => (
             <FormItem>
               <FormLabel>Edge Type</FormLabel>
