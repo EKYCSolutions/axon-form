@@ -1,12 +1,14 @@
 import { EdgeType, GraphSheetType } from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
 import {
+  createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
 } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import { type NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
@@ -200,8 +202,24 @@ export function GraphProvider({
       };
 
       try {
-        await createEdgeService(data);
-        console.log('Edge created successfully');
+        const addEdgeRes = await createEdgeService(data);
+        console.log('Edge created successfully', addEdgeRes);
+
+        if (data.type == EdgeType.Shows) {
+          data.conditions?.forEach(async (condition) => {
+            const addConditionBody: ConditionFormSchemaData = {
+              node: data.source_node,
+              edge: addEdgeRes.id,
+              expr: condition.expr,
+              value: condition.value,
+            };
+
+            const addConditionRes =
+              await createConditionService(addConditionBody);
+
+            console.log('Condition created successfully', addConditionRes);
+          });
+        }
 
         const newEdges = [...edges, newEdge];
         setEdges(newEdges);

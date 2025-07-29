@@ -45,6 +45,9 @@ export enum GraphSheetType {
   AddEdge = 'add_edge',
   EditEdge = 'edit_edge',
   ShowEdge = 'show_edge',
+  AddCondition = 'add_condition',
+  EditCondition = 'edit_condition',
+  ShowCondition = 'show_condition',
 }
 
 export enum ConditionExpression {

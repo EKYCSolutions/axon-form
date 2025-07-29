@@ -1,4 +1,6 @@
 import { PocketBaseCollection } from '@/configs/collections';
+import type { EdgeResponse } from '@/types/PocketBaseResponse';
+import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import PocketBase from 'pocketbase';
@@ -52,8 +54,10 @@ export const createEdge = async (data: EdgeFormSchemaData): Promise<any> => {
   });
 };
 
-export const getAllEdges = async (): Promise<any> => {
-  return await client.collection(PocketBaseCollection.EDGES).getList(1, 50, {});
+export const getAllEdges = async (): Promise<{ items: EdgeResponse[] }> => {
+  return (await client.collection(PocketBaseCollection.EDGES).getList(1, 50, {
+    expand: 'conditions_via_edge',
+  })) as { items: EdgeResponse[] };
 };
 
 export const getEdge = async (id: string): Promise<any> => {
@@ -71,13 +75,14 @@ export const deleteEdge = async (id: string): Promise<any> => {
   return await client.collection(PocketBaseCollection.EDGES).delete(id);
 };
 
-export const createCondition = async (
+export const createConditionService = async (
   data: ConditionFormSchemaData,
 ): Promise<any> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).create({
-    source_node: data.source_node,
-    target_node: data.target_node,
-    type: data.type,
+    check_node: data.node,
+    edge: data.edge,
+    expression: data.expr,
+    expected_value: data.value,
   });
 };
 

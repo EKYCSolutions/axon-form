@@ -28,17 +28,19 @@ export interface GraphEdge extends Relationship {
   //
   edgeType: EdgeType;
   //
-  configs: Record<string, any>;
+  configs?: Record<string, any>;
+  //
+  conditions: EdgeCondition[];
 }
 
 export interface EdgeCondition {
   id: string;
   //
-  edge_id: string;
-  check_node_id: string;
+  edge: string;
+  check_node: string;
   //
   expression: ConditionExpression;
-  expected_value?: string | number | boolean;
+  expected_value: string | number | boolean;
 }
 
 export interface ValidationRule {

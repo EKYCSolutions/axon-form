@@ -1,16 +1,23 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { capitalize, convertSnakeCaseToTitleCase } from '@/utils/string';
+import {
+  capitalize,
+  convertPascalCaseToTitleCase,
+  convertSnakeCaseToTitleCase,
+} from '@/utils/string';
 import { useGraph } from './hooks/useGraph';
 import ReadonlyContainer from './ReadonlyContainer';
-import { Button } from './ui/button';
 
 interface IProps {
   className?: string;
 }
 
 export default function EdgeDetail({ className }: IProps) {
-  const { selectedEdge } = useGraph();
+  const { selectedEdge, setSheetType } = useGraph();
+
+  if (!selectedEdge) {
+    return;
+  }
 
   return (
     <Card
@@ -21,25 +28,32 @@ export default function EdgeDetail({ className }: IProps) {
     >
       <CardContent className='px-0'>
         <div className='flex flex-col gap-4'>
-          <ReadonlyContainer title='ID' text={selectedEdge?.id} copyable />
+          <ReadonlyContainer title='ID' text={selectedEdge.id} copyable />
           <ReadonlyContainer
             title='Source Node'
-            text={selectedEdge?.sourceNode}
+            text={selectedEdge.sourceNode}
             copyable
           />
           <ReadonlyContainer
             title='Target Node'
-            text={capitalize(selectedEdge?.targetNode)}
+            text={capitalize(selectedEdge.targetNode)}
           />
           <ReadonlyContainer
             title='Edge type'
-            text={convertSnakeCaseToTitleCase(
-              selectedEdge?.edgeType.toString(),
-            )}
+            text={convertSnakeCaseToTitleCase(selectedEdge.edgeType)}
           />
+          {selectedEdge?.conditions &&
+            selectedEdge.conditions.map((condition, idx) => (
+              <div key={idx} className='space-y-2'>
+                <h2 className='text-sm'>Condition {idx + 1}</h2>
+                <ReadonlyContainer
+                  text={convertPascalCaseToTitleCase(condition.expression)}
+                />
+                <ReadonlyContainer text={condition.expected_value.toString()} />
+              </div>
+            ))}
         </div>
       </CardContent>
-      <Button variant='outline'>Add Condition</Button>
     </Card>
   );
 }

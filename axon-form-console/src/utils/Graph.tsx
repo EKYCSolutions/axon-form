@@ -7,20 +7,26 @@ import NodeDetail from '@/components/NodeDetail';
 import { Button } from '@/components/ui/button';
 import { SheetTitle } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
-import { PenIcon } from 'lucide-react';
+import { PenIcon, Trash2Icon } from 'lucide-react';
 
 interface RenderSheetContentProps {
   sheetType: GraphSheetType;
   //
   onEditNodeClick: () => void;
+  onRemoveNodeClick: () => void;
+  //
   onEditEdgeClick: () => void;
+  onRemoveEdgeClick: () => void;
 }
 
 export const renderSheetContent = ({
   sheetType,
   //
   onEditNodeClick,
+  onRemoveNodeClick,
+  //
   onEditEdgeClick,
+  onRemoveEdgeClick,
 }: RenderSheetContentProps) => {
   switch (sheetType) {
     case GraphSheetType.AddNode:
@@ -35,9 +41,18 @@ export const renderSheetContent = ({
         <>
           <div className='flex items-center justify-between'>
             <SheetTitle className='text-xl font-medium'>Node Detail</SheetTitle>
-            <Button variant='outline' onClick={onEditNodeClick}>
-              <PenIcon size={10} />
-            </Button>
+            <div className='space-x-2'>
+              <Button variant='outline' onClick={onEditNodeClick}>
+                <PenIcon size={10} />
+              </Button>
+              <Button
+                variant='outline'
+                className='dark:hover:border-red-400 dark:hover:bg-red-400/20'
+                onClick={onRemoveNodeClick}
+              >
+                <Trash2Icon className='dark:hover:text-red-400' size={10} />
+              </Button>
+            </div>
           </div>
           <NodeDetail />
         </>
@@ -62,9 +77,18 @@ export const renderSheetContent = ({
         <>
           <div className='flex items-center justify-between'>
             <SheetTitle className='text-xl font-medium'>Edge Detail</SheetTitle>
-            <Button variant='outline' onClick={onEditEdgeClick}>
-              <PenIcon size={10} />
-            </Button>
+            <div className='space-x-2'>
+              <Button variant='outline' onClick={onEditEdgeClick}>
+                <PenIcon size={10} />
+              </Button>
+              <Button
+                variant='outline'
+                className='dark:hover:border-red-400 dark:hover:bg-red-400/20'
+                onClick={onRemoveEdgeClick}
+              >
+                <Trash2Icon className='dark:hover:text-red-400' size={10} />
+              </Button>
+            </div>
           </div>
           <EdgeDetail />
         </>

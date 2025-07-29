@@ -6,8 +6,9 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
 import { getAllEdges, getAllNodes } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph';
+import type { EdgeResponse } from '@/types/PocketBaseResponse';
 import { renderSheetContent } from '@/utils/Graph';
-import { convertEdgeFormSchemaToGraphEdge } from '@/validations/EdgeValidation';
+import { convertEdgeResponseToGraphEdge } from '@/validations/EdgeValidation';
 import { convertNodeFormSchemaToGraphNode } from '@/validations/NodeValidation';
 import { useQueries } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -51,8 +52,8 @@ export default function MainPage() {
       setNodes(nodeRes);
     }
     if (edgesQuery.status == 'success' && edges.length === 0) {
-      const edgeRes: GraphEdge[] = edgesQuery.data.items.map((edge) =>
-        convertEdgeFormSchemaToGraphEdge(edge),
+      const edgeRes: GraphEdge[] = edgesQuery.data.items.map(
+        (edge: EdgeResponse) => convertEdgeResponseToGraphEdge(edge),
       );
 
       setEdges(edgeRes);
@@ -71,8 +72,14 @@ export default function MainPage() {
                 onEditNodeClick: () => {
                   setSheetType(GraphSheetType.EditNode);
                 },
+                onRemoveNodeClick: () => {
+                  //
+                },
                 onEditEdgeClick: () => {
                   setSheetType(GraphSheetType.EditEdge);
+                },
+                onRemoveEdgeClick: () => {
+                  //
                 },
               })}
             </div>
