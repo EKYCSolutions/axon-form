@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 
 import {
   convertGraphEdgeToEdgeForm,
@@ -15,14 +15,7 @@ interface IProps {
 }
 
 export default function EditEdgeForm({ className }: IProps) {
-  const {
-    selectedEdge,
-    updateEdge,
-    setSheetOpen,
-    setIsEdgeMode,
-    setSourceNode,
-    setTargetNode,
-  } = useGraph();
+  const { selectedEdge, updateEdge, setSheetOpen } = useGraph();
 
   if (!selectedEdge) {
     return;
@@ -31,6 +24,11 @@ export default function EditEdgeForm({ className }: IProps) {
   const form = useForm<EdgeFormSchemaData>({
     resolver: zodResolver(EdgeFormSchema),
     defaultValues: convertGraphEdgeToEdgeForm(selectedEdge),
+  });
+
+  const fieldArray = useFieldArray({
+    control: form.control,
+    name: 'conditions',
   });
 
   function onSubmit(data: EdgeFormSchemaData) {
@@ -44,5 +42,12 @@ export default function EditEdgeForm({ className }: IProps) {
     toast.success('Update node successfully');
   }
 
-  return <EdgeForm form={form} onSubmit={onSubmit} className={className} />;
+  return (
+    <EdgeForm
+      form={form}
+      fieldArray={fieldArray}
+      onSubmit={onSubmit}
+      className={className}
+    />
+  );
 }

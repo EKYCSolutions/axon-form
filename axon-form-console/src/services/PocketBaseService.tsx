@@ -1,6 +1,6 @@
 import { PocketBaseCollection } from '@/configs/collections';
 import type { EdgeResponse } from '@/types/PocketBaseResponse';
-import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
+import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import PocketBase from 'pocketbase';
@@ -25,7 +25,6 @@ export const createNode = async (data: NodeFormSchemaData): Promise<any> => {
     type: data.type,
     field_type: data.field_type,
     fieldType: data.field_type,
-    is_visible: data.is_visible,
     nodeType: data.type,
     validation_rules: data.validation_rules,
   });

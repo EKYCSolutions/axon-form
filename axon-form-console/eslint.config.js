@@ -17,10 +17,10 @@ export default tseslint.config([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
-    },
-    env: {
-      node: true,
+      globals: {
+        ...globals.browser,
+        ...globals.node, // ✅ include Node.js globals here
+      },
     },
   },
 ]);

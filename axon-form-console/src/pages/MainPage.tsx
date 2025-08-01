@@ -4,9 +4,10 @@ import { useGraph } from '@/components/hooks/useGraph';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
+import { cn } from '@/lib/utils';
 import { getAllEdges, getAllNodes } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph';
-import type { EdgeResponse } from '@/types/PocketBaseResponse';
+import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
 import { renderSheetContent } from '@/utils/Graph';
 import { convertEdgeResponseToGraphEdge } from '@/validations/EdgeValidation';
 import { convertNodeFormSchemaToGraphNode } from '@/validations/NodeValidation';
@@ -17,6 +18,7 @@ export default function MainPage() {
   const {
     nvlRef,
     isEdgeMode,
+    isGroupConditionMode,
     sourceNode,
     targetNode,
     nodes,
@@ -45,8 +47,8 @@ export default function MainPage() {
 
   useEffect(() => {
     if (nodesQuery.status == 'success' && nodes.length === 0) {
-      const nodeRes: GraphNode[] = nodesQuery.data.items.map((node) =>
-        convertNodeFormSchemaToGraphNode(node),
+      const nodeRes: GraphNode[] = nodesQuery.data.items.map(
+        (node: NodeResponse) => convertNodeFormSchemaToGraphNode(node),
       );
 
       setNodes(nodeRes);
@@ -62,30 +64,33 @@ export default function MainPage() {
 
   return (
     <div className='relative w-full h-full dark:bg-slate-100'>
-      <div className='space-x-2'>
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-          <SheetContent className='h-full p-4 dark:outline-none dark:bg-transparent dark:shadow-none dark:border-none [&>button:first-of-type]:hidden border-l-0'>
-            <div className='h-full p-4 rounded-lg bg-black space-y-6 overflow-y-auto'>
-              {renderSheetContent({
-                sheetType: sheetType,
-                //,
-                onEditNodeClick: () => {
-                  setSheetType(GraphSheetType.EditNode);
-                },
-                onRemoveNodeClick: () => {
-                  //
-                },
-                onEditEdgeClick: () => {
-                  setSheetType(GraphSheetType.EditEdge);
-                },
-                onRemoveEdgeClick: () => {
-                  //
-                },
-              })}
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent
+          className={cn(
+            'h-full p-4 dark:outline-none dark:bg-transparent dark:shadow-none dark:border-none [&>button:first-of-type]:hidden border-l-0',
+            sheetType == GraphSheetType.AddConditionGroup && 'min-w-[50vw]',
+          )}
+        >
+          <div className='h-full p-4 rounded-lg bg-black space-y-6 overflow-y-auto'>
+            {renderSheetContent({
+              sheetType: sheetType,
+              //,
+              onEditNodeClick: () => {
+                setSheetType(GraphSheetType.EditNode);
+              },
+              onRemoveNodeClick: () => {
+                //
+              },
+              onEditEdgeClick: () => {
+                setSheetType(GraphSheetType.EditEdge);
+              },
+              onRemoveEdgeClick: () => {
+                //
+              },
+            })}
+          </div>
+        </SheetContent>
+      </Sheet>
       <div className='absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-4'>
         {isEdgeMode ? (
           <Alert className='dark:opacity-80 hover:cursor-default'>
@@ -93,6 +98,10 @@ export default function MainPage() {
               Please select a {sourceNode ? 'target' : 'source'} node to
               continue
             </AlertDescription>
+          </Alert>
+        ) : isGroupConditionMode ? (
+          <Alert className='dark:opacity-80 hover:cursor-default'>
+            <AlertDescription>Please select an edge</AlertDescription>
           </Alert>
         ) : (
           <GraphMenubar />

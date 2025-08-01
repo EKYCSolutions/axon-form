@@ -17,7 +17,6 @@ import { NodeFieldType, NodeType, ValidationRuleType } from '@/configs/graph';
 import { convertPascalCaseToTitleCase } from '@/utils/string';
 import { ValidationRuleTypeWithValue } from '@/validations/ValidationRulesValidation';
 import { Plus, Trash2Icon } from 'lucide-react';
-import { Checkbox } from '../ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -124,31 +123,6 @@ export default function NodeForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
-            <FormField
-              control={form.control}
-              name='is_visible'
-              render={({ field }) => {
-                return (
-                  <FormItem className='flex flex-row items-start gap-2'>
-                    <FormControl>
-                      <Checkbox
-                        name='is_visible'
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div>
-                      <FormLabel className='text-sm font-normal'>
-                        Show Field
-                      </FormLabel>
-                      <FormDescription className='text-xs'>
-                        Set whether field is visible by default
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                );
-              }}
             />
             <FormLabel>Field Validations</FormLabel>
             {fieldArray.fields.map((field, index) => (

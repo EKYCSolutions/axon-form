@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils.js';
-import { ChevronUp, Crop, Pencil, Plus } from 'lucide-react';
+import { ChevronUp, Pencil, Plus } from 'lucide-react';
 import { useGraph } from '../hooks/useGraph.js';
 import { Separator } from '../ui/separator.js';
 
@@ -47,12 +47,19 @@ export default function GraphMenuBar({ className }: IProps) {
           <Plus size={20} />
           Edge
         </MenubarTrigger>
+        <MenubarTrigger
+          onClick={() => {
+            setSheetOpen(true);
+            setSheetType(GraphSheetType.AddConditionGroup);
+          }}
+          className='w-fit items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-2 py-1  font-normal'
+        >
+          <Plus size={20} />
+          Condition Group
+        </MenubarTrigger>
       </MenubarMenu>
       <Separator orientation='vertical' />
       <MenubarMenu>
-        <MenubarTrigger className='px-1'>
-          <Crop size={20} />
-        </MenubarTrigger>
         <MenubarContent>
           <MenubarCheckboxItem>Always Show Bookmarks Bar</MenubarCheckboxItem>
           <MenubarCheckboxItem checked>

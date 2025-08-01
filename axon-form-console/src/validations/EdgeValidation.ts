@@ -5,7 +5,7 @@ import type {
   EdgeResponse,
 } from '@/types/PocketBaseResponse';
 import z from 'zod';
-import { ConditionFormSchema } from './ConditionValidation';
+import { ConditionFormSchema } from './ConditionValidation.js';
 
 export const EdgeFormSchema = z
   .object({

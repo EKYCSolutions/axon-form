@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { EdgeType, GraphSheetType } from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
 import {
@@ -100,7 +101,9 @@ export function GraphProvider({
         element: Node | Relationship,
         hitElements: HitTargets,
         event: MouseEvent,
-      ) => {},
+      ) => {
+        // console.log('hit element >>', hitElements);
+      },
       [],
     ),
     onNodeClick: useCallback(
@@ -129,6 +132,7 @@ export function GraphProvider({
 
         const foundEdge = edges.find((e) => e.id === rel.id);
         setSelectedEdge(foundEdge);
+
         //
         setSheetOpen(true);
         setSheetType(GraphSheetType.ShowEdge);
@@ -137,12 +141,12 @@ export function GraphProvider({
     ),
 
     onDrag: useCallback((draggedNodes: Node[]) => {
-      console.log('onDrag', draggedNodes);
+      // console.log('onDrag', draggedNodes);
     }, []),
 
     onPan: useCallback(
       (_panning: { x: number; y: number }, evt: MouseEvent) => {
-        console.log('onPan', _panning, evt);
+        // console.log('onPan', _panning, evt);
       },
       [],
     ),
@@ -163,12 +167,9 @@ export function GraphProvider({
         caption: data.label,
         label: data.label,
         fieldType: data.field_type,
-        is_visible: data.is_visible,
         nodeType: data.type,
         validations: data.validation_rules,
       };
-
-      console.log('object >>', newNode);
 
       try {
         const addNodeRes = await createNodeService(data);
@@ -267,13 +268,11 @@ export function GraphProvider({
               caption: updates.label,
               fieldType: updates.field_type,
               nodeType: updates.type,
-              is_visible: updates.is_visible,
               validations: updates.validation_rules,
             }
           : node,
       );
 
-      console.log('nodes >>', newNodes);
       try {
         await updateNodeService(nodeId, updates);
         console.log('Edge updated successfully');

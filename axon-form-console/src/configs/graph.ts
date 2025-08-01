@@ -8,7 +8,7 @@ export enum NodeFieldType {
   Text = 'text',
   Number = 'number',
   Datetime = 'datetime',
-  MultiSelect = 'multi-select',
+  MultiSelect = 'multi_select',
   Radio = 'radio',
   Dropdown = 'dropdown',
   Checkbox = 'checkbox',
@@ -45,9 +45,9 @@ export enum GraphSheetType {
   AddEdge = 'add_edge',
   EditEdge = 'edit_edge',
   ShowEdge = 'show_edge',
-  AddCondition = 'add_condition',
-  EditCondition = 'edit_condition',
-  ShowCondition = 'show_condition',
+  AddConditionGroup = 'add_condition_group',
+  EditConditionGroup = 'edit_condition_group',
+  ShowConditionGroup = 'show_condition_group',
 }
 
 export enum ConditionExpression {
@@ -62,11 +62,18 @@ export enum ConditionExpression {
   EndsWith = 'ends_with',
 }
 
+export enum ConditionGroupExpression {
+  And = 'and',
+  Or = 'or',
+  Nor = 'nor',
+  Not = 'not',
+}
+
 export enum ValidationRuleType {
   Required = 'required',
   Email = 'email',
-  MinLength = 'minLength',
-  MaxLength = 'maxLength',
+  MinLength = 'min_length',
+  MaxLength = 'max_length',
   Pattern = 'pattern',
   Min = 'min',
   Max = 'max',

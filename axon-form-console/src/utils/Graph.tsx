@@ -1,4 +1,5 @@
 import EdgeDetail from '@/components/EdgeDetail';
+import AddConditionGroupForm from '@/components/forms/AddConditionGroupForm';
 import AddEdgeForm from '@/components/forms/AddEdgeForm';
 import AddNodeForm from '@/components/forms/AddNodeForm';
 import EditEdgeForm from '@/components/forms/EditEdgeForm';
@@ -98,6 +99,15 @@ export const renderSheetContent = ({
         <>
           <SheetTitle className='text-xl font-medium'>Edit Edge</SheetTitle>
           <EditEdgeForm />
+        </>
+      );
+    case GraphSheetType.AddConditionGroup:
+      return (
+        <>
+          <SheetTitle className='text-xl font-medium'>
+            Add Condition Group
+          </SheetTitle>
+          <AddConditionGroupForm />
         </>
       );
     default:

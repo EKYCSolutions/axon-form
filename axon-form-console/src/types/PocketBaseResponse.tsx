@@ -4,10 +4,19 @@ export interface BaseResponse {
   updated_at: Date;
 }
 
+export interface NodeResponse extends BaseResponse {
+  type: string;
+  field_type: string;
+  label: string;
+  //
+  config: Record<string, any>;
+  validation_rules: Record<string, any>;
+}
 export interface EdgeResponse extends BaseResponse {
   source_node: string;
   target_node: string;
   type: string;
+  //
   expand: {
     conditions_via_edge: ConditionResponse[];
   };

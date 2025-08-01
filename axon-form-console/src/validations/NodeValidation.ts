@@ -1,5 +1,7 @@
 import { NodeFieldType, NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
+import type { NodeResponse } from '@/types/PocketBaseResponse';
+import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
 import { ValidationRuleFormSchema } from './ValidationRulesValidation';
 
@@ -10,7 +12,6 @@ export const NodeFormSchema = z
     label: z.string().min(1, {
       message: 'Label must be at least 1 character',
     }),
-    is_visible: z.boolean().optional(),
     validation_rules: z.array(ValidationRuleFormSchema).optional(),
   })
   .refine(
@@ -32,7 +33,6 @@ export const NodeFormSchemaDefaultValue: NodeFormSchemaData = {
   type: '' as NodeType,
   field_type: undefined,
   label: '',
-  is_visible: true,
 };
 
 export function convertGraphNodeToNodeForm(
@@ -42,20 +42,18 @@ export function convertGraphNodeToNodeForm(
     type: node.nodeType,
     field_type: node.fieldType,
     label: node.label,
-    is_visible: node.is_visible,
     validation_rules: node.validations,
   };
 }
-3;
 
-export function convertNodeFormSchemaToGraphNode(node) {
+export function convertNodeFormSchemaToGraphNode(node: NodeResponse) {
   return {
     id: node.id,
     nodeType: node.type,
     fieldType: node.field_type,
     label: node.label,
     caption: node.label,
-    is_visible: node.is_visible,
+    color: generateRandomRgbColor(node.type as NodeType),
     validations: node.validation_rules,
   };
 }

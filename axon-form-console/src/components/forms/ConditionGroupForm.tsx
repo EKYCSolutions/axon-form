@@ -1,0 +1,93 @@
+import { ConditionGroupExpression } from '@/configs/graph';
+import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation.js';
+import { type UseFormReturn } from 'react-hook-form';
+
+import type { GraphEdge } from '@/types/Graph.js';
+import { convertPascalCaseToTitleCase } from '@/utils/string.js';
+import RecursiveCollapsibleConditionGroup from '../RecursiveCollapsibleConditionGroup.js';
+import { Button } from '../ui/button.js';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../ui/form.js';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select.js';
+import { Separator } from '../ui/separator.js';
+
+interface IProps {
+  className?: string;
+  //
+  form: UseFormReturn<ConditionGroupFormSchemaData>;
+  onSubmit: (data: ConditionGroupFormSchemaData) => void;
+}
+
+export default function ConditionGroupForm({
+  className,
+  form,
+  onSubmit,
+}: IProps) {
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
+        <FormField
+          control={form.control}
+          name='expr'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Expression</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl className='w-full'>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Expression' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className='w-full' defaultValue={field.value}>
+                  {Object.entries(ConditionGroupExpression).map(
+                    ([key, value]) => (
+                      <SelectItem key={value} value={value}>
+                        {convertPascalCaseToTitleCase(key)}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <RecursiveCollapsibleConditionGroup
+          form={form}
+          fieldArrayName='children'
+          expression={form.watch('expr')}
+          edges={form.watch('edges') as GraphEdge[]}
+          children={form.watch('children')}
+          //
+          onAddEdge={(edge) => {
+            form.setValue(
+              'edges',
+              form.watch('edges') ? [...form.watch('edges'), edge] : [edge],
+            );
+          }}
+        />
+        <Separator />
+        <Button
+          type='submit'
+          className='w-full'
+          disabled={!form.formState.isValid}
+        >
+          Submit
+        </Button>
+      </form>
+    </Form>
+  );
+}

@@ -15,7 +15,6 @@ export interface GraphNode extends Node {
   nodeType: NodeType;
   fieldType?: NodeFieldType;
   //
-  is_visible?: boolean;
   is_required?: boolean;
   //
   configs?: Record<string, any>;
@@ -30,7 +29,7 @@ export interface GraphEdge extends Relationship {
   //
   configs?: Record<string, any>;
   //
-  conditions: EdgeCondition[];
+  conditions?: EdgeCondition[];
 }
 
 export interface EdgeCondition {
@@ -41,6 +40,11 @@ export interface EdgeCondition {
   //
   expression: ConditionExpression;
   expected_value: string | number | boolean;
+}
+export interface EdgeConditionGroup {
+  id: string;
+  //
+  conditions: string;
 }
 
 export interface ValidationRule {
