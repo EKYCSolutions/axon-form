@@ -4,15 +4,13 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
-  MenubarRadioGroup,
-  MenubarRadioItem,
   MenubarSeparator,
   MenubarShortcut,
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils.js';
-import { ChevronUp, Pencil, Plus } from 'lucide-react';
+import { ChevronUp, Plus } from 'lucide-react';
 import { useGraph } from '../hooks/useGraph.js';
 import { Separator } from '../ui/separator.js';
 
@@ -78,22 +76,7 @@ export default function GraphMenuBar({ className }: IProps) {
           <MenubarItem inset>Hide Sidebar</MenubarItem>
         </MenubarContent>
       </MenubarMenu>
-      <MenubarMenu>
-        <MenubarTrigger className='px-1'>
-          <Pencil size={20} />
-        </MenubarTrigger>
-        <MenubarContent>
-          <MenubarRadioGroup value='benoit'>
-            <MenubarRadioItem value='andy'>Andy</MenubarRadioItem>
-            <MenubarRadioItem value='benoit'>Benoit</MenubarRadioItem>
-            <MenubarRadioItem value='Luis'>Luis</MenubarRadioItem>
-          </MenubarRadioGroup>
-          <MenubarSeparator />
-          <MenubarItem inset>Edit...</MenubarItem>
-          <MenubarSeparator />
-          <MenubarItem inset>Add Profile...</MenubarItem>
-        </MenubarContent>
-      </MenubarMenu>
+
       <Separator orientation='vertical' />
 
       <MenubarMenu>

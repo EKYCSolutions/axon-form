@@ -194,12 +194,13 @@ export function GraphProvider({
     async (data: EdgeFormSchemaData) => {
       const newEdge: GraphEdge = {
         id: uuidv4(),
+        label: data.label,
         from: data.source_node,
         to: data.target_node,
         sourceNode: data.source_node,
         targetNode: data.target_node,
         edgeType: EdgeType.HasOption,
-        caption: data.type || '',
+        caption: data.label || '',
       };
 
       try {
@@ -296,12 +297,13 @@ export function GraphProvider({
           ? {
               ...edge,
               //
+              label: updates.label,
               from: updates.source_node,
               to: updates.target_node,
               sourceNode: updates.source_node,
               targetNode: updates.target_node,
               edgeType: updates.type,
-              caption: updates.type?.toString(),
+              caption: updates.label,
             }
           : edge,
       );

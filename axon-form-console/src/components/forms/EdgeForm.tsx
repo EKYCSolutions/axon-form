@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -94,6 +95,24 @@ export default function EdgeForm({
               <FormMessage />
             </FormItem>
           )}
+        />
+        <FormField
+          control={form.control}
+          name='label'
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Edge Label</FormLabel>
+                <FormControl>
+                  <Input placeholder='Enter the label' {...field} />
+                </FormControl>
+                <FormDescription>
+                  Label for the relationship between nodes
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            );
+          }}
         />
         <FormField
           control={form.control}

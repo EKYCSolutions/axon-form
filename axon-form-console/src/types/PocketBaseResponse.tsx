@@ -13,6 +13,7 @@ export interface NodeResponse extends BaseResponse {
   validation_rules: Record<string, any>;
 }
 export interface EdgeResponse extends BaseResponse {
+  label: string;
   source_node: string;
   target_node: string;
   type: string;

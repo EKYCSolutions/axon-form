@@ -22,6 +22,7 @@ export interface GraphNode extends Node {
 }
 
 export interface GraphEdge extends Relationship {
+  label: string;
   sourceNode: string;
   targetNode: string;
   //

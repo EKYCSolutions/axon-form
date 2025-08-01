@@ -9,6 +9,9 @@ import { ConditionFormSchema } from './ConditionValidation.js';
 
 export const EdgeFormSchema = z
   .object({
+    label: z.string().min(1, {
+      message: 'Edge label is required',
+    }),
     source_node: z.string().min(1, {
       message: 'Source node must be selected',
     }),
@@ -34,30 +37,33 @@ export const EdgeFormSchema = z
 export type EdgeFormSchemaData = z.infer<typeof EdgeFormSchema>;
 
 export const EdgeFormSchemaDefaultValue: EdgeFormSchemaData = {
+  label: '',
   source_node: '',
   target_node: '',
   type: '' as EdgeType,
 };
 
 export function convertGraphEdgeToEdgeForm(
-  node: GraphEdge,
+  edge: GraphEdge,
 ): EdgeFormSchemaData {
   return {
-    source_node: node.sourceNode,
-    target_node: node.targetNode,
-    type: node.edgeType,
+    label: edge.label,
+    source_node: edge.sourceNode,
+    target_node: edge.targetNode,
+    type: edge.edgeType,
   };
 }
 
 export function convertEdgeResponseToGraphEdge(edge: EdgeResponse): GraphEdge {
   return {
     id: edge.id,
+    label: edge.label,
     from: edge.source_node,
     to: edge.target_node,
     sourceNode: edge.source_node,
     targetNode: edge.target_node,
     edgeType: edge.type as EdgeType,
-    caption: edge.type?.toString(),
+    caption: edge.label,
     conditions: edge.expand?.conditions_via_edge?.map((condition) =>
       convertConditionResponseToGraphEdgeCondition(condition),
     ),

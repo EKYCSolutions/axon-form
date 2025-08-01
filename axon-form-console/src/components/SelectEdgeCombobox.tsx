@@ -46,7 +46,7 @@ export function SelectEdgeCombobox({
             role='combobox'
             className={cn('justify-between', className)}
           >
-            {selectedEdges[idx] ? selectedEdges[idx].id : 'Select edge'}
+            {selectedEdges[idx] ? selectedEdges[idx].label : 'Select edge'}
             <ChevronsUpDown className='opacity-50' />
           </Button>
         </FormControl>
@@ -69,7 +69,7 @@ export function SelectEdgeCombobox({
                     }
                   }}
                 >
-                  {edge?.id}
+                  {edge?.label}
                   <Check
                     className={cn(
                       'ml-auto',

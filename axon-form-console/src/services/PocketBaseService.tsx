@@ -1,5 +1,5 @@
 import { PocketBaseCollection } from '@/configs/collections';
-import type { EdgeResponse } from '@/types/PocketBaseResponse';
+import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
@@ -15,11 +15,13 @@ export const client = new PocketBase(
 
 client.authStore.save(token, null);
 
-export const getAllNodes = async (): Promise<any> => {
+export const getAllNodes = async (): Promise<NodeResponse[]> => {
   return await client.collection(PocketBaseCollection.NODES).getList(1, 50, {});
 };
 
-export const createNode = async (data: NodeFormSchemaData): Promise<any> => {
+export const createNode = async (
+  data: NodeFormSchemaData,
+): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).create({
     label: data.label,
     type: data.type,
@@ -30,23 +32,26 @@ export const createNode = async (data: NodeFormSchemaData): Promise<any> => {
   });
 };
 
-export const getNode = async (id: string): Promise<any> => {
+export const getNode = async (id: string): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).getOne(id);
 };
 
 export const updateNode = async (
   id: string,
   data: Partial<NodeFormSchemaData>,
-): Promise<any> => {
+): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).update(id, data);
 };
 
-export const deleteNode = async (id: string): Promise<any> => {
+export const deleteNode = async (id: string): Promise<boolean> => {
   return await client.collection(PocketBaseCollection.NODES).delete(id);
 };
 
-export const createEdge = async (data: EdgeFormSchemaData): Promise<any> => {
+export const createEdge = async (
+  data: EdgeFormSchemaData,
+): Promise<EdgeResponse> => {
   return await client.collection(PocketBaseCollection.EDGES).create({
+    label: data.label,
     source_node: data.source_node,
     target_node: data.target_node,
     type: data.type,
@@ -59,18 +64,18 @@ export const getAllEdges = async (): Promise<{ items: EdgeResponse[] }> => {
   })) as { items: EdgeResponse[] };
 };
 
-export const getEdge = async (id: string): Promise<any> => {
+export const getEdge = async (id: string): Promise<EdgeResponse> => {
   return await client.collection(PocketBaseCollection.EDGES).getOne(id);
 };
 
 export const updateEdge = async (
   id: string,
   data: Partial<EdgeFormSchemaData>,
-): Promise<any> => {
+): Promise<EdgeResponse> => {
   return await client.collection(PocketBaseCollection.EDGES).update(id, data);
 };
 
-export const deleteEdge = async (id: string): Promise<any> => {
+export const deleteEdge = async (id: string): Promise<boolean> => {
   return await client.collection(PocketBaseCollection.EDGES).delete(id);
 };
 
