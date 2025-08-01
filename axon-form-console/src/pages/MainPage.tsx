@@ -18,7 +18,6 @@ export default function MainPage() {
   const {
     nvlRef,
     isEdgeMode,
-    isGroupConditionMode,
     sourceNode,
     targetNode,
     nodes,
@@ -98,10 +97,6 @@ export default function MainPage() {
               Please select a {sourceNode ? 'target' : 'source'} node to
               continue
             </AlertDescription>
-          </Alert>
-        ) : isGroupConditionMode ? (
-          <Alert className='dark:opacity-80 hover:cursor-default'>
-            <AlertDescription>Please select an edge</AlertDescription>
           </Alert>
         ) : (
           <GraphMenubar />

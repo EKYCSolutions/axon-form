@@ -1,9 +1,10 @@
 import { ConditionGroupExpression } from '@/configs/graph';
 import type { GraphEdge } from '@/types/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation.js';
-import { ChevronsUpDown, Plus } from 'lucide-react';
+import { ChevronsUpDown, Plus, Trash2Icon } from 'lucide-react';
 import { useFieldArray, type UseFormReturn } from 'react-hook-form';
 import { useGraph } from './hooks/useGraph.js';
+import { SelectEdgeCombobox } from './SelectEdgeCombobox.js';
 import { Button } from './ui/button.js';
 import {
   Collapsible,
@@ -33,7 +34,9 @@ interface IProps {
   edges: GraphEdge[];
   children?: IProps[];
   //
-  onAddEdge: (edge: GraphEdge) => void;
+  onAddEdge: (edge: GraphEdge | undefined) => void;
+  onUpdateEdge: (edge: GraphEdge, idx: number) => void;
+  onRemoveEdge: (idx: number) => void;
 }
 
 export default function RecursiveCollapsibleConditionGroup({
@@ -44,18 +47,20 @@ export default function RecursiveCollapsibleConditionGroup({
   edges,
   //
   onAddEdge,
+  onUpdateEdge,
+  onRemoveEdge,
 }: IProps) {
   const CONDITION_GROUP_LEVEL_LIMIT = 1;
   const conditionGroupLevel = fieldArrayName.split('.').length - 1;
   //
   const currentFieldArrayName = fieldArrayName ?? 'children';
   //
-  const { fields, append, remove, update } = useFieldArray({
+  const { fields, append, update } = useFieldArray({
     control: form.control,
     name: currentFieldArrayName as FieldArrayName,
   });
 
-  const { selectedEdge, setIsGroupConditionMode, setSheetOpen } = useGraph();
+  const { edges: edgeList } = useGraph();
 
   return (
     <Collapsible className='flex w-full flex-col gap-2'>
@@ -85,7 +90,7 @@ export default function RecursiveCollapsibleConditionGroup({
         )}
         <Button
           variant='outline'
-          onClick={() => onAddEdge()}
+          onClick={() => onAddEdge(undefined)}
           disabled={expression == undefined}
         >
           <Plus />
@@ -111,24 +116,26 @@ export default function RecursiveCollapsibleConditionGroup({
         <p>Edges</p>
         {edges &&
           edges.map((edge, idx) => {
-            console.log(idx);
-
             return (
-              <Button
-                type='button'
-                variant='secondary'
-                key={idx}
-                onClick={() => {
-                  setIsGroupConditionMode(true);
-                  setSheetOpen(false);
-                  //
-                  if (selectedEdge) {
-                    onAddEdge(selectedEdge);
-                  }
-                }}
-              >
-                {edge ? 'Select an edge' : 'Add an edge'}
-              </Button>
+              <div key={idx} className='flex items-center w-full gap-2'>
+                <SelectEdgeCombobox
+                  idx={idx}
+                  edges={edgeList}
+                  selectedEdges={edges}
+                  onEdgeSelect={(selectedEdge) => {
+                    onUpdateEdge(selectedEdge, idx);
+                  }}
+                  className='flex-1'
+                />
+                <Button
+                  type='button'
+                  variant='outline'
+                  className='p-0 dark:border-red-400/50 dark:hover:bg-red-400/20'
+                  onClick={() => onRemoveEdge(idx)}
+                >
+                  <Trash2Icon className='text-red-400/50' />
+                </Button>
+              </div>
             );
           })}
         {fields.length > 0 && (
@@ -175,6 +182,22 @@ export default function RecursiveCollapsibleConditionGroup({
                         edges: [...child.edges, edge],
                       })
                     }
+                    onUpdateEdge={(edge, edgeIdx) => {
+                      const updatedEdges = [...child.edges];
+                      updatedEdges[edgeIdx] = edge;
+                      update(idx, {
+                        ...child,
+                        edges: updatedEdges,
+                      });
+                    }}
+                    onRemoveEdge={(edgeIdx) => {
+                      const updatedEdges = [...child.edges];
+                      updatedEdges.splice(edgeIdx, 1);
+                      update(idx, {
+                        ...child,
+                        edges: updatedEdges,
+                      });
+                    }}
                   />
                 </div>
               );

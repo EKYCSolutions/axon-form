@@ -78,6 +78,16 @@ export default function ConditionGroupForm({
               form.watch('edges') ? [...form.watch('edges'), edge] : [edge],
             );
           }}
+          onUpdateEdge={(edge, idx) => {
+            const updatedEdges = [...form.watch('edges')];
+            updatedEdges[idx] = edge;
+            form.setValue('edges', updatedEdges);
+          }}
+          onRemoveEdge={(idx) => {
+            const updatedEdges = [...form.watch('edges')];
+            updatedEdges.splice(idx, 1);
+            form.setValue('edges', updatedEdges);
+          }}
         />
         <Separator />
         <Button
