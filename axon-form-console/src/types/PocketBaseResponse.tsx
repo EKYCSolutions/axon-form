@@ -9,8 +9,8 @@ export interface NodeResponse extends BaseResponse {
   field_type: string;
   label: string;
   //
-  config: Record<string, any>;
-  validation_rules: Record<string, any>;
+  config: Record<string, unknown>;
+  validation_rules: Record<string, unknown>;
 }
 export interface EdgeResponse extends BaseResponse {
   label: string;

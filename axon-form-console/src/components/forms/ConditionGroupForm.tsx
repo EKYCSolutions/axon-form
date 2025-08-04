@@ -64,7 +64,6 @@ export default function ConditionGroupForm({
             </FormItem>
           )}
         />
-
         <RecursiveCollapsibleConditionGroup
           form={form}
           fieldArrayName='children'
@@ -79,14 +78,15 @@ export default function ConditionGroupForm({
             );
           }}
           onUpdateEdge={(edge, idx) => {
+            console.log('updating this edge >>', edge);
             const updatedEdges = [...form.watch('edges')];
             updatedEdges[idx] = edge;
-            form.setValue('edges', updatedEdges);
+            form.setValue('edges', updatedEdges, { shouldValidate: true });
           }}
           onRemoveEdge={(idx) => {
             const updatedEdges = [...form.watch('edges')];
             updatedEdges.splice(idx, 1);
-            form.setValue('edges', updatedEdges);
+            form.setValue('edges', updatedEdges, { shouldValidate: true });
           }}
         />
         <Separator />

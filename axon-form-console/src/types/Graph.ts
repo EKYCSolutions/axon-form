@@ -17,7 +17,7 @@ export interface GraphNode extends Node {
   //
   is_required?: boolean;
   //
-  configs?: Record<string, any>;
+  configs?: Record<string, unknown>;
   validations?: ValidationRule[];
 }
 
@@ -28,7 +28,7 @@ export interface GraphEdge extends Relationship {
   //
   edgeType: EdgeType;
   //
-  configs?: Record<string, any>;
+  configs?: Record<string, unknown>;
   //
   conditions?: EdgeCondition[];
 }

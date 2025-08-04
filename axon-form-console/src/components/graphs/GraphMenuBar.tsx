@@ -19,7 +19,7 @@ interface IProps {
 }
 
 export default function GraphMenuBar({ className }: IProps) {
-  const { nvlRef, zoom, resetZoom, updateZoom, setSheetOpen, setSheetType } =
+  const { zoom, resetZoom, updateZoom, setSheetOpen, setSheetType } =
     useGraph();
 
   return (

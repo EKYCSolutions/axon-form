@@ -2,13 +2,16 @@
 import { EdgeType, GraphSheetType } from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
 import {
-  createConditionService,
+  createConditionGroup as createConditionGroupService,
+  createCondition as createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
 } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import { convertConditionGroupToConditionString } from '@/utils/Graph';
+import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import { type NodeFormSchemaData } from '@/validations/NodeValidation.js';
@@ -234,6 +237,18 @@ export function GraphProvider({
     [edges, nodes, updateGraphVisualization, handleError, resetEdgeCreation],
   );
 
+  const addConditionGroup = useCallback(
+    async (data: ConditionGroupFormSchemaData) => {
+      const conditionGroupString = convertConditionGroupToConditionString(data);
+
+      const createConditionGroupRes =
+        await createConditionGroupService(conditionGroupString);
+
+      console.log('create condition group res >>', createConditionGroupRes);
+    },
+    [],
+  );
+
   const removeNode = useCallback(
     (nodeId: string) => {
       const newNodes = nodes.filter((node) => node.id !== nodeId);
@@ -374,6 +389,7 @@ export function GraphProvider({
     // Operations
     addNode,
     addEdge,
+    addConditionGroup,
     removeNode,
     removeEdge,
     updateNode,

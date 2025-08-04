@@ -16,7 +16,8 @@ import { Input } from '@/components/ui/input';
 import { NodeFieldType, NodeType, ValidationRuleType } from '@/configs/graph';
 import { convertPascalCaseToTitleCase } from '@/utils/string';
 import { ValidationRuleTypeWithValue } from '@/validations/ValidationRulesValidation';
-import { Plus, Trash2Icon } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import DeleteButton from '../DeleteButton';
 import {
   Select,
   SelectContent,
@@ -131,14 +132,7 @@ export default function NodeForm({
                   <FormLabel className='font-light'>
                     Validation {index + 1}
                   </FormLabel>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    className='p-0 dark:border-red-400/50 dark:hover:bg-red-400/20'
-                    onClick={() => fieldArray.remove(index)}
-                  >
-                    <Trash2Icon className='text-red-400/50' />
-                  </Button>
+                  <DeleteButton onClick={() => fieldArray.remove(index)} />
                 </div>
                 <FormField
                   control={form.control}

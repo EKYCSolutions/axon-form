@@ -14,7 +14,8 @@ import {
 import { ConditionExpression, EdgeType } from '@/configs/graph';
 import { convertPascalCaseToTitleCase } from '@/utils/string';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
-import { Plus, Trash2Icon } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import DeleteButton from '../DeleteButton';
 import { useGraph } from '../hooks/useGraph';
 import { Input } from '../ui/input';
 import {
@@ -59,7 +60,7 @@ export default function EdgeForm({
         <FormField
           control={form.control}
           name='source_node'
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Source Node</FormLabel>
               <FormControl>
@@ -84,7 +85,7 @@ export default function EdgeForm({
         <FormField
           control={form.control}
           name='target_node'
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Target Node</FormLabel>
               <FormControl>
@@ -148,14 +149,7 @@ export default function EdgeForm({
                   <FormLabel className='font-light'>
                     Condition {index + 1}
                   </FormLabel>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    className='p-0 dark:border-red-400/50 dark:hover:bg-red-400/20'
-                    onClick={() => fieldArray.remove(index)}
-                  >
-                    <Trash2Icon className='text-red-400/50' />
-                  </Button>
+                  <DeleteButton onClick={() => fieldArray.remove(index)} />
                 </div>
                 <FormField
                   control={form.control}

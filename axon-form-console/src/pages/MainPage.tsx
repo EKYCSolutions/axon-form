@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { getAllEdges, getAllNodes } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph';
 import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
-import { renderSheetContent } from '@/utils/Graph';
+import { renderSheetContent } from '@/utils/Graph.js';
 import { convertEdgeResponseToGraphEdge } from '@/validations/EdgeValidation';
 import { convertNodeFormSchemaToGraphNode } from '@/validations/NodeValidation';
 import { useQueries } from '@tanstack/react-query';
@@ -19,7 +19,6 @@ export default function MainPage() {
     nvlRef,
     isEdgeMode,
     sourceNode,
-    targetNode,
     nodes,
     edges,
     sheetOpen,
@@ -52,6 +51,7 @@ export default function MainPage() {
 
       setNodes(nodeRes);
     }
+
     if (edgesQuery.status == 'success' && edges.length === 0) {
       const edgeRes: GraphEdge[] = edgesQuery.data.items.map(
         (edge: EdgeResponse) => convertEdgeResponseToGraphEdge(edge),

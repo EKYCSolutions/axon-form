@@ -1,5 +1,6 @@
 import type { GraphSheetType } from '@/configs/graph';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import type NVL from '@neo4j-nvl/base';
@@ -43,6 +44,8 @@ export interface GraphContextType {
   addEdge: (data: EdgeFormSchemaData) => void;
   updateEdge: (edgeId: string, updates: EdgeFormSchemaData) => void;
   removeEdge: (edgeId: string) => void;
+  //
+  addConditionGroup: (data: ConditionGroupFormSchemaData) => void;
   //
   clearGraph: () => void;
   //

@@ -79,9 +79,9 @@ export const deleteEdge = async (id: string): Promise<boolean> => {
   return await client.collection(PocketBaseCollection.EDGES).delete(id);
 };
 
-export const createConditionService = async (
+export const createCondition = async (
   data: ConditionFormSchemaData,
-): Promise<any> => {
+): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).create({
     check_node: data.node,
     edge: data.edge,
@@ -90,25 +90,60 @@ export const createConditionService = async (
   });
 };
 
-export const getAllConditions = async (): Promise<any> => {
+export const getAllConditions = async (): Promise<unknown> => {
   return await client
     .collection(PocketBaseCollection.CONDITIONS)
     .getList(1, 50, {});
 };
 
-export const getCondition = async (id: string): Promise<any> => {
+export const getCondition = async (id: string): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).getOne(id);
 };
 
 export const updateCondition = async (
   id: string,
   data: Partial<ConditionFormSchemaData>,
-): Promise<any> => {
+): Promise<unknown> => {
   return await client
     .collection(PocketBaseCollection.CONDITIONS)
     .update(id, data);
 };
 
-export const deleteCondition = async (id: string): Promise<any> => {
+export const deleteCondition = async (id: string): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).delete(id);
+};
+
+export const createConditionGroup = async (
+  conditonGroupString: string,
+): Promise<unknown> => {
+  return await client.collection(PocketBaseCollection.CONDITION_GROUPS).create({
+    conditions: conditonGroupString,
+  });
+};
+
+export const getAllConditionGroups = async (): Promise<unknown> => {
+  return await client
+    .collection(PocketBaseCollection.CONDITION_GROUPS)
+    .getList(1, 50, {});
+};
+
+export const getConditionGroup = async (id: string): Promise<unknown> => {
+  return await client
+    .collection(PocketBaseCollection.CONDITION_GROUPS)
+    .getOne(id);
+};
+
+export const updateConditionGroup = async (
+  id: string,
+  data: Partial<ConditionFormSchemaData>,
+): Promise<unknown> => {
+  return await client
+    .collection(PocketBaseCollection.CONDITION_GROUPS)
+    .update(id, data);
+};
+
+export const deleteConditionGroup = async (id: string): Promise<unknown> => {
+  return await client
+    .collection(PocketBaseCollection.CONDITION_GROUPS)
+    .delete(id);
 };
