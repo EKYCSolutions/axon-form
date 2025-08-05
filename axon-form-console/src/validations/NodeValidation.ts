@@ -3,7 +3,6 @@ import type { GraphNode } from '@/types/Graph';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
-import { convertEdgeResponseToGraphEdge } from './EdgeValidation';
 import { ValidationRuleFormSchema } from './ValidationRulesValidation';
 
 export const NodeFormSchema = z
@@ -50,7 +49,6 @@ export function convertGraphNodeToNodeForm(
 export function convertNodeFormSchemaToGraphNode(
   node: NodeResponse,
 ): GraphNode {
-  // edges_via_source_node
   return {
     id: node.id,
     nodeType: node.type as NodeType,
@@ -59,8 +57,5 @@ export function convertNodeFormSchemaToGraphNode(
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
     validations: node.validation_rules,
-    edges: node.expand?.edges_via_source_node?.map((edge) =>
-      convertEdgeResponseToGraphEdge(edge),
-    ),
   };
 }

@@ -82,8 +82,6 @@ export function GraphProvider({
   });
 
   const fetchGraphData = useCallback(() => {
-    // console.log('node query >>', nodesQuery.data);
-    // console.log('edge query >>', edgesQuery.data);
     //
     if (
       nodesQuery.status == 'success' &&

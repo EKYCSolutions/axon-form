@@ -11,10 +11,6 @@ export interface NodeResponse extends BaseResponse {
   //
   config: Record<string, unknown>;
   validation_rules: Record<string, unknown>;
-  //
-  expand?: {
-    edges_via_source_node: EdgeResponse[];
-  };
 }
 export interface EdgeResponse extends BaseResponse {
   label: string;

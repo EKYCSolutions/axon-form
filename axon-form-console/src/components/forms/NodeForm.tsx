@@ -42,10 +42,6 @@ export default function NodeForm({
   fieldArray,
   onSubmit,
 }: IProps) {
-  const {
-    formState: { isDirty, isValid, errors },
-  } = form;
-
   return (
     <Form {...form}>
       <form
