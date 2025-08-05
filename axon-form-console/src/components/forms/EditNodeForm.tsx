@@ -17,13 +17,10 @@ interface IProps {
 export default function EditNodeForm({ className }: IProps) {
   const { selectedNode, updateNode, setSheetOpen } = useGraph();
 
-  if (!selectedNode) {
-    return;
-  }
-
   const form = useForm<NodeFormSchemaData>({
     resolver: zodResolver(NodeFormSchema),
-    defaultValues: convertGraphNodeToNodeForm(selectedNode),
+    defaultValues: convertGraphNodeToNodeForm(selectedNode!),
+    reValidateMode: 'onChange',
   });
 
   const fieldArray = useFieldArray({

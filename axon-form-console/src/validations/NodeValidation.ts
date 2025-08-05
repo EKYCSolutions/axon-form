@@ -3,6 +3,7 @@ import type { GraphNode } from '@/types/Graph';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
+import { convertEdgeResponseToGraphEdge } from './EdgeValidation';
 import { ValidationRuleFormSchema } from './ValidationRulesValidation';
 
 export const NodeFormSchema = z
@@ -30,8 +31,8 @@ export const NodeFormSchema = z
 export type NodeFormSchemaData = z.infer<typeof NodeFormSchema>;
 
 export const NodeFormSchemaDefaultValue: NodeFormSchemaData = {
-  type: '' as NodeType,
-  field_type: undefined,
+  type: NodeType.Input,
+  field_type: NodeFieldType.Text,
   label: '',
 };
 
@@ -46,14 +47,20 @@ export function convertGraphNodeToNodeForm(
   };
 }
 
-export function convertNodeFormSchemaToGraphNode(node: NodeResponse) {
+export function convertNodeFormSchemaToGraphNode(
+  node: NodeResponse,
+): GraphNode {
+  // edges_via_source_node
   return {
     id: node.id,
-    nodeType: node.type,
-    fieldType: node.field_type,
+    nodeType: node.type as NodeType,
+    fieldType: node.field_type as NodeFieldType,
     label: node.label,
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
     validations: node.validation_rules,
+    edges: node.expand?.edges_via_source_node?.map((edge) =>
+      convertEdgeResponseToGraphEdge(edge),
+    ),
   };
 }

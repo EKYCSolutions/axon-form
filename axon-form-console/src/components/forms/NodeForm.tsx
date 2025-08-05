@@ -42,6 +42,10 @@ export default function NodeForm({
   fieldArray,
   onSubmit,
 }: IProps) {
+  const {
+    formState: { isDirty, isValid, errors },
+  } = form;
+
   return (
     <Form {...form}>
       <form
@@ -74,7 +78,9 @@ export default function NodeForm({
               <FormLabel>Node Type</FormLabel>
               <Select
                 onValueChange={(value) =>
-                  form.setValue('type', value as NodeType)
+                  form.setValue('type', value as NodeType, {
+                    shouldValidate: true,
+                  })
                 }
                 value={field.value || ''}
               >
@@ -97,7 +103,7 @@ export default function NodeForm({
         />
         {form.watch('type') === NodeType.Input && (
           <>
-            <Separator />
+            <Separator className='bg-gray-400/25' />
             <FormField
               control={form.control}
               name='field_type'

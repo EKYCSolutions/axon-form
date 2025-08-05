@@ -6,17 +6,28 @@ import {
   createCondition as createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
+  getAllEdges,
+  getAllNodes,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
 } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
+import { generateRandomRgbColor } from '@/utils/Color';
 import { convertConditionGroupToConditionString } from '@/utils/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
-import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
-import { type NodeFormSchemaData } from '@/validations/NodeValidation.js';
+import {
+  convertEdgeResponseToGraphEdge,
+  type EdgeFormSchemaData,
+} from '@/validations/EdgeValidation.js';
+import {
+  convertNodeFormSchemaToGraphNode,
+  type NodeFormSchemaData,
+} from '@/validations/NodeValidation.js';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
+import { useQueries } from '@tanstack/react-query';
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,6 +65,52 @@ export function GraphProvider({
   const [sourceNode, setSourceNode] = useState<GraphNode | undefined>();
   const [targetNode, setTargetNode] = useState<GraphNode | undefined>();
 
+  // Search state
+  const [searchText, setSearchText] = useState<string>('');
+
+  const [nodesQuery, edgesQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ['nodes', searchText],
+        queryFn: () => getAllNodes(searchText),
+      },
+      {
+        queryKey: ['edges', searchText],
+        queryFn: () => getAllEdges(),
+      },
+    ],
+  });
+
+  const fetchGraphData = useCallback(() => {
+    // console.log('node query >>', nodesQuery.data);
+    // console.log('edge query >>', edgesQuery.data);
+    //
+    if (
+      nodesQuery.status == 'success' &&
+      nodesQuery.data?.items.length != nodes.length
+    ) {
+      //
+      const nodeRes: GraphNode[] = nodesQuery.data.items.map(
+        (node: NodeResponse) => convertNodeFormSchemaToGraphNode(node),
+      );
+      //
+      setNodes(nodeRes);
+    }
+
+    if (
+      edgesQuery.status == 'success' &&
+      edgesQuery.data?.items.length != edges.length
+    ) {
+      //
+      const edgeRes: GraphEdge[] = edgesQuery.data.items.map(
+        (edge: EdgeResponse) => convertEdgeResponseToGraphEdge(edge),
+      );
+
+      setEdges(edgeRes);
+    }
+    //
+  }, [nodesQuery, edgesQuery, searchText]);
+
   // Helper function to update graph visualization
   const updateGraphVisualization = useCallback(
     (newNodes: GraphNode[], newEdges: GraphEdge[]) => {
@@ -90,6 +147,7 @@ export function GraphProvider({
       if (!targetNode && foundNode.id !== sourceNode.id) {
         console.log('Setting target node:', foundNode);
         setTargetNode(foundNode);
+        setIsEdgeMode(false);
         setSheetOpen(true);
         return;
       }
@@ -109,6 +167,7 @@ export function GraphProvider({
       },
       [],
     ),
+
     onNodeClick: useCallback(
       (node: Node, hitTargets: HitTargets, evt: MouseEvent) => {
         console.log('onNodeClick', node, hitTargets, evt);
@@ -172,6 +231,7 @@ export function GraphProvider({
         fieldType: data.field_type,
         nodeType: data.type,
         validations: data.validation_rules,
+        color: generateRandomRgbColor(data.type),
       };
 
       try {
@@ -285,6 +345,7 @@ export function GraphProvider({
               fieldType: updates.field_type,
               nodeType: updates.type,
               validations: updates.validation_rules,
+              color: generateRandomRgbColor(updates.type),
             }
           : node,
       );
@@ -363,6 +424,13 @@ export function GraphProvider({
     nodes,
     edges,
 
+    // Search text
+    searchText,
+
+    //
+    nodesQuery,
+    edgesQuery,
+
     // UI state
     selectedNode,
     selectedEdge,
@@ -375,6 +443,9 @@ export function GraphProvider({
     sourceNode,
     targetNode,
 
+    // initializer
+    fetchGraphData,
+
     // Setters
     setSelectedNode,
     setSelectedEdge,
@@ -385,6 +456,7 @@ export function GraphProvider({
     setTargetNode,
     setNodes,
     setEdges,
+    setSearchText,
 
     // Operations
     addNode,

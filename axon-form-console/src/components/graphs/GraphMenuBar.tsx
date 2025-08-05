@@ -10,8 +10,10 @@ import {
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils.js';
-import { ChevronUp, Plus } from 'lucide-react';
+import { ChevronUp, Plus, Search } from 'lucide-react';
+import { useDebouncedCallback } from 'use-debounce'; // Import useDebouncedCallback from 'use-debounce'
 import { useGraph } from '../hooks/useGraph.js';
+import { Input } from '../ui/input.js';
 import { Separator } from '../ui/separator.js';
 
 interface IProps {
@@ -19,8 +21,25 @@ interface IProps {
 }
 
 export default function GraphMenuBar({ className }: IProps) {
-  const { zoom, resetZoom, updateZoom, setSheetOpen, setSheetType } =
-    useGraph();
+  const {
+    zoom,
+    resetZoom,
+    updateZoom,
+    setSheetOpen,
+    setSheetType,
+    setSearchText,
+  } = useGraph();
+
+  // Debounce callback
+  const debounced = useDebouncedCallback(
+    // function
+    (value) => {
+      setSearchText(value);
+      console.log('value >>', value);
+    },
+    //
+    500,
+  );
 
   return (
     <Menubar className={cn('h-10 w-fit gap-2 px-2 rounded-xl', className)}>
@@ -57,6 +76,18 @@ export default function GraphMenuBar({ className }: IProps) {
         </MenubarTrigger>
       </MenubarMenu>
       <Separator orientation='vertical' />
+      <div className='relative'>
+        <Input
+          onChange={(e) => debounced(e.target.value)}
+          placeholder='Search'
+          className='pl-7 h-7 md:text-xs font-light'
+        />
+        <Search
+          size={15}
+          color='gray'
+          className='absolute top-1/2 -translate-y-1/2 left-2'
+        />
+      </div>
       <MenubarMenu>
         <MenubarContent>
           <MenubarCheckboxItem>Always Show Bookmarks Bar</MenubarCheckboxItem>
@@ -107,7 +138,7 @@ export default function GraphMenuBar({ className }: IProps) {
           <MenubarItem className='text-xs' onClick={() => updateZoom(1)}>
             Zoom to 100%
           </MenubarItem>
-          <MenubarItem className='text-xs' onClick={() => updateZoom(0.95)}>
+          <MenubarItem className='text-xs' onClick={() => updateZoom(0.75)}>
             Zoom to fit
           </MenubarItem>
           <MenubarSeparator />

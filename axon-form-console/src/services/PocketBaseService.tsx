@@ -15,8 +15,12 @@ export const client = new PocketBase(
 
 client.authStore.save(token, null);
 
-export const getAllNodes = async (): Promise<NodeResponse[]> => {
-  return await client.collection(PocketBaseCollection.NODES).getList(1, 50, {});
+export const getAllNodes = async (
+  searchString: string = '',
+): Promise<{ items: NodeResponse[] }> => {
+  return await client.collection(PocketBaseCollection.NODES).getList(1, 500, {
+    filter: `label ~ "${searchString}"`,
+  });
 };
 
 export const createNode = async (

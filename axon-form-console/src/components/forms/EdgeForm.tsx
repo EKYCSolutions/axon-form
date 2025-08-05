@@ -75,7 +75,7 @@ export default function EdgeForm({
                     setSheetOpen(false);
                   }}
                 >
-                  {sourceNode ? sourceNode.id : 'Select source node'}
+                  {sourceNode ? sourceNode.label : 'Select source node'}
                 </Button>
               </FormControl>
               <FormMessage />
@@ -90,7 +90,7 @@ export default function EdgeForm({
               <FormLabel>Target Node</FormLabel>
               <FormControl>
                 <Button type='button' variant='secondary' className=''>
-                  {targetNode ? targetNode.id : 'Select target node'}
+                  {targetNode ? targetNode.label : 'Select target node'}
                 </Button>
               </FormControl>
               <FormMessage />

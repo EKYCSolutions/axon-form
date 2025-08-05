@@ -1,6 +1,5 @@
 export enum NodeType {
   Input = 'input',
-  Options = 'options',
   Values = 'values',
 }
 

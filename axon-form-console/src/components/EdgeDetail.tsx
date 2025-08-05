@@ -29,6 +29,7 @@ export default function EdgeDetail({ className }: IProps) {
       <CardContent className='px-0'>
         <div className='flex flex-col gap-4'>
           <ReadonlyContainer title='ID' text={selectedEdge.id} copyable />
+          <ReadonlyContainer title='Label' text={selectedEdge.label} copyable />
           <ReadonlyContainer
             title='Source Node'
             text={selectedEdge.sourceNode}

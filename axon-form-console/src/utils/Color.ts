@@ -9,7 +9,6 @@ import { NodeType } from '@/configs/graph';
 export function generateRandomRgbColor(nodeType?: NodeType): string {
   const colorPalette = {
     [NodeType.Input]: 'rgb(173, 216, 230)', // Light Blue
-    [NodeType.Options]: 'rgb(149, 219, 149)', // Light Green
     [NodeType.Values]: 'rgb(255, 223, 186)', // Light Orange
   };
 
