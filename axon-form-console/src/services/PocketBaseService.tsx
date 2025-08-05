@@ -20,6 +20,7 @@ export const getAllNodes = async (
 ): Promise<{ items: NodeResponse[] }> => {
   return await client.collection(PocketBaseCollection.NODES).getList(1, 500, {
     filter: `label ~ "${searchString}"`,
+    expand: 'edges_via_source_node,edges_via_target_node',
   });
 };
 

@@ -3,6 +3,7 @@ import type { GraphNode } from '@/types/Graph';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
+import { convertEdgeResponseToGraphEdge } from './EdgeValidation';
 import { ValidationRuleFormSchema } from './ValidationRulesValidation';
 
 export const NodeFormSchema = z
@@ -31,7 +32,7 @@ export type NodeFormSchemaData = z.infer<typeof NodeFormSchema>;
 
 export const NodeFormSchemaDefaultValue: NodeFormSchemaData = {
   type: NodeType.Input,
-  field_type: NodeFieldType.Text,
+  field_type: undefined,
   label: '',
 };
 
@@ -49,13 +50,30 @@ export function convertGraphNodeToNodeForm(
 export function convertNodeFormSchemaToGraphNode(
   node: NodeResponse,
 ): GraphNode {
+  const expandedEdges = [
+    ...(node.expand?.edges_via_source_node
+      ? node.expand.edges_via_source_node.map((edge) =>
+          convertEdgeResponseToGraphEdge(edge),
+        )
+      : []),
+    ...(node.expand?.edges_via_target_node
+      ? node.expand.edges_via_target_node.map((edge) =>
+          convertEdgeResponseToGraphEdge(edge),
+        )
+      : []),
+  ];
+
   return {
     id: node.id,
     nodeType: node.type as NodeType,
-    fieldType: node.field_type as NodeFieldType,
+    fieldType:
+      node.field_type.length > 0
+        ? (node.field_type as NodeFieldType)
+        : undefined,
     label: node.label,
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
     validations: node.validation_rules,
+    edges: expandedEdges,
   };
 }

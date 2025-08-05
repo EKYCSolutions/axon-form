@@ -12,15 +12,12 @@ import {
   updateNode as updateNodeService,
 } from '@/services/PocketBaseService';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
-import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
+import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import { convertConditionGroupToConditionString } from '@/utils/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
-import {
-  convertEdgeResponseToGraphEdge,
-  type EdgeFormSchemaData,
-} from '@/validations/EdgeValidation.js';
+import { type EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import {
   convertNodeFormSchemaToGraphNode,
   type NodeFormSchemaData,
@@ -82,6 +79,8 @@ export function GraphProvider({
   });
 
   const fetchGraphData = useCallback(() => {
+    console.log('called');
+    console.log(nodesQuery.data?.items.length != nodes.length);
     //
     if (
       nodesQuery.status == 'success' &&
@@ -91,27 +90,25 @@ export function GraphProvider({
       const nodeRes: GraphNode[] = nodesQuery.data.items.map(
         (node: NodeResponse) => convertNodeFormSchemaToGraphNode(node),
       );
+
+      const edgeRes: GraphEdge[] = nodeRes
+        .filter((node) => node?.edges.length > 0)
+        .flatMap((node) => node.edges);
+
+      const ids = new Set();
+      const uniqueEdges = edgeRes.filter(
+        ({ id }) => !ids.has(id) && ids.add(id),
+      );
       //
       setNodes(nodeRes);
+      setEdges(uniqueEdges);
     }
-
-    if (
-      edgesQuery.status == 'success' &&
-      edgesQuery.data?.items.length != edges.length
-    ) {
-      //
-      const edgeRes: GraphEdge[] = edgesQuery.data.items.map(
-        (edge: EdgeResponse) => convertEdgeResponseToGraphEdge(edge),
-      );
-
-      setEdges(edgeRes);
-    }
-    //
   }, [nodesQuery, edgesQuery, searchText]);
 
   // Helper function to update graph visualization
   const updateGraphVisualization = useCallback(
     (newNodes: GraphNode[], newEdges: GraphEdge[]) => {
+      console.log('new node >>', newNodes);
       nvlRef.current?.addElementsToGraph(newNodes, newEdges);
     },
     [],
@@ -266,7 +263,6 @@ export function GraphProvider({
 
       try {
         const addEdgeRes = await createEdgeService(data);
-        console.log('Edge created successfully', addEdgeRes);
 
         if (data.type == EdgeType.Shows) {
           data.conditions?.forEach(async (condition) => {

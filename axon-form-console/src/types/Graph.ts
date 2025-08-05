@@ -19,6 +19,8 @@ export interface GraphNode extends Node {
   //
   configs?: Record<string, unknown>;
   validations?: ValidationRule[];
+  //
+  edges?: GraphEdge[];
 }
 
 export interface GraphEdge extends Relationship {

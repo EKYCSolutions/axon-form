@@ -34,45 +34,6 @@ export default function MainPage() {
     fetchGraphData();
   }, [nodesQuery, edgesQuery]);
 
-  // const [nodesQuery, edgesQuery] = useQueries({
-  //   queries: [
-  //     {
-  //       queryKey: ['nodes'],
-  //       queryFn: () => getAllNodes(''),
-  //     },
-  //     {
-  //       queryKey: ['edges'],
-  //       queryFn: () => getAllEdges(),
-  //     },
-  //   ],
-  // });
-
-  // useEffect(() => {
-  //   if (nodesQuery.status == 'success' && nodes.length === 0) {
-  //     if (nodesQuery.data?.items.length === 0) {
-  //       return;
-  //     }
-
-  //     const nodeRes: GraphNode[] = nodesQuery.data.items.map(
-  //       (node: NodeResponse) => convertNodeFormSchemaToGraphNode(node),
-  //     );
-
-  //     setNodes(nodeRes);
-  //   }
-
-  //   if (edgesQuery.status == 'success' && edges.length === 0) {
-  //     if (edgesQuery.data?.items.length === 0) {
-  //       return;
-  //     }
-
-  //     const edgeRes: GraphEdge[] = edgesQuery.data.items.map(
-  //       (edge: EdgeResponse) => convertEdgeResponseToGraphEdge(edge),
-  //     );
-
-  //     setEdges(edgeRes);
-  //   }
-  // }, [nodesQuery, edgesQuery]);
-
   return (
     <div className='relative w-full h-full dark:bg-slate-100'>
       <Sheet
