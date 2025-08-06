@@ -6,7 +6,6 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
 import { renderSheetContent } from '@/utils/Graph.js';
-import { useEffect } from 'react';
 
 export default function MainPage() {
   const {
@@ -19,20 +18,11 @@ export default function MainPage() {
     sheetOpen,
     sheetType,
     mouseEventCallbacks,
-    setNodes,
-    setEdges,
-    nodesQuery,
-    edgesQuery,
-    fetchGraphData,
     setSheetOpen,
     setSheetType,
     setSourceNode,
     setTargetNode,
   } = useGraph();
-
-  useEffect(() => {
-    fetchGraphData();
-  }, [nodesQuery, edgesQuery]);
 
   return (
     <div className='relative w-full h-full dark:bg-slate-100'>

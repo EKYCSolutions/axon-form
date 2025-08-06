@@ -4,7 +4,10 @@ import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
 import { convertEdgeResponseToGraphEdge } from './EdgeValidation';
-import { ValidationRuleFormSchema } from './ValidationRulesValidation';
+import {
+  convertValidationRuleResponseToValidationRule,
+  ValidationRuleFormSchema,
+} from './ValidationRulesValidation';
 
 export const NodeFormSchema = z
   .object({
@@ -47,10 +50,12 @@ export function convertGraphNodeToNodeForm(
   };
 }
 
-export function convertNodeFormSchemaToGraphNode(
-  node: NodeResponse,
-): GraphNode {
-  const expandedEdges = [
+export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
+  //
+  // Fetch all edges connected to the nodes
+  // Each node could be a source or a target node
+  // All the connected edges are destructured into expandedEdges
+  const edges = [
     ...(node.expand?.edges_via_source_node
       ? node.expand.edges_via_source_node.map((edge) =>
           convertEdgeResponseToGraphEdge(edge),
@@ -73,7 +78,12 @@ export function convertNodeFormSchemaToGraphNode(
     label: node.label,
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
-    validations: node.validation_rules,
-    edges: expandedEdges,
+    validations:
+      node.validation_rules.length > 0
+        ? node.validation_rules.map((validation) =>
+            convertValidationRuleResponseToValidationRule(validation),
+          )
+        : [],
+    edges: edges,
   };
 }

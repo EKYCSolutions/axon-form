@@ -10,11 +10,11 @@ export interface NodeResponse extends BaseResponse {
   label: string;
   //
   config: Record<string, unknown>;
-  validation_rules: Record<string, unknown>;
+  validation_rules: Record<string, string | number>[];
   //
   expand?: {
-    edges_via_source_node: EdgeResponse[];
-    edges_via_target_node: EdgeResponse[];
+    edges_via_source_node?: EdgeResponse[];
+    edges_via_target_node?: EdgeResponse[];
   };
 }
 export interface EdgeResponse extends BaseResponse {

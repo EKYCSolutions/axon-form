@@ -1,12 +1,10 @@
 import type { GraphSheetType } from '@/configs/graph';
 import type { GraphEdge, GraphNode } from '@/types/Graph.js';
-import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import type NVL from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
-import type { UseQueryResult } from '@tanstack/react-query';
 import { createContext, type RefObject } from 'react';
 
 export interface GraphContextType {
@@ -27,22 +25,6 @@ export interface GraphContextType {
   isEdgeMode: boolean;
   //
   searchText: string;
-  //
-  nodesQuery: UseQueryResult<
-    {
-      items: NodeResponse[];
-    },
-    Error
-  >;
-  edgesQuery: UseQueryResult<
-    {
-      items: EdgeResponse[];
-    },
-    Error
-  >;
-
-  //
-  fetchGraphData: () => void;
 
   // Actions
   setNodes: React.Dispatch<React.SetStateAction<GraphNode[]>>;

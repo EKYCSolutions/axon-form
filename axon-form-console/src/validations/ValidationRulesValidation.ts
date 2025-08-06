@@ -1,4 +1,5 @@
 import { ValidationRuleType } from '@/configs/graph';
+import type { ValidationRule } from '@/types/Graph';
 import z from 'zod';
 
 export const ValidationRuleFormSchema = z.object({
@@ -18,3 +19,13 @@ export const ValidationRuleTypeWithValue = [
   ValidationRuleType.Min,
   ValidationRuleType.Max,
 ];
+
+export const convertValidationRuleResponseToValidationRule = (
+  validation_rule: Record<string, string | number>,
+): ValidationRule => {
+  return {
+    type: validation_rule.type as ValidationRuleType,
+    value: validation_rule.value,
+    message: validation_rule.message?.toString(),
+  };
+};

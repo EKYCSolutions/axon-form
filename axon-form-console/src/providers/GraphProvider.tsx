@@ -6,7 +6,6 @@ import {
   createCondition as createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
-  getAllEdges,
   getAllNodes,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
@@ -19,13 +18,19 @@ import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupV
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import { type EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import {
-  convertNodeFormSchemaToGraphNode,
+  convertNodeResponseToGraphNode,
   type NodeFormSchemaData,
 } from '@/validations/NodeValidation.js';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
 import { useQueries } from '@tanstack/react-query';
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -65,50 +70,40 @@ export function GraphProvider({
   // Search state
   const [searchText, setSearchText] = useState<string>('');
 
-  const [nodesQuery, edgesQuery] = useQueries({
+  const [nodesQuery] = useQueries({
     queries: [
       {
         queryKey: ['nodes', searchText],
         queryFn: () => getAllNodes(searchText),
       },
-      {
-        queryKey: ['edges', searchText],
-        queryFn: () => getAllEdges(),
-      },
     ],
   });
 
-  const fetchGraphData = useCallback(() => {
-    console.log('called');
-    console.log(nodesQuery.data?.items.length != nodes.length);
-    //
-    if (
-      nodesQuery.status == 'success' &&
-      nodesQuery.data?.items.length != nodes.length
-    ) {
-      //
+  useEffect(() => {
+    if (nodesQuery.status === 'success' && nodesQuery.data?.items) {
+      console.log('Fetching nodes data from query');
+
       const nodeRes: GraphNode[] = nodesQuery.data.items.map(
-        (node: NodeResponse) => convertNodeFormSchemaToGraphNode(node),
+        (node: NodeResponse) => convertNodeResponseToGraphNode(node),
       );
 
       const edgeRes: GraphEdge[] = nodeRes
-        .filter((node) => node?.edges.length > 0)
+        .filter((node) => node.edges.length > 0)
         .flatMap((node) => node.edges);
 
       const ids = new Set();
       const uniqueEdges = edgeRes.filter(
         ({ id }) => !ids.has(id) && ids.add(id),
       );
-      //
+
       setNodes(nodeRes);
       setEdges(uniqueEdges);
     }
-  }, [nodesQuery, edgesQuery, searchText]);
+  }, [nodesQuery.status, nodesQuery.data]); // Only depend on query status and data
 
   // Helper function to update graph visualization
   const updateGraphVisualization = useCallback(
     (newNodes: GraphNode[], newEdges: GraphEdge[]) => {
-      console.log('new node >>', newNodes);
       nvlRef.current?.addElementsToGraph(newNodes, newEdges);
     },
     [],
@@ -240,6 +235,7 @@ export function GraphProvider({
 
         const newNodes = [...nodes, newNode];
         setNodes(newNodes);
+        console.log('new nodes >>', newNodes);
         updateGraphVisualization(newNodes, edges);
       } catch (error) {
         handleError(error);
@@ -263,6 +259,7 @@ export function GraphProvider({
 
       try {
         const addEdgeRes = await createEdgeService(data);
+        console.log('Edge created successfully', addEdgeRes);
 
         if (data.type == EdgeType.Shows) {
           data.conditions?.forEach(async (condition) => {
@@ -421,10 +418,6 @@ export function GraphProvider({
     // Search text
     searchText,
 
-    //
-    nodesQuery,
-    edgesQuery,
-
     // UI state
     selectedNode,
     selectedEdge,
@@ -436,9 +429,6 @@ export function GraphProvider({
     isEdgeMode,
     sourceNode,
     targetNode,
-
-    // initializer
-    fetchGraphData,
 
     // Setters
     setSelectedNode,

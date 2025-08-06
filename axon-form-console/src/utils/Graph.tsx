@@ -153,7 +153,6 @@ export const convertConditionStringToConditionGroupObject = (
   const POCKETBASE_ID_LENGTH = 15;
 
   console.log('condition string >>', conditionString);
-
   // Trim whitespace
   let trimmed = conditionString.trim();
 
