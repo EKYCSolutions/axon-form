@@ -6,6 +6,8 @@ import {
   createCondition as createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
+  deleteEdge as deleteEdgeService,
+  deleteNode as deleteNodeService,
   getAllNodes,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
@@ -55,6 +57,7 @@ export function GraphProvider({
 
   // UI state
   const [selectedNode, setSelectedNode] = useState<GraphNode | undefined>();
+  const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([]);
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | undefined>();
   const [zoom, setZoom] = useState<number>(100);
   const [sheetOpen, setSheetOpen] = useState<boolean>(false);
@@ -86,6 +89,7 @@ export function GraphProvider({
       const nodeRes: GraphNode[] = nodesQuery.data.items.map(
         (node: NodeResponse) => convertNodeResponseToGraphNode(node),
       );
+      const nodeIds = nodeRes.map((node) => node.id);
 
       const edgeRes: GraphEdge[] = nodeRes
         .filter((node) => node.edges.length > 0)
@@ -95,9 +99,12 @@ export function GraphProvider({
       const uniqueEdges = edgeRes.filter(
         ({ id }) => !ids.has(id) && ids.add(id),
       );
+      const edgesWithNodes = uniqueEdges.filter(
+        (edge) => nodeIds.includes(edge.from) && nodeIds.includes(edge.to),
+      );
 
       setNodes(nodeRes);
-      setEdges(uniqueEdges);
+      setEdges(edgesWithNodes);
     }
   }, [nodesQuery.status, nodesQuery.data]); // Only depend on query status and data
 
@@ -108,6 +115,12 @@ export function GraphProvider({
     },
     [],
   );
+
+  // Helper function to handle success
+  const handleSuccess = useCallback((message: string) => {
+    toast.success(message);
+    console.log('Graph operation success:', message);
+  }, []);
 
   // Helper function to handle errors
   const handleError = useCallback((error: unknown) => {
@@ -147,6 +160,23 @@ export function GraphProvider({
 
   // Mouse event callbacks
   const mouseEventCallbacks: MouseEventCallbacks = {
+    onNodeRightClick: useCallback(
+      (node, hitElements, event) => {
+        // Update node selected state
+        const updatedNodes = nodes.map((item) =>
+          item.id === node.id ? { ...item, selected: !item.selected } : item,
+        );
+        setNodes(updatedNodes);
+
+        // handle selected nodes state
+        const newNodes = selectedNodes.find((item) => item.id == node.id)
+          ? selectedNodes.filter((item) => item.id !== node.id)
+          : [...selectedNodes, node];
+        setSelectedNodes(newNodes);
+      },
+      [nodes, selectedNodes],
+    ),
+
     onHover: useCallback(
       (
         element: Node | Relationship,
@@ -222,6 +252,8 @@ export function GraphProvider({
         nodeType: data.type,
         validations: data.validation_rules,
         color: generateRandomRgbColor(data.type),
+        edges: [],
+        activated: true,
       };
 
       try {
@@ -246,7 +278,7 @@ export function GraphProvider({
 
   const addEdge = useCallback(
     async (data: EdgeFormSchemaData) => {
-      const newEdge: GraphEdge = {
+      let newEdge: GraphEdge = {
         id: uuidv4(),
         label: data.label,
         from: data.source_node,
@@ -260,6 +292,11 @@ export function GraphProvider({
       try {
         const addEdgeRes = await createEdgeService(data);
         console.log('Edge created successfully', addEdgeRes);
+
+        newEdge = {
+          ...newEdge,
+          id: addEdgeRes.id,
+        };
 
         if (data.type == EdgeType.Shows) {
           data.conditions?.forEach(async (condition) => {
@@ -277,7 +314,10 @@ export function GraphProvider({
           });
         }
 
+        console.log('old edges >> ', edges);
         const newEdges = [...edges, newEdge];
+
+        console.log('new edges >>', newEdges);
         setEdges(newEdges);
         updateGraphVisualization(nodes, newEdges);
         resetEdgeCreation();
@@ -301,24 +341,49 @@ export function GraphProvider({
   );
 
   const removeNode = useCallback(
-    (nodeId: string) => {
+    async (nodeId: string) => {
       const newNodes = nodes.filter((node) => node.id !== nodeId);
+      //
+      const edgeIdsToDelete = edges
+        .filter((edge) => edge.from === nodeId || edge.to === nodeId)
+        .map((edge) => edge.id);
       const newEdges = edges.filter(
-        (edge) => edge.from !== nodeId && edge.to !== nodeId,
+        (edge) => !edgeIdsToDelete.includes(edge.id),
       );
+      //
+      try {
+        await Promise.all([
+          deleteNodeService(nodeId),
+          edgeIdsToDelete.map((id) => deleteEdgeService(id)),
+        ]);
 
-      setNodes(newNodes);
-      setEdges(newEdges);
-      updateGraphVisualization(newNodes, newEdges);
+        setNodes(newNodes);
+        setEdges(newEdges);
+        updateGraphVisualization(newNodes, newEdges);
+
+        setSheetOpen(false);
+
+        handleSuccess('Node deleted successfully');
+      } catch (error) {
+        handleError(error);
+      }
     },
     [nodes, edges, updateGraphVisualization],
   );
 
   const removeEdge = useCallback(
     (edgeId: string) => {
-      const newEdges = edges.filter((edge) => edge.id !== edgeId);
-      setEdges(newEdges);
-      updateGraphVisualization(nodes, newEdges);
+      try {
+        deleteEdgeService(edgeId);
+        //
+        const newEdges = edges.filter((edge) => edge.id !== edgeId);
+        setEdges(newEdges);
+        updateGraphVisualization(nodes, newEdges);
+        //
+        handleSuccess('Edge deleted successfully');
+      } catch (error) {
+        handleError(error);
+      }
     },
     [edges, nodes, updateGraphVisualization],
   );
@@ -406,6 +471,26 @@ export function GraphProvider({
     setZoom(zoomLevelCleaned);
   }, []);
 
+  const resetSelectedNodes = () => {
+    const updatedNodes = nodes.map((item) =>
+      item.selected ? { ...item, selected: false } : item,
+    );
+    //
+    setSelectedNodes([]);
+    setNodes(updatedNodes);
+  };
+  const deleteSelectedNodes = () => {
+    console.log('deleting selected nodes >>', selectedNodes);
+    //
+    resetSelectedNodes();
+  };
+
+  const duplicatedSelectedNodes = () => {
+    console.log('duplicating selected nodes >>', selectedNodes);
+    //
+    resetSelectedNodes();
+  };
+
   // Context value
   const value: GraphContextType = {
     // Refs
@@ -420,6 +505,7 @@ export function GraphProvider({
 
     // UI state
     selectedNode,
+    selectedNodes,
     selectedEdge,
     zoom,
     sheetOpen,
@@ -453,6 +539,10 @@ export function GraphProvider({
     clearGraph,
     resetZoom,
     updateZoom,
+    //
+    resetSelectedNodes,
+    deleteSelectedNodes,
+    duplicatedSelectedNodes,
 
     // Event handlers
     mouseEventCallbacks,

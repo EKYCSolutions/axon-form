@@ -76,6 +76,7 @@ export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
         ? (node.field_type as NodeFieldType)
         : undefined,
     label: node.label,
+    selected: false,
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
     validations:

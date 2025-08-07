@@ -49,7 +49,7 @@ export const renderSheetContent = ({
         <>
           <div className='flex items-center justify-between'>
             <SheetTitle className='text-xl font-medium'>Node Detail</SheetTitle>
-            <div className='space-x-2'>
+            <div className='space-x-2 flex items-center'>
               <Button variant='outline' onClick={onEditNodeClick}>
                 <PenIcon size={10} />
               </Button>
@@ -79,7 +79,7 @@ export const renderSheetContent = ({
         <>
           <div className='flex items-center justify-between'>
             <SheetTitle className='text-xl font-medium'>Edge Detail</SheetTitle>
-            <div className='space-x-2'>
+            <div className='space-x-2 flex items-center'>
               <Button variant='outline' onClick={onEditEdgeClick}>
                 <PenIcon size={10} />
               </Button>

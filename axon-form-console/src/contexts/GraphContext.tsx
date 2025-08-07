@@ -14,6 +14,7 @@ export interface GraphContextType {
   // State
   nodes: GraphNode[];
   selectedNode: GraphNode | undefined;
+  selectedNodes: GraphNode[];
   sourceNode: GraphNode | undefined;
   targetNode: GraphNode | undefined;
   edges: GraphEdge[];
@@ -48,6 +49,10 @@ export interface GraphContextType {
   addEdge: (data: EdgeFormSchemaData) => void;
   updateEdge: (edgeId: string, updates: EdgeFormSchemaData) => void;
   removeEdge: (edgeId: string) => void;
+  //
+  resetSelectedNodes: () => void;
+  deleteSelectedNodes: () => void;
+  duplicatedSelectedNodes: () => void;
   //
   addConditionGroup: (data: ConditionGroupFormSchemaData) => void;
   //

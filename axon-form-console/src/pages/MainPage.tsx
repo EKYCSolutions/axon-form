@@ -13,6 +13,8 @@ export default function MainPage() {
     isEdgeMode,
     sourceNode,
     targetNode,
+    selectedNode,
+    selectedEdge,
     nodes,
     edges,
     sheetOpen,
@@ -22,6 +24,8 @@ export default function MainPage() {
     setSheetType,
     setSourceNode,
     setTargetNode,
+    removeNode,
+    removeEdge,
   } = useGraph();
 
   return (
@@ -50,13 +54,17 @@ export default function MainPage() {
                 setSheetType(GraphSheetType.EditNode);
               },
               onRemoveNodeClick: () => {
-                //
+                if (selectedNode) {
+                  removeNode(selectedNode.id);
+                }
               },
               onEditEdgeClick: () => {
                 setSheetType(GraphSheetType.EditEdge);
               },
               onRemoveEdgeClick: () => {
-                //
+                if (selectedEdge) {
+                  removeEdge(selectedEdge.id);
+                }
               },
             })}
           </div>
@@ -79,8 +87,8 @@ export default function MainPage() {
         options={{
           initialZoom: 1.5,
           styling: {
-            selectedBorderColor: '#',
-            selectedInnerBorderColor: 'black',
+            selectedBorderColor: 'rgba(255, 255, 255, 0.05)',
+            selectedInnerBorderColor: 'rgba(255, 255, 255, 0.05)',
           },
           layout: 'hierarchical',
         }}
