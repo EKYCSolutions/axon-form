@@ -6,7 +6,6 @@ import {
   convertGraphNodeToNodeForm,
   type NodeFormSchemaData,
 } from '@/validations/NodeValidation.js';
-import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import NodeForm from './NodeForm';
 
@@ -36,7 +35,6 @@ export default function EditNodeForm({ className }: IProps) {
     updateNode(selectedNode?.id, data);
     //
     setSheetOpen(false);
-    toast.success('Update node successfully');
   }
 
   return (

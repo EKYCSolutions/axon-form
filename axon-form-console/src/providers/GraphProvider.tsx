@@ -137,7 +137,7 @@ export function GraphProvider({
   }, []);
 
   // Edge creation helpers
-  const resetEdgeCreation = useCallback(() => {
+  const resetEdgeMode = useCallback(() => {
     setSourceNode(undefined);
     setTargetNode(undefined);
     setIsEdgeMode(false);
@@ -150,10 +150,17 @@ export function GraphProvider({
       if (!sourceNode) {
         console.log('Setting source node:', foundNode);
         setSourceNode(foundNode);
+
+        // For edit mode
+        if (targetNode) {
+          setIsEdgeMode(false);
+          setSheetOpen(true);
+        }
+
         return;
       }
 
-      if (!targetNode && foundNode.id !== sourceNode.id) {
+      if (!targetNode) {
         console.log('Setting target node:', foundNode);
         setTargetNode(foundNode);
         setIsEdgeMode(false);
@@ -218,8 +225,15 @@ export function GraphProvider({
         //
         console.log('onRelationshipClick', rel, hitTargets, evt);
 
+        //
         const foundEdge = edges.find((e) => e.id === rel.id);
+        const sourceNode = nodes.find((n) => n.id === foundEdge?.sourceNode);
+        const targetNode = nodes.find((n) => n.id === foundEdge?.targetNode);
+
+        //
         setSelectedEdge(foundEdge);
+        setSourceNode(sourceNode);
+        setTargetNode(targetNode);
 
         //
         setSheetOpen(true);
@@ -320,18 +334,16 @@ export function GraphProvider({
           });
         }
 
-        console.log('old edges >> ', edges);
         const newEdges = [...edges, newEdge];
 
-        console.log('new edges >>', newEdges);
         setEdges(newEdges);
         updateGraphVisualization(nodes, newEdges);
-        resetEdgeCreation();
+        resetEdgeMode();
       } catch (error) {
         handleError(error);
       }
     },
-    [edges, nodes, updateGraphVisualization, handleError, resetEdgeCreation],
+    [edges, nodes, updateGraphVisualization, handleError, resetEdgeMode],
   );
 
   const addConditionGroup = useCallback(
@@ -414,7 +426,8 @@ export function GraphProvider({
 
       try {
         await updateNodeService(nodeId, updates);
-        console.log('Edge updated successfully');
+        console.log('Node updated successfully');
+        handleSuccess('Node updated successfully');
       } catch (error) {
         handleError(error);
       }
@@ -427,9 +440,12 @@ export function GraphProvider({
 
   const updateEdge = useCallback(
     async (edgeId: string, updates: EdgeFormSchemaData) => {
-      // const newEdges = edges.map((edge) =>
-      //   edge.id === edgeId ? { ...edge, ...updates } : edge,
-      // );
+      //
+      if (updates.source_node == updates.target_node) {
+        handleError(Error('Source and target nodes cannot be the same'));
+        return;
+      }
+
       const newEdges = edges.map((edge) =>
         edge.id === edgeId
           ? {
@@ -449,14 +465,16 @@ export function GraphProvider({
       try {
         await updateEdgeService(edgeId, updates);
         console.log('Edge updated successfully');
+        handleSuccess('Edge updated successfully');
       } catch (error) {
         handleError(error);
       }
 
       setEdges(newEdges);
       updateGraphVisualization(nodes, newEdges);
+      resetEdgeMode();
     },
-    [edges, nodes, updateGraphVisualization, handleError],
+    [edges, nodes, updateGraphVisualization, setEdges, handleError],
   );
 
   const clearGraph = useCallback(() => {
@@ -486,7 +504,7 @@ export function GraphProvider({
     setNodes(updatedNodes);
   };
 
-  const deleteSelectedNodes = async () => {
+  const removeSelectedNodes = async () => {
     console.log('deleting selected nodes >>', selectedNodes);
     const nodeIdsToDelete = selectedNodes.map((node) => node.id);
     const edgeIdsToDelete: string[] = [];
@@ -628,9 +646,10 @@ export function GraphProvider({
     clearGraph,
     resetZoom,
     updateZoom,
+    resetEdgeMode,
     //
     resetSelectedNodes,
-    deleteSelectedNodes,
+    removeSelectedNodes,
     duplicateSelectedNodes,
 
     // Event handlers

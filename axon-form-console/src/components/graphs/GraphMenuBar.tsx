@@ -23,10 +23,14 @@ interface IProps {
 
 export default function GraphMenuBar({ className }: IProps) {
   const {
+    isEdgeMode,
+    sourceNode,
     nodes,
     searchText,
     selectedNodes,
     zoom,
+    //
+    resetEdgeMode,
     resetZoom,
     updateZoom,
     setSheetOpen,
@@ -34,7 +38,7 @@ export default function GraphMenuBar({ className }: IProps) {
     setSearchText,
     //
     resetSelectedNodes,
-    deleteSelectedNodes,
+    removeSelectedNodes,
     duplicateSelectedNodes,
   } = useGraph();
 
@@ -46,6 +50,33 @@ export default function GraphMenuBar({ className }: IProps) {
     (value) => setSearchText(value),
     500,
   );
+
+  if (isEdgeMode) {
+    return (
+      <Menubar
+        className={cn(
+          'h-10 w-fit gap-2 px-2 rounded-xl dark:opacity-90',
+          className,
+        )}
+      >
+        <MenubarMenu>
+          <MenubarTrigger
+            onClick={() => {
+              resetEdgeMode();
+            }}
+            className='items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-4 py-1  font-normal'
+          >
+            Cancel
+          </MenubarTrigger>
+        </MenubarMenu>
+        <MenubarMenu>
+          <MenubarTrigger className='items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all h-7 px-4 py-1 font-normal'>
+            Please select a {sourceNode ? 'target' : 'source'} node
+          </MenubarTrigger>
+        </MenubarMenu>
+      </Menubar>
+    );
+  }
 
   return (
     <Menubar className={cn('h-10 w-fit gap-2 px-2 rounded-xl', className)}>
@@ -87,7 +118,7 @@ export default function GraphMenuBar({ className }: IProps) {
             description='This action cannot be undone. This will permanently delete this item and remove all associated data.'
             //
             continueText='Delete'
-            onContinueClick={() => deleteSelectedNodes()}
+            onContinueClick={() => removeSelectedNodes()}
           >
             <div className='flex text-red-400 w-fit items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-2 py-1  font-normal'>
               <Trash2Icon size={15} />

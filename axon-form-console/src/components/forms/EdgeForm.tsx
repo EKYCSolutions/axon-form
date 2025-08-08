@@ -70,8 +70,6 @@ export default function EdgeForm({
                   onClick={() => {
                     setIsEdgeMode(true);
                     setSourceNode(undefined);
-                    setTargetNode(undefined);
-                    //
                     setSheetOpen(false);
                   }}
                 >
@@ -89,7 +87,15 @@ export default function EdgeForm({
             <FormItem>
               <FormLabel>Target Node</FormLabel>
               <FormControl>
-                <Button type='button' variant='secondary' className=''>
+                <Button
+                  type='button'
+                  variant='secondary'
+                  onClick={() => {
+                    setIsEdgeMode(true);
+                    setSheetOpen(false);
+                    setTargetNode(undefined);
+                  }}
+                >
                   {targetNode ? targetNode.label : 'Select target node'}
                 </Button>
               </FormControl>

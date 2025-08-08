@@ -6,7 +6,7 @@ import {
   EdgeFormSchema,
   type EdgeFormSchemaData,
 } from '@/validations/EdgeValidation.js';
-import { toast } from 'sonner';
+import { useEffect } from 'react';
 import { useGraph } from '../hooks/useGraph.js';
 import EdgeForm from './EdgeForm.js';
 
@@ -15,15 +15,12 @@ interface IProps {
 }
 
 export default function EditEdgeForm({ className }: IProps) {
-  const { selectedEdge, updateEdge, setSheetOpen } = useGraph();
-
-  if (!selectedEdge) {
-    return;
-  }
+  const { sourceNode, targetNode, selectedEdge, updateEdge, setSheetOpen } =
+    useGraph();
 
   const form = useForm<EdgeFormSchemaData>({
     resolver: zodResolver(EdgeFormSchema),
-    defaultValues: convertGraphEdgeToEdgeForm(selectedEdge),
+    defaultValues: convertGraphEdgeToEdgeForm(selectedEdge!),
   });
 
   const fieldArray = useFieldArray({
@@ -35,12 +32,22 @@ export default function EditEdgeForm({ className }: IProps) {
     if (!selectedEdge?.id) {
       return;
     }
+
     //
     updateEdge(selectedEdge?.id, data);
     //
     setSheetOpen(false);
-    toast.success('Update node successfully');
   }
+
+  useEffect(() => {
+    if (sourceNode) {
+      form.setValue('source_node', sourceNode.id);
+    }
+    //
+    if (targetNode) {
+      form.setValue('target_node', targetNode.id);
+    }
+  }, [sourceNode, targetNode, form]);
 
   return (
     <EdgeForm

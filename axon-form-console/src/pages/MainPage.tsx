@@ -1,7 +1,6 @@
 import GraphMenubar from '@/components/graphs/GraphMenuBar.js';
 import GraphVisualizationWrapper from '@/components/graphs/GraphVisualizationWrapper';
 import { useGraph } from '@/components/hooks/useGraph';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
@@ -10,7 +9,6 @@ import { renderSheetContent } from '@/utils/Graph.js';
 export default function MainPage() {
   const {
     nvlRef,
-    isEdgeMode,
     sourceNode,
     targetNode,
     selectedNode,
@@ -77,16 +75,7 @@ export default function MainPage() {
         </SheetContent>
       </Sheet>
       <div className='absolute bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center space-y-4'>
-        {isEdgeMode ? (
-          <Alert className='dark:opacity-80 hover:cursor-default'>
-            <AlertDescription>
-              Please select a {sourceNode ? 'target' : 'source'} node to
-              continue
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <GraphMenubar />
-        )}
+        <GraphMenubar />
       </div>
       <GraphVisualizationWrapper
         nvlRef={nvlRef}

@@ -51,8 +51,10 @@ export interface GraphContextType {
   updateEdge: (edgeId: string, updates: EdgeFormSchemaData) => void;
   removeEdge: (edgeId: string) => void;
   //
+  resetEdgeMode: () => void;
+  //
   resetSelectedNodes: () => void;
-  deleteSelectedNodes: () => void;
+  removeSelectedNodes: () => void;
   duplicateSelectedNodes: () => void;
   //
   addConditionGroup: (data: ConditionGroupFormSchemaData) => void;
