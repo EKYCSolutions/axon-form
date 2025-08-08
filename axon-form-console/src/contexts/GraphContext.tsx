@@ -52,7 +52,7 @@ export interface GraphContextType {
   //
   resetSelectedNodes: () => void;
   deleteSelectedNodes: () => void;
-  duplicatedSelectedNodes: () => void;
+  duplicateSelectedNodes: () => void;
   //
   addConditionGroup: (data: ConditionGroupFormSchemaData) => void;
   //

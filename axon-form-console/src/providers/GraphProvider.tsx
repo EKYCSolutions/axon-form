@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { EdgeType, GraphSheetType } from '@/configs/graph';
+import {
+  EdgeType,
+  GraphSheetType,
+  NodeFieldType,
+  NodeType,
+} from '@/configs/graph';
 import { GraphContext, type GraphContextType } from '@/contexts/GraphContext';
 import {
   createConditionGroup as createConditionGroupService,
@@ -20,6 +25,7 @@ import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupV
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import { type EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import {
+  convertGraphNodeToNodeForm,
   convertNodeResponseToGraphNode,
   type NodeFormSchemaData,
 } from '@/validations/NodeValidation.js';
@@ -479,14 +485,80 @@ export function GraphProvider({
     setSelectedNodes([]);
     setNodes(updatedNodes);
   };
-  const deleteSelectedNodes = () => {
+
+  const deleteSelectedNodes = async () => {
     console.log('deleting selected nodes >>', selectedNodes);
-    //
-    resetSelectedNodes();
+    const nodeIdsToDelete = selectedNodes.map((node) => node.id);
+    const edgeIdsToDelete: string[] = [];
+
+    try {
+      selectedNodes.forEach(async (node) => {
+        const edgesOfNodeToDelete = edges
+          .filter((edge) => edge.from === node.id || edge.to === node.id)
+          .map((edge) => edge.id);
+
+        await Promise.all([
+          deleteNodeService(node.id),
+          edgesOfNodeToDelete.map((id) => deleteEdgeService(id)),
+        ]);
+
+        edgeIdsToDelete.push(...edgesOfNodeToDelete);
+      });
+
+      const updatedNodes = nodes.filter(
+        (node) => !nodeIdsToDelete.includes(node.id),
+      );
+      const updatedEdges = edges.filter(
+        (edge) => !edgeIdsToDelete.includes(edge.id),
+      );
+
+      setSelectedNodes([]);
+      setNodes(updatedNodes);
+      setEdges(updatedEdges);
+      updateGraphVisualization(updatedNodes, updatedEdges);
+    } catch (error) {
+      handleError(error);
+    }
   };
 
-  const duplicatedSelectedNodes = () => {
+  const duplicateSelectedNodes = async () => {
     console.log('duplicating selected nodes >>', selectedNodes);
+
+    const addNodesBody = selectedNodes.map((node) => {
+      return {
+        ...convertGraphNodeToNodeForm(node),
+        label: `${node.label} copy`,
+      };
+    });
+
+    try {
+      const addNodesRes = await Promise.all(
+        addNodesBody.map((node) => createNodeService(node)),
+      );
+
+      const newNodes: GraphNode[] = addNodesRes.map((node: NodeResponse) => {
+        return {
+          ...node,
+          caption: node.label,
+          nodeType: node.type as NodeType,
+          fieldType: node.field_type as NodeFieldType,
+          validations: [],
+          activated: true,
+          edges: [],
+          color: generateRandomRgbColor(node.type as NodeType),
+          validation_rules: [],
+        };
+      });
+
+      setNodes([...nodes, ...newNodes]);
+      setSelectedNodes([]);
+      updateGraphVisualization([...nodes, ...newNodes], edges);
+      //
+      handleSuccess('Nodes duplicated successfully');
+    } catch (error) {
+      handleError(error);
+    }
+
     //
     resetSelectedNodes();
   };
@@ -542,7 +614,7 @@ export function GraphProvider({
     //
     resetSelectedNodes,
     deleteSelectedNodes,
-    duplicatedSelectedNodes,
+    duplicateSelectedNodes,
 
     // Event handlers
     mouseEventCallbacks,

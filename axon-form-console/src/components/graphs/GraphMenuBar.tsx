@@ -9,9 +9,11 @@ import {
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils.js';
 import { ChevronUp, Plus, Search, Trash2Icon } from 'lucide-react';
+import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce'; // Import useDebouncedCallback from 'use-debounce'
 import CustomAlertDialog from '../CustomAlertDialog.js';
 import { useGraph } from '../hooks/useGraph.js';
+import { Alert, AlertDescription } from '../ui/alert.js';
 import { Input } from '../ui/input.js';
 import { Separator } from '../ui/separator.js';
 
@@ -21,6 +23,8 @@ interface IProps {
 
 export default function GraphMenuBar({ className }: IProps) {
   const {
+    nodes,
+    searchText,
     selectedNodes,
     zoom,
     resetZoom,
@@ -31,17 +35,15 @@ export default function GraphMenuBar({ className }: IProps) {
     //
     resetSelectedNodes,
     deleteSelectedNodes,
-    duplicatedSelectedNodes,
+    duplicateSelectedNodes,
   } = useGraph();
 
-  // Debounce callback
+  const [onChangeText, setOnChangeText] = useState<string>(searchText);
+
+  //
   const debounced = useDebouncedCallback(
-    // function
-    (value) => {
-      setSearchText(value);
-      console.log('value >>', value);
-    },
     //
+    (value) => setSearchText(value),
     500,
   );
 
@@ -71,7 +73,9 @@ export default function GraphMenuBar({ className }: IProps) {
           <CustomAlertDialog
             title='Duplicate the selected items?'
             description='This will create an exact copy of these items with all its current settings and data.'
-            onContinueClick={() => duplicatedSelectedNodes()}
+            //
+            continueText='Duplicate'
+            onContinueClick={() => duplicateSelectedNodes()}
           >
             <div className='flex text-white w-fit items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-2 py-1  font-normal'>
               <Plus size={20} />
@@ -81,6 +85,8 @@ export default function GraphMenuBar({ className }: IProps) {
           <CustomAlertDialog
             title='Are you absolutely sure?'
             description='This action cannot be undone. This will permanently delete this item and remove all associated data.'
+            //
+            continueText='Delete'
             onContinueClick={() => deleteSelectedNodes()}
           >
             <div className='flex text-red-400 w-fit items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-2 py-1  font-normal'>
@@ -91,6 +97,11 @@ export default function GraphMenuBar({ className }: IProps) {
         </>
       ) : (
         <>
+          {nodes.length == 0 && (
+            <Alert className='w-fit hover:cursor-default absolute bottom-12 left-1/2 -translate-x-1/2 z-50'>
+              <AlertDescription>No nodes found</AlertDescription>
+            </Alert>
+          )}
           <MenubarMenu>
             <MenubarTrigger
               onClick={() => {
@@ -126,7 +137,11 @@ export default function GraphMenuBar({ className }: IProps) {
           <Separator orientation='vertical' />
           <div className='relative'>
             <Input
-              onChange={(e) => debounced(e.target.value)}
+              onChange={(e) => {
+                setOnChangeText(e.target.value);
+                debounced(e.target.value);
+              }}
+              value={onChangeText}
               placeholder='Search'
               className='pl-7 h-7 md:text-xs font-light'
             />

@@ -14,6 +14,7 @@ export const client = new PocketBase(
 );
 
 client.authStore.save(token, null);
+client.autoCancellation(false);
 
 export const getAllNodes = async (
   searchString: string = '',

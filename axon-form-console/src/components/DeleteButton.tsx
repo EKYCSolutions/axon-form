@@ -2,13 +2,36 @@ import { cn } from '@/lib/utils';
 import { Trash2Icon } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
 import CustomAlertDialog from './CustomAlertDialog';
+import { Button } from './ui/button';
 
 interface IProps {
   className?: string;
+  //
   onClick: MouseEventHandler<HTMLButtonElement>;
+  showConfirmationDialog: boolean;
 }
 
-export default function DeleteButton({ className, onClick }: IProps) {
+export default function DeleteButton({
+  className,
+  onClick,
+  showConfirmationDialog = true,
+}: IProps) {
+  if (!showConfirmationDialog) {
+    return (
+      <Button
+        type='button'
+        variant='outline'
+        className={cn(
+          'p-0 dark:border-red-400/50 dark:hover:bg-red-400/20',
+          className,
+        )}
+        onClick={onClick}
+      >
+        <Trash2Icon className='text-red-400/50' />
+      </Button>
+    );
+  }
+
   return (
     <CustomAlertDialog
       title='Are you absolutely sure?'
