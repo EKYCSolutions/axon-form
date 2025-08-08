@@ -25,6 +25,7 @@ export default function MainPage() {
     setSourceNode,
     setTargetNode,
     removeNode,
+    duplicateNode,
     removeEdge,
   } = useGraph();
 
@@ -50,6 +51,11 @@ export default function MainPage() {
             {renderSheetContent({
               sheetType: sheetType,
               //,
+              onDuplicateNodeClick: () => {
+                if (selectedNode) {
+                  duplicateNode(selectedNode.id);
+                }
+              },
               onEditNodeClick: () => {
                 setSheetType(GraphSheetType.EditNode);
               },

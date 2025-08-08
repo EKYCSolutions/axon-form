@@ -17,10 +17,7 @@ import { convertConditionGroupToConditionString } from '@/utils/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import { type EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
-import {
-  convertNodeFormSchemaToGraphNode,
-  type NodeFormSchemaData,
-} from '@/validations/NodeValidation.js';
+import { type NodeFormSchemaData } from '@/validations/NodeValidation.js';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
 import { useQueries } from '@tanstack/react-query';

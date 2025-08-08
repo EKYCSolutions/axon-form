@@ -134,7 +134,10 @@ export default function NodeForm({
                   <FormLabel className='font-light'>
                     Validation {index + 1}
                   </FormLabel>
-                  <DeleteButton onClick={() => fieldArray.remove(index)} />
+                  <DeleteButton
+                    onClick={() => fieldArray.remove(index)}
+                    showConfirmationDialog={false}
+                  />
                 </div>
                 <FormField
                   control={form.control}

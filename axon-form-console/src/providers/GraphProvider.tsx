@@ -521,6 +521,22 @@ export function GraphProvider({
     }
   };
 
+  const duplicateNode = async (nodeId: string) => {
+    const node = nodes.find((node) => node.id == nodeId);
+
+    if (!node) {
+      handleError(Error('Node not found'));
+      return;
+    }
+
+    const addNodeBody: NodeFormSchemaData = {
+      ...convertGraphNodeToNodeForm(node),
+      label: `${node.label} copy`,
+    };
+
+    addNode(addNodeBody);
+  };
+
   const duplicateSelectedNodes = async () => {
     console.log('duplicating selected nodes >>', selectedNodes);
 
@@ -602,6 +618,7 @@ export function GraphProvider({
 
     // Operations
     addNode,
+    duplicateNode,
     addEdge,
     addConditionGroup,
     removeNode,

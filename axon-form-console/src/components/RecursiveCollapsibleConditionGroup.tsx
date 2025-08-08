@@ -124,6 +124,7 @@ export default function RecursiveCollapsibleConditionGroup({
                     onClick={() => {
                       onRemoveEdge(idx);
                     }}
+                    showConfirmationDialog={false}
                   />
                 </div>
               );

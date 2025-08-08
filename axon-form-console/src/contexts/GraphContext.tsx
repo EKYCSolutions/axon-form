@@ -43,6 +43,7 @@ export interface GraphContextType {
   setSearchText: React.Dispatch<React.SetStateAction<string>>;
   //
   addNode: (data: NodeFormSchemaData) => void;
+  duplicateNode: (nodeId: string) => void;
   updateNode: (nodeId: string, updates: NodeFormSchemaData) => void;
   removeNode: (nodeId: string) => void;
   //

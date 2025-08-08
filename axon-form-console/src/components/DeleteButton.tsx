@@ -8,7 +8,7 @@ interface IProps {
   className?: string;
   //
   onClick: MouseEventHandler<HTMLButtonElement>;
-  showConfirmationDialog: boolean;
+  showConfirmationDialog?: boolean;
 }
 
 export default function DeleteButton({
