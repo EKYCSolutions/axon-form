@@ -474,7 +474,7 @@ export function GraphProvider({
       updateGraphVisualization(nodes, newEdges);
       resetEdgeMode();
     },
-    [edges, nodes, updateGraphVisualization, setEdges, handleError],
+    [edges, nodes, updateGraphVisualization, handleError],
   );
 
   const clearGraph = useCallback(() => {

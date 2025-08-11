@@ -20,7 +20,7 @@ export default function EditEdgeForm({ className }: IProps) {
 
   const form = useForm<EdgeFormSchemaData>({
     resolver: zodResolver(EdgeFormSchema),
-    defaultValues: convertGraphEdgeToEdgeForm(selectedEdge!),
+    defaultValues: convertGraphEdgeToEdgeForm(selectedEdge),
   });
 
   const fieldArray = useFieldArray({

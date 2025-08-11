@@ -69,8 +69,8 @@ export default function EdgeForm({
                   variant='secondary'
                   onClick={() => {
                     setIsEdgeMode(true);
-                    setSourceNode(undefined);
                     setSheetOpen(false);
+                    setSourceNode(undefined);
                   }}
                 >
                   {sourceNode ? sourceNode.label : 'Select source node'}
