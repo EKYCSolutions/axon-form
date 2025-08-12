@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils.js';
+import { exportJSON } from '@/utils/File.js';
 import { convertGraphToJSON } from '@/utils/Graph.js';
 import {
   ChevronUp,
@@ -238,9 +239,7 @@ export default function GraphMenuBar({ className }: IProps) {
                 className='hover:cursor-pointer text-xs'
                 onClick={() => {
                   const json = convertGraphToJSON(nodes, edges);
-
-                  console.log('json >>', json);
-                  // exportJSON(json, 'graph.json');
+                  exportJSON(json, 'graph.json');
                 }}
               >
                 <Download />
