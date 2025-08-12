@@ -1,11 +1,12 @@
-import { ConditionExpression, EdgeType } from '@/configs/graph';
-import type { EdgeCondition, GraphEdge } from '@/types/Graph';
-import type {
-  ConditionResponse,
-  EdgeResponse,
-} from '@/types/PocketBaseResponse';
+import { EdgeType } from '@/configs/graph';
+import type { GraphEdge } from '@/types/Graph';
+import type { EdgeResponse } from '@/types/PocketBaseResponse';
 import z from 'zod';
-import { ConditionFormSchema } from './ConditionValidation.js';
+import {
+  ConditionFormSchema,
+  convertConditionResponseToGraphEdgeCondition,
+  convertGraphEdgeConditionToConditionForm,
+} from './ConditionValidation.js';
 
 export const EdgeFormSchema = z
   .object({
@@ -51,6 +52,9 @@ export function convertGraphEdgeToEdgeForm(
     source_node: edge.sourceNode,
     target_node: edge.targetNode,
     type: edge.edgeType,
+    conditions: edge.conditions?.map((condition) =>
+      convertGraphEdgeConditionToConditionForm(condition),
+    ),
   };
 }
 
@@ -67,17 +71,5 @@ export function convertEdgeResponseToGraphEdge(edge: EdgeResponse): GraphEdge {
     conditions: edge.expand?.conditions_via_edge?.map((condition) =>
       convertConditionResponseToGraphEdgeCondition(condition),
     ),
-  };
-}
-
-export function convertConditionResponseToGraphEdgeCondition(
-  condition: ConditionResponse,
-): EdgeCondition {
-  return {
-    id: condition.id,
-    check_node: condition.check_node,
-    expression: condition.expression as ConditionExpression,
-    expected_value: condition.expected_value,
-    edge: condition.edge,
   };
 }

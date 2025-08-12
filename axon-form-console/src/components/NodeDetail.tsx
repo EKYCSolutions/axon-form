@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { capitalize, convertPascalCaseToTitleCase } from '@/utils/string';
+import { capitalize, convertSnakeCaseToTitleCase } from '@/utils/string';
 import { useGraph } from './hooks/useGraph';
 import ReadonlyContainer from './ReadonlyContainer';
 
@@ -41,7 +41,7 @@ export default function NodeDetail({ className }: IProps) {
               <div key={idx} className='space-y-2'>
                 <h2 className='text-sm'>Validation {idx + 1}</h2>
                 <ReadonlyContainer
-                  text={convertPascalCaseToTitleCase(validation.type)}
+                  text={convertSnakeCaseToTitleCase(validation.type)}
                 />
                 {validation?.value && (
                   <ReadonlyContainer text={validation.value?.toString()} />

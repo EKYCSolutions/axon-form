@@ -1,10 +1,10 @@
 import GraphMenubar from '@/components/graphs/GraphMenuBar.js';
 import GraphVisualizationWrapper from '@/components/graphs/GraphVisualizationWrapper';
 import { useGraph } from '@/components/hooks/useGraph';
+import RenderSheetContent from '@/components/RenderSheetContent';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
-import { renderSheetContent } from '@/utils/Graph.js';
 
 export default function MainPage() {
   const {
@@ -46,31 +46,30 @@ export default function MainPage() {
           )}
         >
           <div className='h-full p-4 rounded-lg bg-black space-y-6 overflow-y-auto'>
-            {renderSheetContent({
-              sheetType: sheetType,
-              //,
-              onDuplicateNodeClick: () => {
+            <RenderSheetContent
+              sheetType={sheetType}
+              onDuplicateNodeClick={() => {
                 if (selectedNode) {
                   duplicateNode(selectedNode.id);
                 }
-              },
-              onEditNodeClick: () => {
+              }}
+              onEditNodeClick={() => {
                 setSheetType(GraphSheetType.EditNode);
-              },
-              onRemoveNodeClick: () => {
+              }}
+              onRemoveNodeClick={() => {
                 if (selectedNode) {
                   removeNode(selectedNode.id);
                 }
-              },
-              onEditEdgeClick: () => {
+              }}
+              onEditEdgeClick={() => {
                 setSheetType(GraphSheetType.EditEdge);
-              },
-              onRemoveEdgeClick: () => {
+              }}
+              onRemoveEdgeClick={() => {
                 if (selectedEdge) {
                   removeEdge(selectedEdge.id);
                 }
-              },
-            })}
+              }}
+            />
           </div>
         </SheetContent>
       </Sheet>

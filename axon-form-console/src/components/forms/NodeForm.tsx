@@ -225,7 +225,7 @@ export default function NodeForm({
         <Button
           className='w-full'
           type='submit'
-          disabled={!form.formState.isValid}
+          disabled={!form.formState.isValid || !form.formState.isDirty}
         >
           Submit
         </Button>

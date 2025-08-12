@@ -34,7 +34,11 @@ export default function EditEdgeForm({ className }: IProps) {
     }
 
     //
-    updateEdge(selectedEdge?.id, data);
+    updateEdge(
+      selectedEdge?.id,
+      data,
+      convertGraphEdgeToEdgeForm(selectedEdge),
+    );
     //
     setSheetOpen(false);
   }

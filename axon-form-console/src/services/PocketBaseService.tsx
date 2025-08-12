@@ -18,10 +18,11 @@ client.autoCancellation(false);
 
 export const getAllNodes = async (
   searchString: string = '',
-): Promise<{ items: NodeResponse[] }> => {
-  return await client.collection(PocketBaseCollection.NODES).getList(1, 500, {
+): Promise<NodeResponse[]> => {
+  return await client.collection(PocketBaseCollection.NODES).getFullList({
     filter: `label ~ "${searchString}"`,
-    expand: 'edges_via_source_node,edges_via_target_node',
+    expand:
+      'edges_via_source_node.conditions_via_edge,edges_via_target_node.conditions_via_edge',
   });
 };
 
@@ -64,10 +65,10 @@ export const createEdge = async (
   });
 };
 
-export const getAllEdges = async (): Promise<{ items: EdgeResponse[] }> => {
-  return (await client.collection(PocketBaseCollection.EDGES).getList(1, 50, {
+export const getAllEdges = async (): Promise<EdgeResponse[]> => {
+  return await client.collection(PocketBaseCollection.EDGES).getFullList({
     expand: 'conditions_via_edge',
-  })) as { items: EdgeResponse[] };
+  });
 };
 
 export const getEdge = async (id: string): Promise<EdgeResponse> => {
@@ -110,9 +111,12 @@ export const updateCondition = async (
   id: string,
   data: Partial<ConditionFormSchemaData>,
 ): Promise<unknown> => {
-  return await client
-    .collection(PocketBaseCollection.CONDITIONS)
-    .update(id, data);
+  return await client.collection(PocketBaseCollection.CONDITIONS).update(id, {
+    check_node: data.node,
+    edge: data.edge,
+    expression: data.expr,
+    expected_value: data.value,
+  });
 };
 
 export const deleteCondition = async (id: string): Promise<unknown> => {

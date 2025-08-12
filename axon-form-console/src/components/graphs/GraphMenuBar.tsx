@@ -8,7 +8,15 @@ import {
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
 import { cn } from '@/lib/utils.js';
-import { ChevronUp, Plus, Search, Trash2Icon } from 'lucide-react';
+import { convertGraphToJSON } from '@/utils/Graph.js';
+import {
+  ChevronUp,
+  Download,
+  Ellipsis,
+  Plus,
+  Search,
+  Trash2Icon,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce'; // Import useDebouncedCallback from 'use-debounce'
 import CustomAlertDialog from '../CustomAlertDialog.js';
@@ -23,9 +31,10 @@ interface IProps {
 
 export default function GraphMenuBar({ className }: IProps) {
   const {
+    nodes,
+    edges,
     isEdgeMode,
     sourceNode,
-    nodes,
     searchText,
     selectedNodes,
     zoom,
@@ -217,6 +226,25 @@ export default function GraphMenuBar({ className }: IProps) {
               <MenubarSeparator />
               <MenubarItem className='text-xs' onClick={() => resetZoom()}>
                 Reset zoom
+              </MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger className='bg-none focus:bg-transparent data-[state=open]:bg-transparent'>
+              <Ellipsis size={15} />
+            </MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem
+                className='hover:cursor-pointer text-sm'
+                onClick={() => {
+                  const json = convertGraphToJSON(nodes, edges);
+
+                  console.log('json >>', json);
+                  // exportJSON(json, 'graph.json');
+                }}
+              >
+                <Download />
+                Export to JSON
               </MenubarItem>
             </MenubarContent>
           </MenubarMenu>

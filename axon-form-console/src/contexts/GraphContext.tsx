@@ -48,7 +48,11 @@ export interface GraphContextType {
   removeNode: (nodeId: string) => void;
   //
   addEdge: (data: EdgeFormSchemaData) => void;
-  updateEdge: (edgeId: string, updates: EdgeFormSchemaData) => void;
+  updateEdge: (
+    edgeId: string,
+    updates: EdgeFormSchemaData,
+    initialEdgeData: EdgeFormSchemaData,
+  ) => void;
   removeEdge: (edgeId: string) => void;
   //
   resetEdgeMode: () => void;

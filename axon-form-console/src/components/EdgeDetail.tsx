@@ -1,10 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import {
-  capitalize,
-  convertPascalCaseToTitleCase,
-  convertSnakeCaseToTitleCase,
-} from '@/utils/string';
+import { capitalize, convertSnakeCaseToTitleCase } from '@/utils/string';
 import { useGraph } from './hooks/useGraph';
 import ReadonlyContainer from './ReadonlyContainer';
 
@@ -48,7 +44,7 @@ export default function EdgeDetail({ className }: IProps) {
               <div key={idx} className='space-y-2'>
                 <h2 className='text-sm'>Condition {idx + 1}</h2>
                 <ReadonlyContainer
-                  text={convertPascalCaseToTitleCase(condition.expression)}
+                  text={convertSnakeCaseToTitleCase(condition.expression)}
                 />
                 <ReadonlyContainer text={condition.expected_value.toString()} />
               </div>

@@ -11,9 +11,11 @@ import {
   createCondition as createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
+  deleteCondition as deleteConditionService,
   deleteEdge as deleteEdgeService,
   deleteNode as deleteNodeService,
   getAllNodes,
+  updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
 } from '@/services/PocketBaseService';
@@ -22,7 +24,10 @@ import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import { convertConditionGroupToConditionString } from '@/utils/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
-import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
+import {
+  convertConditionFormToGraphEdgeCondition,
+  type ConditionFormSchemaData,
+} from '@/validations/ConditionValidation';
 import { type EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import {
   convertGraphNodeToNodeForm,
@@ -89,11 +94,11 @@ export function GraphProvider({
   });
 
   useEffect(() => {
-    if (nodesQuery.status === 'success' && nodesQuery.data?.items) {
+    if (nodesQuery.status === 'success' && nodesQuery.data) {
       console.log('Fetching nodes data from query');
 
-      const nodeRes: GraphNode[] = nodesQuery.data.items.map(
-        (node: NodeResponse) => convertNodeResponseToGraphNode(node),
+      const nodeRes: GraphNode[] = nodesQuery.data?.map((node: NodeResponse) =>
+        convertNodeResponseToGraphNode(node),
       );
       const nodeIds = nodeRes.map((node) => node.id);
 
@@ -305,7 +310,7 @@ export function GraphProvider({
         to: data.target_node,
         sourceNode: data.source_node,
         targetNode: data.target_node,
-        edgeType: EdgeType.HasOption,
+        edgeType: data.type as EdgeType,
         caption: data.label || '',
       };
 
@@ -318,7 +323,7 @@ export function GraphProvider({
           id: addEdgeRes.id,
         };
 
-        if (data.type == EdgeType.Shows) {
+        if (data.type == EdgeType.Shows && data.conditions) {
           data.conditions?.forEach(async (condition) => {
             const addConditionBody: ConditionFormSchemaData = {
               node: data.source_node,
@@ -332,6 +337,13 @@ export function GraphProvider({
 
             console.log('Condition created successfully', addConditionRes);
           });
+
+          newEdge = {
+            ...newEdge,
+            conditions: data.conditions.map((condition) =>
+              convertConditionFormToGraphEdgeCondition(condition),
+            ),
+          };
         }
 
         const newEdges = [...edges, newEdge];
@@ -398,6 +410,8 @@ export function GraphProvider({
         setEdges(newEdges);
         updateGraphVisualization(nodes, newEdges);
         //
+        setSheetOpen(false);
+        //
         handleSuccess('Edge deleted successfully');
       } catch (error) {
         handleError(error);
@@ -439,7 +453,11 @@ export function GraphProvider({
   );
 
   const updateEdge = useCallback(
-    async (edgeId: string, updates: EdgeFormSchemaData) => {
+    async (
+      edgeId: string,
+      updates: EdgeFormSchemaData,
+      initialEdgeData: EdgeFormSchemaData,
+    ) => {
       //
       if (updates.source_node == updates.target_node) {
         handleError(Error('Source and target nodes cannot be the same'));
@@ -464,6 +482,66 @@ export function GraphProvider({
 
       try {
         await updateEdgeService(edgeId, updates);
+
+        if (updates.type == EdgeType.Shows && updates.conditions) {
+          //
+          const newConditions = updates.conditions.filter(
+            (condition) => !condition.id,
+          );
+          //
+          const updatedConditions = updates.conditions.filter(
+            (condition) => condition.id,
+          );
+          //
+          const updatedConditionIds = updatedConditions.map(
+            (condition) => condition.id as string,
+          );
+          //
+          const deletedConditionIds = initialEdgeData
+            .conditions!.filter(
+              (c) => c.id && !updatedConditionIds.includes(c.id),
+            )
+            .map((condition) => condition.id);
+
+          newConditions.forEach(async (condition) => {
+            console.log('new condition >>', condition);
+            //
+            const addConditionBody: ConditionFormSchemaData = {
+              node: updates.source_node,
+              edge: edgeId,
+              expr: condition.expr,
+              value: condition.value,
+            };
+            const addConditionRes =
+              await createConditionService(addConditionBody);
+            console.log('Condition created successfully', addConditionRes);
+          });
+          //
+          updatedConditions.forEach(async (condition) => {
+            console.log('updated condition >>', condition);
+            //
+            const updateConditionBody: ConditionFormSchemaData = {
+              node: updates.source_node,
+              edge: edgeId,
+              expr: condition.expr,
+              value: condition.value,
+            };
+            const updateConditionRes = await updateConditionService(
+              condition.id as string,
+              updateConditionBody,
+            );
+            console.log('Condition created successfully', updateConditionRes);
+          });
+          //
+          deletedConditionIds.forEach(async (id) => {
+            console.log('deleted condition >>', id);
+            const deleteConditionRes = await deleteConditionService(
+              id as string,
+            );
+            console.log('Condition deleted successfully', deleteConditionRes);
+          });
+        }
+
         console.log('Edge updated successfully');
         handleSuccess('Edge updated successfully');
       } catch (error) {
