@@ -1,6 +1,6 @@
 export enum NodeType {
   Input = 'input',
-  Values = 'values',
+  Value = 'value',
 }
 
 export enum NodeFieldType {

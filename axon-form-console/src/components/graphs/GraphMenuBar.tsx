@@ -233,9 +233,9 @@ export default function GraphMenuBar({ className }: IProps) {
             <MenubarTrigger className='bg-none focus:bg-transparent data-[state=open]:bg-transparent'>
               <Ellipsis size={15} />
             </MenubarTrigger>
-            <MenubarContent>
+            <MenubarContent className='min-w-4'>
               <MenubarItem
-                className='hover:cursor-pointer text-sm'
+                className='hover:cursor-pointer text-xs'
                 onClick={() => {
                   const json = convertGraphToJSON(nodes, edges);
 
