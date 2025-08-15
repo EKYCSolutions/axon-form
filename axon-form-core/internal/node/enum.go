@@ -100,3 +100,57 @@ func (nft *NodeFieldType) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
+
+type ValidationRuleType int
+
+const (
+	ValidationRuleTypeRequired ValidationRuleType = iota
+	ValidationRuleTypeEmail
+	ValidationRuleTypeMinLength
+	ValidationRuleTypeMaxLength
+	ValidationRuleTypePattern
+	ValidationRuleTypeMin
+	ValidationRuleTypeMax
+)
+
+var validationRuleType = map[ValidationRuleType]string{
+	ValidationRuleTypeRequired:  "required",
+	ValidationRuleTypeEmail:     "email",
+	ValidationRuleTypeMinLength: "min_length",
+	ValidationRuleTypeMaxLength: "max_length",
+	ValidationRuleTypePattern:   "pattern",
+	ValidationRuleTypeMin:       "min",
+	ValidationRuleTypeMax:       "max",
+}
+
+func (vrt ValidationRuleType) String() string {
+	return validationRuleType[vrt]
+}
+
+func (vrt *ValidationRuleType) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	switch s {
+	case "required":
+		*vrt = ValidationRuleTypeRequired
+	case "email":
+		*vrt = ValidationRuleTypeEmail
+	case "min_length":
+		*vrt = ValidationRuleTypeMinLength
+	case "max_length":
+		*vrt = ValidationRuleTypeMaxLength
+	case "pattern":
+		*vrt = ValidationRuleTypePattern
+	case "min":
+		*vrt = ValidationRuleTypeMin
+	case "max":
+		*vrt = ValidationRuleTypeMax
+
+	default:
+		return fmt.Errorf("unknown EdgeType: %s", s)
+	}
+	return nil
+}

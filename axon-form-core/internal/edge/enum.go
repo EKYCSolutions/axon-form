@@ -5,6 +5,44 @@ import (
 	"fmt"
 )
 
+type EdgeType int
+
+const (
+	EdgeTypeHasOption EdgeType = iota
+	EdgeTypeValidates
+	EdgeTypeShows
+)
+
+var edgeType = map[EdgeType]string{
+	EdgeTypeHasOption: "has_options",
+	EdgeTypeValidates: "validates",
+	EdgeTypeShows:     "shows",
+}
+
+func (et EdgeType) String() string {
+	return edgeType[et]
+}
+
+func (et *EdgeType) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	switch s {
+	case "has_options":
+		*et = EdgeTypeHasOption
+	case "validates":
+		*et = EdgeTypeValidates
+	case "shows":
+		*et = EdgeTypeShows
+
+	default:
+		return fmt.Errorf("unknown EdgeType: %s", s)
+	}
+	return nil
+}
+
 type ConditionExpression int
 
 const (

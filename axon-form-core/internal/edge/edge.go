@@ -13,6 +13,7 @@ type Edge struct {
 	Label      string            `json:"label"`
 	SourceNode string            `json:"source_node"`
 	TargetNode string            `json:"target_node"`
+	Type       EdgeType          `json:"type"`
 	Conditions []EdgeCondition   `json:"conditions"`
 	Configs    map[string]string `json:"config"`
 }

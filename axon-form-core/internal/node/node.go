@@ -1,9 +1,9 @@
 package node
 
 type ValidationRule struct {
-	Type    string `json:"type"`
-	Value   string `json:"value"`
-	Message string `json:"message"`
+	Type    ValidationRuleType `json:"type"`
+	Value   string             `json:"value"`
+	Message string             `json:"message"`
 }
 
 type Node struct {

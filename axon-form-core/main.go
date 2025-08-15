@@ -2,10 +2,9 @@ package main
 
 import (
 	"axon-form/core/internal/edge"
+	"axon-form/core/internal/graph"
 	"axon-form/core/internal/node"
 	"axon-form/core/internal/util"
-
-	"go.uber.org/zap"
 )
 
 func main() {
@@ -14,7 +13,7 @@ func main() {
 	edgesJson := graphJson["edges"]
 
 	util.NewLogger()
-	logger := util.GetLogger()
+	// logger := util.GetLogger()
 
 	var nodes []node.Node
 	var edges []edge.Edge
@@ -31,15 +30,27 @@ func main() {
 		edges = append(edges, newEdge)
 	}
 
-	for _, n := range nodes {
-		if n.ID == "wu16d202mgqo6bm" {
-			logger.Debug("Found node:", zap.Any("node", n))
-		}
+	g := graph.NewGraph(
+		nodes,
+		edges,
+	)
+
+	input := graph.VerifyGraphInput{
+		NodeID: "wu16d202mgqo6bm",
+		Value:  "phnom-penh",
 	}
 
-	for _, e := range edges {
-		if e.ID == "rdk4e7zcw2qh4bb" {
-			logger.Debug("Found edge:", zap.Any("edge", e))
-		}
-	}
+	g.TraverseGraph(input)
+
+	// for _, n := range nodes {
+	// 	if n.ID == "wu16d202mgqo6bm" {
+	// 	}
+	// 	logger.Debug("Found node:", zap.Any("node", n))
+	// }
+
+	// for _, e := range edges {
+	// 	if e.ID == "rdk4e7zcw2qh4bb" {
+	// 		logger.Debug("Found edge:", zap.Any("edge", e))
+	// 	}
+	// }
 }
