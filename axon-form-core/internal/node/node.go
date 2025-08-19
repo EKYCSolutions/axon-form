@@ -12,4 +12,5 @@ type Node struct {
 	NodeType        NodeType         `json:"type"`
 	FieldType       NodeFieldType    `json:"field_type"`
 	ValidationRules []ValidationRule `json:"validation_rules"`
+	IsVisible       bool
 }

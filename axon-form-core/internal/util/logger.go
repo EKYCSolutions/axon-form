@@ -1,8 +1,6 @@
 package util
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 )
 
@@ -15,7 +13,6 @@ func NewLogger() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("logger >>", logger)
 	defer logger.Sync()
 }
 

@@ -12,6 +12,8 @@ func NewNode(
 	FieldType NodeFieldType,
 	//
 	ValidationRules []ValidationRule,
+	//
+	IsVisible bool,
 ) Node {
 	return Node{
 		ID:              ID,
@@ -19,6 +21,7 @@ func NewNode(
 		NodeType:        NodeType,
 		FieldType:       FieldType,
 		ValidationRules: ValidationRules,
+		IsVisible:       IsVisible,
 	}
 }
 

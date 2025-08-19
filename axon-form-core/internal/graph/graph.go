@@ -10,7 +10,7 @@ type Graph struct {
 	Edges []edge.Edge
 }
 
-type VerifyGraphInput struct {
+type VerifyNodeInput struct {
 	NodeID string
 	Value  string
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"axon-form/core/internal/edge"
 	"axon-form/core/internal/graph"
 	"axon-form/core/internal/node"
@@ -35,12 +37,17 @@ func main() {
 		edges,
 	)
 
-	input := graph.VerifyGraphInput{
+	input := graph.VerifyNodeInput{
 		NodeID: "wu16d202mgqo6bm",
-		Value:  "phnom-penh",
+		Value:  "international",
 	}
 
-	g.TraverseGraph(input)
+	success, err := g.ValidateNode(input)
+	if err != nil {
+		panic(util.MultiError{Errors: err})
+	}
+
+	fmt.Println("success >>", success)
 
 	// for _, n := range nodes {
 	// 	if n.ID == "wu16d202mgqo6bm" {

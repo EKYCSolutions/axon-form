@@ -200,7 +200,7 @@
       "validation_rules": [
         {
           "type": "required",
-          "message": "hello"
+          "message": "This field is required."
         }
       ]
     },
