@@ -1,5 +1,9 @@
 import { PocketBaseCollection } from '@/configs/collections';
-import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
+import type {
+  ConditionGroupResponse,
+  EdgeResponse,
+  NodeResponse,
+} from '@/types/PocketBaseResponse';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
@@ -131,10 +135,12 @@ export const createConditionGroup = async (
   });
 };
 
-export const getAllConditionGroups = async (): Promise<unknown> => {
+export const getAllConditionGroups = async (): Promise<
+  ConditionGroupResponse[]
+> => {
   return await client
     .collection(PocketBaseCollection.CONDITION_GROUPS)
-    .getList(1, 50, {});
+    .getFullList();
 };
 
 export const getConditionGroup = async (id: string): Promise<unknown> => {

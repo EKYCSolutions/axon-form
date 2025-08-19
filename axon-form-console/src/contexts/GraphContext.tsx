@@ -1,5 +1,9 @@
 import type { GraphSheetType } from '@/configs/graph';
-import type { GraphEdge, GraphNode } from '@/types/Graph.js';
+import type {
+  EdgeConditionGroup,
+  GraphEdge,
+  GraphNode,
+} from '@/types/Graph.js';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
@@ -19,6 +23,7 @@ export interface GraphContextType {
   targetNode: GraphNode | undefined;
   edges: GraphEdge[];
   selectedEdge: GraphEdge | undefined;
+  conditionGroups: EdgeConditionGroup[];
   zoom: number;
   //
   sheetOpen: boolean;
@@ -30,6 +35,9 @@ export interface GraphContextType {
   // Actions
   setNodes: React.Dispatch<React.SetStateAction<GraphNode[]>>;
   setEdges: React.Dispatch<React.SetStateAction<GraphEdge[]>>;
+  setConditionGroups: React.Dispatch<
+    React.SetStateAction<EdgeConditionGroup[]>
+  >;
   setSelectedNode: React.Dispatch<React.SetStateAction<GraphNode | undefined>>;
   setSelectedEdge: React.Dispatch<React.SetStateAction<GraphEdge | undefined>>;
   //

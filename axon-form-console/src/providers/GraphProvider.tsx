@@ -14,13 +14,21 @@ import {
   deleteCondition as deleteConditionService,
   deleteEdge as deleteEdgeService,
   deleteNode as deleteNodeService,
+  getAllConditionGroups,
   getAllNodes,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
 } from '@/services/PocketBaseService';
-import type { GraphEdge, GraphNode } from '@/types/Graph.js';
-import type { NodeResponse } from '@/types/PocketBaseResponse';
+import type {
+  EdgeConditionGroup,
+  GraphEdge,
+  GraphNode,
+} from '@/types/Graph.js';
+import type {
+  ConditionGroupResponse,
+  NodeResponse,
+} from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import { convertConditionGroupToConditionString } from '@/utils/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
@@ -51,6 +59,7 @@ interface GraphProviderProps {
   children: ReactNode;
   initialNodes?: GraphNode[];
   initialEdges?: GraphEdge[];
+  initialConditionGroups?: EdgeConditionGroup[];
 }
 
 const DEFAULT_ZOOM_LEVEL = 0.75;
@@ -59,12 +68,16 @@ export function GraphProvider({
   children,
   initialNodes = [],
   initialEdges = [],
+  initialConditionGroups = [],
 }: GraphProviderProps) {
   const nvlRef = useRef<NVL | null>(null);
 
   // Graph data state
   const [nodes, setNodes] = useState<GraphNode[]>(initialNodes);
   const [edges, setEdges] = useState<GraphEdge[]>(initialEdges);
+  const [conditionGroups, setConditionGroups] = useState<EdgeConditionGroup[]>(
+    initialConditionGroups,
+  );
 
   // UI state
   const [selectedNode, setSelectedNode] = useState<GraphNode | undefined>();
@@ -89,6 +102,14 @@ export function GraphProvider({
       {
         queryKey: ['nodes', searchText],
         queryFn: () => getAllNodes(searchText),
+      },
+    ],
+  });
+  const [conditionGroupsQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ['conditionGroups'],
+        queryFn: () => getAllConditionGroups(),
       },
     ],
   });
@@ -117,7 +138,24 @@ export function GraphProvider({
       setNodes(nodeRes);
       setEdges(edgesWithNodes);
     }
-  }, [nodesQuery.status, nodesQuery.data]); // Only depend on query status and data
+
+    if (conditionGroupsQuery.status && conditionGroupsQuery.data) {
+      const conditionGroupRes: EdgeConditionGroup[] =
+        conditionGroupsQuery.data?.map((cd: ConditionGroupResponse) => {
+          return {
+            id: cd.id,
+            conditions: cd.conditions,
+          };
+        });
+
+      setConditionGroups(conditionGroupRes);
+    }
+  }, [
+    nodesQuery.status,
+    nodesQuery.data,
+    conditionGroupsQuery.status,
+    conditionGroupsQuery.data,
+  ]); // Only depend on query status and data
 
   // Helper function to update graph visualization
   const updateGraphVisualization = useCallback(
@@ -362,10 +400,14 @@ export function GraphProvider({
     async (data: ConditionGroupFormSchemaData) => {
       const conditionGroupString = convertConditionGroupToConditionString(data);
 
-      const createConditionGroupRes =
-        await createConditionGroupService(conditionGroupString);
+      try {
+        const createConditionGroupRes =
+          await createConditionGroupService(conditionGroupString);
 
-      console.log('create condition group res >>', createConditionGroupRes);
+        console.log('create condition group res >>', createConditionGroupRes);
+      } catch (error) {
+        handleError(error);
+      }
     },
     [],
   );
@@ -683,6 +725,7 @@ export function GraphProvider({
     // Data
     nodes,
     edges,
+    conditionGroups,
 
     // Search text
     searchText,
@@ -710,6 +753,7 @@ export function GraphProvider({
     setTargetNode,
     setNodes,
     setEdges,
+    setConditionGroups,
     setSearchText,
 
     // Operations

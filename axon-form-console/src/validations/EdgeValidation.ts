@@ -44,10 +44,9 @@ export const EdgeFormSchemaDefaultValue: EdgeFormSchemaData = {
   type: '' as EdgeType,
 };
 
-export function convertGraphEdgeToEdgeForm(
-  edge: GraphEdge,
-): EdgeFormSchemaData {
+export function convertGraphEdgeToEdgeForm(edge: GraphEdge) {
   return {
+    id: edge.id,
     label: edge.label,
     source_node: edge.sourceNode,
     target_node: edge.targetNode,

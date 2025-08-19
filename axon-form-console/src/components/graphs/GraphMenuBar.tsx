@@ -34,6 +34,7 @@ export default function GraphMenuBar({ className }: IProps) {
   const {
     nodes,
     edges,
+    conditionGroups,
     isEdgeMode,
     sourceNode,
     searchText,
@@ -238,7 +239,11 @@ export default function GraphMenuBar({ className }: IProps) {
               <MenubarItem
                 className='hover:cursor-pointer text-xs'
                 onClick={() => {
-                  const json = convertGraphToJSON(nodes, edges);
+                  const json = convertGraphToJSON(
+                    nodes,
+                    edges,
+                    conditionGroups,
+                  );
                   exportJSON(json, 'graph.json');
                 }}
               >

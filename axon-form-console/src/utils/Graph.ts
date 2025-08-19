@@ -1,5 +1,5 @@
 import { ConditionGroupExpression, EdgeType } from '@/configs/graph';
-import type { GraphEdge, GraphNode } from '@/types/Graph';
+import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import { convertGraphEdgeToEdgeForm } from '@/validations/EdgeValidation';
 import { convertGraphNodeToNodeForm } from '@/validations/NodeValidation';
@@ -116,6 +116,7 @@ export const convertConditionStringToConditionGroupObject = (
 export const convertGraphToJSON = (
   nodes: GraphNode[],
   edges: GraphEdge[],
+  conditionGroups: EdgeConditionGroup[],
 ): Record<string, unknown> => {
   //
   const nodeJson = nodes.map((node) => convertGraphNodeToNodeForm(node));
@@ -124,5 +125,6 @@ export const convertGraphToJSON = (
   return {
     nodes: nodeJson,
     edges: edgeJson,
+    condition_groups: conditionGroups,
   };
 };

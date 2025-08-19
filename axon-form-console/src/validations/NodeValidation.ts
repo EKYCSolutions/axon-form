@@ -39,10 +39,9 @@ export const NodeFormSchemaDefaultValue: NodeFormSchemaData = {
   label: '',
 };
 
-export function convertGraphNodeToNodeForm(
-  node: GraphNode,
-): NodeFormSchemaData {
+export function convertGraphNodeToNodeForm(node: GraphNode) {
   return {
+    id: node.id,
     type: node.nodeType,
     field_type: node.fieldType,
     label: node.label,

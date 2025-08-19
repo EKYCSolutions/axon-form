@@ -5,6 +5,7 @@ import {
 } from '@/validations/ConditionGroupValidation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import ConditionGroupForm from './ConditionGroupForm';
 
@@ -15,18 +16,14 @@ export default function AddConditionGroupForm() {
     defaultValues: ConditionGroupFormSchemaDefaultValue,
   });
 
-  const { addConditionGroup } = useGraph();
+  const { addConditionGroup, setSheetOpen } = useGraph();
 
   function onSubmit(data: ConditionGroupFormSchemaData) {
-    console.log('data >> ', data);
-
     addConditionGroup(data);
 
-    // const conditionString = convertConditionGroupToConditionString(data);
-    // console.log('condition string >>', conditionString);
-    // const conditionGroupObject =
-    //   convertConditionStringToConditionGroupObject(conditionString);
-    // console.log('condition group object >>', conditionGroupObject);
+    form.reset();
+    setSheetOpen(false);
+    toast.success('Added group condition successfully');
   }
 
   return <ConditionGroupForm form={form} onSubmit={onSubmit} />;

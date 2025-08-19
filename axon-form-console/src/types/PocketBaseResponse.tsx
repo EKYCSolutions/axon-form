@@ -34,3 +34,7 @@ export interface ConditionResponse extends BaseResponse {
   expression: string;
   expected_value: string;
 }
+
+export interface ConditionGroupResponse extends BaseResponse {
+  conditions: string;
+}
