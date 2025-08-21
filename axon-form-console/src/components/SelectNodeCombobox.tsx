@@ -18,24 +18,22 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import type { GraphEdge } from '@/types/Graph';
+import type { GraphNode } from '@/types/Graph';
 
 interface IProps {
-  idx: number;
   className: string;
   //
-  edges: GraphEdge[];
-  selectedEdges: GraphEdge[];
+  nodes: GraphNode[];
+  selectedNode: GraphNode | undefined;
   //
-  onEdgeSelect: (edge: GraphEdge) => void;
+  onNodeSelect: (node: GraphNode) => void;
 }
 
-export function SelectEdgeCombobox({
-  idx,
+export function SelectNodeCombobox({
   className,
-  edges,
-  selectedEdges,
-  onEdgeSelect,
+  nodes,
+  selectedNode,
+  onNodeSelect,
 }: IProps) {
   return (
     <Popover>
@@ -46,7 +44,7 @@ export function SelectEdgeCombobox({
             role='combobox'
             className={cn('justify-between', className)}
           >
-            {selectedEdges[idx] ? selectedEdges[idx].label : 'Select edge'}
+            {selectedNode ? selectedNode.label : 'Select node'}
             <ChevronsUpDown className='opacity-50' />
           </Button>
         </FormControl>
@@ -54,7 +52,7 @@ export function SelectEdgeCombobox({
       <PopoverContent className='w-full p-0'>
         <Command
           filter={(value, search) => {
-            const item = edges.find((item) => item.id === value);
+            const item = nodes.find((item) => item.id === value);
             return item?.label.toLowerCase().includes(search.toLowerCase())
               ? 1
               : 0;
@@ -62,25 +60,26 @@ export function SelectEdgeCombobox({
         >
           <CommandInput placeholder='Search framework...' className='h-9' />
           <CommandList>
-            <CommandEmpty>No edge found.</CommandEmpty>
+            <CommandEmpty>No node found.</CommandEmpty>
             <CommandGroup>
-              {edges.map((edge) => (
+              {nodes.map((node) => (
                 <CommandItem
-                  value={edge?.id}
-                  key={edge?.id}
+                  value={node?.id}
+                  key={node?.id}
                   onSelect={(value) => {
-                    const edgeFound = edges.find((e) => e.id == value);
+                    console.log(value);
+                    const nodeFound = nodes.find((e) => e.id == value);
 
-                    if (edgeFound) {
-                      onEdgeSelect(edgeFound);
+                    if (nodeFound) {
+                      onNodeSelect(nodeFound);
                     }
                   }}
                 >
-                  {edge?.label}
+                  {node?.label}
                   <Check
                     className={cn(
                       'ml-auto',
-                      selectedEdges?.find((e) => e?.id == edge?.id)
+                      selectedNode?.id == node?.id
                         ? 'opacity-100'
                         : 'opacity-0',
                     )}

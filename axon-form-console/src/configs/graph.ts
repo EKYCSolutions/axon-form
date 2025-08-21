@@ -49,7 +49,6 @@ export enum ConditionGroupExpression {
   And = 'and',
   Or = 'or',
   Nor = 'nor',
-  Not = 'not',
 }
 
 export enum ValidationRuleType {

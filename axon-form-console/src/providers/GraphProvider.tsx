@@ -401,8 +401,10 @@ export function GraphProvider({
       const conditionGroupString = convertConditionGroupToConditionString(data);
 
       try {
-        const createConditionGroupRes =
-          await createConditionGroupService(conditionGroupString);
+        const createConditionGroupRes = await createConditionGroupService(
+          data,
+          conditionGroupString,
+        );
 
         console.log('create condition group res >>', createConditionGroupRes);
       } catch (error) {

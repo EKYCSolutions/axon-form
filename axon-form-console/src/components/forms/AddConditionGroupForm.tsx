@@ -16,13 +16,14 @@ export default function AddConditionGroupForm() {
     defaultValues: ConditionGroupFormSchemaDefaultValue,
   });
 
-  const { addConditionGroup, setSheetOpen } = useGraph();
+  const { addConditionGroup, setSheetOpen, setSelectedNode } = useGraph();
 
   function onSubmit(data: ConditionGroupFormSchemaData) {
     addConditionGroup(data);
 
     form.reset();
     setSheetOpen(false);
+    setSelectedNode(undefined);
     toast.success('Added group condition successfully');
   }
 

@@ -21,9 +21,9 @@ export const convertConditionGroupToConditionString = (
     for (const child of data.children) {
       const childExpression = convertConditionGroupToConditionString(child);
 
-      // Wrap chilkd expressions in parentheses if they contain operators
+      // Wrap child expressions in parentheses if they contain operators
       if (child.expr && (child.edges.length > 1 || child.children)) {
-        parts.push(`(${childExpression})`);
+        parts.push(`( ${childExpression} )`);
       } else {
         parts.push(childExpression);
       }
@@ -45,15 +45,12 @@ export const convertConditionStringToConditionGroupObject = (
 ): ConditionGroupFormSchemaData => {
   const POCKETBASE_ID_LENGTH = 15;
 
-  console.log('condition string >>', conditionString);
   // Trim whitespace
   let trimmed = conditionString.trim();
 
   if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
     trimmed = trimmed.slice(1, -1);
   }
-
-  console.log('trimmed >>', trimmed);
 
   //
   let expr: ConditionGroupExpression;
@@ -68,19 +65,11 @@ export const convertConditionStringToConditionGroupObject = (
   } else if (trimmed.includes(' NOR ')) {
     expr = ConditionGroupExpression.Nor;
     delimiter = ' NOR ';
-  } else if (trimmed.includes(' NOT ')) {
-    expr = ConditionGroupExpression.Not;
-    delimiter = ' NOT ';
   } else {
     throw Error('Invalid condition string');
   }
-
-  console.log('delimiter >>', delimiter);
-
   // Split the string to get individual UUIDs
   const children = delimiter ? trimmed.split(delimiter) : [trimmed];
-
-  console.log('children >>', children);
 
   //
   const edgeIds = children
@@ -107,6 +96,7 @@ export const convertConditionStringToConditionGroupObject = (
   );
 
   return {
+    node,
     expr,
     children: conditionGroupChildrenObjects,
     edges,

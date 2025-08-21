@@ -3,6 +3,7 @@ import z from 'zod';
 
 const ConditionGroupFirstLevelFormSchema = z.object({
   expr: z.enum(ConditionGroupExpression),
+  node: z.string().min(1),
   edges: z
     .array(
       z.object({
@@ -21,6 +22,7 @@ const ConditionGroupFirstLevelFormSchema = z.object({
 
 export const ConditionGroupFormSchema = z.object({
   expr: z.enum(ConditionGroupExpression),
+  node: z.string().min(1),
   edges: z
     .array(
       z.object({

@@ -4,7 +4,9 @@ import { type UseFormReturn } from 'react-hook-form';
 
 import type { GraphEdge } from '@/types/Graph.js';
 import { convertPascalCaseToTitleCase } from '@/utils/string.js';
+import { useGraph } from '../hooks/useGraph.js';
 import RecursiveCollapsibleConditionGroup from '../RecursiveCollapsibleConditionGroup.js';
+import { SelectNodeCombobox } from '../SelectNodeCombobox.js';
 import { Button } from '../ui/button.js';
 import {
   Form,
@@ -35,9 +37,32 @@ export default function ConditionGroupForm({
   form,
   onSubmit,
 }: IProps) {
+  const { nodes: nodeList, selectedNode, setSelectedNode } = useGraph();
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
+        <FormField
+          control={form.control}
+          name='node'
+          render={() => (
+            <FormItem className='mb-4'>
+              <FormLabel>Node</FormLabel>
+              <SelectNodeCombobox
+                nodes={nodeList}
+                selectedNode={selectedNode}
+                onNodeSelect={(selectedNode) => {
+                  setSelectedNode(selectedNode);
+                  form.setValue('node', selectedNode.id, {
+                    shouldValidate: true,
+                  });
+                }}
+                className='flex-1'
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name='expr'

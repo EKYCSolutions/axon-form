@@ -4,6 +4,7 @@ import type {
   EdgeResponse,
   NodeResponse,
 } from '@/types/PocketBaseResponse';
+import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
@@ -128,9 +129,11 @@ export const deleteCondition = async (id: string): Promise<unknown> => {
 };
 
 export const createConditionGroup = async (
+  data: ConditionGroupFormSchemaData,
   conditonGroupString: string,
 ): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITION_GROUPS).create({
+    node: data.node,
     conditions: conditonGroupString,
   });
 };
