@@ -9,36 +9,35 @@ import (
 
 	"axon-form/core/internal/edge"
 	"axon-form/core/internal/node"
+	"axon-form/core/internal/util"
 )
 
 func NewGraph(
 	Nodes []node.Node,
 	Edges []edge.Edge,
+	ConditionGroups []edge.EdgeConditionGroup,
 ) Graph {
 	return Graph{
-		Nodes: Nodes,
-		Edges: Edges,
+		Nodes:           Nodes,
+		Edges:           Edges,
+		ConditionGroups: ConditionGroups,
 	}
 }
 
-func (g Graph) GetNodeByID(id string) *node.Node {
-	var node *node.Node
-
-	// Find the node of input
-	for i := range g.Nodes {
-		if g.Nodes[i].ID == id {
-			node = &g.Nodes[i]
-			break
+func (g Graph) UpdateConditionGroupEdgeValid(edgeID string) {
+	for _, cg := range g.ConditionGroups {
+		for _, id := range cg.EdgeIDs {
+			if id == edgeID {
+				cg.ValidEdges[edgeID] = true
+			}
 		}
 	}
-
-	return node
 }
 
 func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	var foundEdges []edge.Edge
 
-	foundNode := g.GetNodeByID(input.NodeID)
+	foundNode := node.GetNodeByID(input.NodeID, g.Nodes)
 
 	if foundNode == nil {
 		panic("Node not found")
@@ -74,10 +73,19 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 
 		// Update node visibility
 		if len(edgeErrors) == 0 {
-			nodeToUpdate := g.GetNodeByID(e.TargetNode)
+			nodeToUpdate := node.GetNodeByID(e.TargetNode, g.Nodes)
 			nodeToUpdate.IsVisible = true
+
+			g.UpdateConditionGroupEdgeValid(e.ID)
 		}
 	}
+
+	for _, cg := range g.ConditionGroups {
+		util.EvalPostfix(cg.PostfixExpr, cg.ValidEdges)
+
+		// TODO: Update visibility of the specific field if condition group is valid
+	}
+	//
 
 	return true, nil
 }

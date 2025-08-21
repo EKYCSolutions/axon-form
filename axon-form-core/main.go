@@ -13,12 +13,14 @@ func main() {
 	graphJson := util.ReadFile("example-graph.json")
 	nodesJson := graphJson["nodes"]
 	edgesJson := graphJson["edges"]
+	conditionGroupsJson := graphJson["condition_groups"]
 
 	util.NewLogger()
 	// logger := util.GetLogger()
 
 	var nodes []node.Node
 	var edges []edge.Edge
+	var conditionGroups []edge.EdgeConditionGroup
 
 	for _, n := range nodesJson {
 		nodeJson := n.(map[string]any)
@@ -32,9 +34,16 @@ func main() {
 		edges = append(edges, newEdge)
 	}
 
+	for _, e := range conditionGroupsJson {
+		conditionGroupJson := e.(map[string]any)
+		conditionGroup := edge.NewEdgeConditionGroupFromJSON(conditionGroupJson, edges)
+		conditionGroups = append(conditionGroups, conditionGroup)
+	}
+
 	g := graph.NewGraph(
 		nodes,
 		edges,
+		conditionGroups,
 	)
 
 	input := graph.VerifyNodeInput{

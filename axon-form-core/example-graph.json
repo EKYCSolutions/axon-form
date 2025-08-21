@@ -200,7 +200,7 @@
       "validation_rules": [
         {
           "type": "required",
-          "message": "This field is required."
+          "message": "hello"
         }
       ]
     },
@@ -933,6 +933,16 @@
       "source_node": "4iyeecodb491llj",
       "target_node": "vih3cgp7tyy37b1",
       "type": "has_options"
+    }
+  ],
+  "condition_groups": [
+    {
+      "id": "uz37z4l9hf9ahsi",
+      "conditions": "fbwpet888qawlep AND 0bfyl0oqxzmhuha"
+    },
+    {
+      "id": "mn2n9q2lrcosp0m",
+      "conditions": "jnt3r648yvitwid AND dk3lm5moqrrsp3r AND ( dra8o2whev1bocm OR ug35kb9d64gmbs2 )"
     }
   ]
 }

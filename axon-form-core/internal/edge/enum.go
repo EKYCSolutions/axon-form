@@ -104,3 +104,45 @@ func (ce *ConditionExpression) UnmarshalJSON(data []byte) error {
 	}
 	return nil
 }
+
+type ConditionGroupExpression int
+
+const (
+	ConditionGroupExpressionAnd = iota
+	ConditionGroupExpressionOr
+	ConditionGroupExpressionNor
+	ConditionGroupExpressionNot
+)
+
+var conditionGroupExpression = map[ConditionGroupExpression]string{
+	ConditionGroupExpressionAnd: "and",
+	ConditionGroupExpressionOr:  "or",
+	ConditionGroupExpressionNor: "nor",
+	ConditionGroupExpressionNot: "not",
+}
+
+func (cge ConditionGroupExpression) String() string {
+	return conditionGroupExpression[cge]
+}
+
+func (cge *ConditionGroupExpression) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	switch s {
+	case "and":
+		*cge = ConditionGroupExpressionAnd
+	case "or":
+		*cge = ConditionGroupExpressionOr
+	case "nor":
+		*cge = ConditionGroupExpressionNor
+	case "not":
+		*cge = ConditionGroupExpressionNot
+
+	default:
+		return fmt.Errorf("unknown ConditionGroupExpression: %s", s)
+	}
+	return nil
+}
