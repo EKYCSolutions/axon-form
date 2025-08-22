@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"axon-form/core/internal/edge"
 	"axon-form/core/internal/graph"
 	"axon-form/core/internal/node"
@@ -10,13 +8,12 @@ import (
 )
 
 func main() {
-	graphJson := util.ReadFile("example-graph.json")
+	graphJson := util.ReadFile("example-graph-simple.json")
 	nodesJson := graphJson["nodes"]
 	edgesJson := graphJson["edges"]
 	conditionGroupsJson := graphJson["condition_groups"]
 
 	util.NewLogger()
-	// logger := util.GetLogger()
 
 	var nodes []node.Node
 	var edges []edge.Edge
@@ -46,27 +43,33 @@ func main() {
 		conditionGroups,
 	)
 
-	input := graph.VerifyNodeInput{
-		NodeID: "wu16d202mgqo6bm",
-		Value:  "international",
+	product_type_input := graph.VerifyNodeInput{
+		NodeID: "t494fub1vww8jv2",
+		Value:  "Laptop",
 	}
 
-	success, err := g.ValidateNode(input)
-	if err != nil {
-		panic(util.MultiError{Errors: err})
+	customer_name_input := graph.VerifyNodeInput{
+		NodeID: "b8mvlvxveal87lw",
+		Value:  "Sambath",
 	}
 
-	fmt.Println("success >>", success)
+	email_input := graph.VerifyNodeInput{
+		NodeID: "7fzhb9en55ntbeh",
+		Value:  "test@gmail.com",
+	}
 
-	// for _, n := range nodes {
-	// 	if n.ID == "wu16d202mgqo6bm" {
-	// 	}
-	// 	logger.Debug("Found node:", zap.Any("node", n))
-	// }
+	delivery_option_input := graph.VerifyNodeInput{
+		NodeID: "byfr5rsuiidyvsq",
+		Value:  "Pickup",
+	}
 
-	// for _, e := range edges {
-	// 	if e.ID == "rdk4e7zcw2qh4bb" {
-	// 		logger.Debug("Found edge:", zap.Any("edge", e))
-	// 	}
+	g.ValidateNode(product_type_input)
+	g.ValidateNode(customer_name_input)
+	g.ValidateNode(email_input)
+	g.ValidateNode(delivery_option_input)
+
+	g.GetFormValue()
+	// if err != nil {
+	// 	panic(util.MultiError{Errors: err})
 	// }
 }

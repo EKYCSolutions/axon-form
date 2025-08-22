@@ -1,0 +1,97 @@
+{
+  "nodes": [
+    {
+      "id": "t494fub1vww8jv2",
+      "type": "input",
+      "field_type": "dropdown",
+      "label": "Select Product Type",
+      "validation_rules": []
+    },
+    {
+      "id": "kq1sfch5ivka5wd",
+      "type": "value",
+      "label": "Laptop",
+      "validation_rules": []
+    },
+    {
+      "id": "31vvgplwq4ycwmo",
+      "type": "value",
+      "label": "Phone",
+      "validation_rules": []
+    },
+    {
+      "id": "b8mvlvxveal87lw",
+      "type": "input",
+      "field_type": "text",
+      "label": "Customer Name",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Name is required"
+        }
+      ]
+    },
+    {
+      "id": "7fzhb9en55ntbeh",
+      "type": "input",
+      "field_type": "text",
+      "label": "Email",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Email is required"
+        }
+      ]
+    },
+    {
+      "id": "byfr5rsuiidyvsq",
+      "type": "input",
+      "field_type": "radio",
+      "label": "Delivery Option",
+      "validation_rules": []
+    },
+    {
+      "id": "50f49bcqb4ej4bz",
+      "type": "value",
+      "label": "Home Delivery",
+      "validation_rules": []
+    },
+    {
+      "id": "5nb3tdl76esj1et",
+      "type": "value",
+      "label": "Pickup",
+      "validation_rules": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "ui4fj7fskvrzcvs",
+      "label": "product-type-phone",
+      "source_node": "t494fub1vww8jv2",
+      "target_node": "31vvgplwq4ycwmo",
+      "type": "has_options"
+    },
+    {
+      "id": "tnqnr33soh74eor",
+      "label": "product-type-laptop",
+      "source_node": "t494fub1vww8jv2",
+      "target_node": "kq1sfch5ivka5wd",
+      "type": "has_options"
+    },
+    {
+      "id": "emcm9816uqjyvlv",
+      "label": "delivery-option-home-delivery",
+      "source_node": "byfr5rsuiidyvsq",
+      "target_node": "50f49bcqb4ej4bz",
+      "type": "has_options"
+    },
+    {
+      "id": "8bz6gj7sobn4qy6",
+      "label": "delivery-option-pickup",
+      "source_node": "byfr5rsuiidyvsq",
+      "target_node": "5nb3tdl76esj1et",
+      "type": "has_options"
+    }
+  ],
+  "condition_groups": []
+}

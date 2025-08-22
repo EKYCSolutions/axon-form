@@ -1,8 +1,10 @@
 package graph
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -24,14 +26,24 @@ func NewGraph(
 	}
 }
 
-func (g Graph) UpdateConditionGroupEdgeValid(edgeID string) {
-	for _, cg := range g.ConditionGroups {
-		for _, id := range cg.EdgeIDs {
-			if id == edgeID {
-				cg.ValidEdges[edgeID] = true
+func (g Graph) GetFormValue() {
+	result := make(map[string]any)
+
+	for _, n := range g.Nodes {
+		if n.NodeType == node.NodeTypeInput {
+			if n.Value == nil {
+				log.Panicf("%s field has no value", n.Label)
 			}
+			result[n.Label] = n.Value
 		}
 	}
+
+	jsonBytes, err := json.Marshal(result)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(string(jsonBytes))
 }
 
 func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
@@ -94,6 +106,16 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	//
 
 	return true, nil
+}
+
+func (g Graph) UpdateConditionGroupEdgeValid(edgeID string) {
+	for _, cg := range g.ConditionGroups {
+		for _, id := range cg.EdgeIDs {
+			if id == edgeID {
+				cg.ValidEdges[edgeID] = true
+			}
+		}
+	}
 }
 
 func (g Graph) ValidateConditionGroup(cg edge.EdgeConditionGroup) bool {
