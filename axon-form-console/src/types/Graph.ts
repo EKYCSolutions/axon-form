@@ -47,6 +47,7 @@ export interface EdgeCondition {
 export interface EdgeConditionGroup {
   id: string;
   //
+  node: string;
   conditions: string;
 }
 

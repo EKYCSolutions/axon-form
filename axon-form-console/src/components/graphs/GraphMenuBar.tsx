@@ -244,6 +244,8 @@ export default function GraphMenuBar({ className }: IProps) {
                     edges,
                     conditionGroups,
                   );
+
+                  console.log('json >>', json);
                   exportJSON(json, 'graph.json');
                 }}
               >

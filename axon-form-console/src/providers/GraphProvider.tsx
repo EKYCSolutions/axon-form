@@ -144,6 +144,7 @@ export function GraphProvider({
         conditionGroupsQuery.data?.map((cd: ConditionGroupResponse) => {
           return {
             id: cd.id,
+            node: cd.node,
             conditions: cd.conditions,
           };
         });

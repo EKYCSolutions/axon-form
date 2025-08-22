@@ -36,5 +36,6 @@ export interface ConditionResponse extends BaseResponse {
 }
 
 export interface ConditionGroupResponse extends BaseResponse {
+  node: string;
   conditions: string;
 }
