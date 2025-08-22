@@ -45,6 +45,9 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 
 	_, fieldErrors := g.ValidateNodeValidationRules(input, *foundNode)
 
+	// Update node value
+	foundNode.Value = input.Value
+
 	// Return errors if there is an invalid field validation
 	if len(fieldErrors) > 0 {
 		return false, fieldErrors
@@ -81,13 +84,20 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	}
 
 	for _, cg := range g.ConditionGroups {
-		util.EvalPostfix(cg.PostfixExpr, cg.ValidEdges)
-
-		// TODO: Update visibility of the specific field if condition group is valid
+		valid := g.ValidateConditionGroup(cg)
+		//
+		if valid {
+			node := node.GetNodeByID(cg.NodeID, g.Nodes)
+			node.IsVisible = true
+		}
 	}
 	//
 
 	return true, nil
+}
+
+func (g Graph) ValidateConditionGroup(cg edge.EdgeConditionGroup) bool {
+	return util.EvalPostfix(cg.PostfixExpr, cg.ValidEdges)
 }
 
 func (g Graph) ValidateNodeValidationRules(i VerifyNodeInput, n node.Node) ([]bool, []error) {

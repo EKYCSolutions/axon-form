@@ -13,4 +13,8 @@ type Node struct {
 	FieldType       NodeFieldType    `json:"field_type"`
 	ValidationRules []ValidationRule `json:"validation_rules"`
 	IsVisible       bool
+
+	// Type any is used here because Value could be of type "string", "int", "float", "boolean"
+	// Golang does not have support for union type
+	Value any
 }

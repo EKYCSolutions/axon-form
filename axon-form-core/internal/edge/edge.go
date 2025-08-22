@@ -19,10 +19,10 @@ type EdgeCondition struct {
 }
 
 type EdgeConditionGroup struct {
-	ID            string `json:"id"`
-	Conditions    string `json:"conditions"`
-	SourceNodeIDs []string
-	EdgeIDs       []string
-	PostfixExpr   []string
-	ValidEdges    map[string]bool
+	ID          string `json:"id"`
+	Conditions  string `json:"conditions"`
+	NodeID      string `json:"node"`
+	EdgeIDs     []string
+	PostfixExpr []string
+	ValidEdges  map[string]bool
 }
