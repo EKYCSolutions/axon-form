@@ -4,18 +4,21 @@
       "id": "t494fub1vww8jv2",
       "type": "input",
       "field_type": "dropdown",
+      "field_name": "product_type",
       "label": "Select Product Type",
       "validation_rules": []
     },
     {
       "id": "kq1sfch5ivka5wd",
       "type": "value",
+      "field_name": "",
       "label": "Laptop",
       "validation_rules": []
     },
     {
       "id": "31vvgplwq4ycwmo",
       "type": "value",
+      "field_name": "",
       "label": "Phone",
       "validation_rules": []
     },
@@ -23,6 +26,7 @@
       "id": "b8mvlvxveal87lw",
       "type": "input",
       "field_type": "text",
+      "field_name": "customer_name",
       "label": "Customer Name",
       "validation_rules": [
         {
@@ -35,6 +39,7 @@
       "id": "7fzhb9en55ntbeh",
       "type": "input",
       "field_type": "text",
+      "field_name": "email",
       "label": "Email",
       "validation_rules": [
         {
@@ -47,19 +52,30 @@
       "id": "byfr5rsuiidyvsq",
       "type": "input",
       "field_type": "radio",
+      "field_name": "delivery_option",
       "label": "Delivery Option",
       "validation_rules": []
     },
     {
       "id": "50f49bcqb4ej4bz",
       "type": "value",
+      "field_name": "",
       "label": "Home Delivery",
       "validation_rules": []
     },
     {
       "id": "5nb3tdl76esj1et",
       "type": "value",
+      "field_name": "",
       "label": "Pickup",
+      "validation_rules": []
+    },
+    {
+      "id": "m0yy2ffq10njrbf",
+      "type": "input",
+      "field_type": "file",
+      "field_name": "receipt_upload",
+      "label": "Upload Receipt",
       "validation_rules": []
     }
   ],

@@ -11,6 +11,7 @@ type Node struct {
 	Label           string           `json:"label"`
 	NodeType        NodeType         `json:"type"`
 	FieldType       NodeFieldType    `json:"field_type"`
+	FieldName       string           `json:"field_name"`
 	ValidationRules []ValidationRule `json:"validation_rules"`
 	IsVisible       bool
 
