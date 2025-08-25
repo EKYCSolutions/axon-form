@@ -1,11 +1,21 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"axon-form/core/internal/graph"
 )
 
 func main() {
-	g := graph.InitGraph("example-graph-simple.json")
+	// Read the JSON file
+	jsonData, err := os.ReadFile("example/assets/example-graph-simple.json")
+	fmt.Println("json length >>", len(jsonData))
+	if err != nil {
+		fmt.Printf("Error reading JSON file: %v", err)
+	}
+
+	g := graph.InitGraph(jsonData)
 
 	product_type_input := graph.VerifyNodeInput{
 		NodeID: "t494fub1vww8jv2",
