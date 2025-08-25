@@ -48,11 +48,6 @@ func InitGraph(
 		conditionGroup := edge.NewEdgeConditionGroupFromJSON(conditionGroupJson, edges)
 		conditionGroups = append(conditionGroups, conditionGroup)
 	}
-
-	fmt.Println("length of nodes >>", len(nodes))
-	fmt.Println("length of edges >>", len(edges))
-	fmt.Println("length of conditiongroups >>", len(conditionGroups))
-
 	return Graph{
 		Nodes:           nodes,
 		Edges:           edges,
