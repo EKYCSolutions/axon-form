@@ -56,11 +56,12 @@ export default function NodeForm({
               <FormItem>
                 <FormLabel>Node Label</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter the label' {...field} />
+                  <Input
+                    className='font-light text-sm'
+                    placeholder='Enter the label'
+                    {...field}
+                  />
                 </FormControl>
-                <FormDescription>
-                  This is the label for your node
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             );
@@ -99,6 +100,29 @@ export default function NodeForm({
         />
         {form.watch('type') === NodeType.Input && (
           <>
+            <Separator className='bg-gray-400/25' />
+            <FormField
+              control={form.control}
+              name='field_name'
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Field Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        className='font-light text-sm'
+                        placeholder='Enter the label'
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      This is the label for your node
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
             <Separator className='bg-gray-400/25' />
             <FormField
               control={form.control}

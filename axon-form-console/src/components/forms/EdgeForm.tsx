@@ -111,7 +111,11 @@ export default function EdgeForm({
               <FormItem>
                 <FormLabel>Edge Label</FormLabel>
                 <FormControl>
-                  <Input placeholder='Enter the label' {...field} />
+                  <Input
+                    className='font-light text-sm'
+                    placeholder='Enter the label'
+                    {...field}
+                  />
                 </FormControl>
                 <FormDescription>
                   Label for the relationship between nodes

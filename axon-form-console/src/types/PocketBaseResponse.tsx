@@ -6,8 +6,9 @@ export interface BaseResponse {
 
 export interface NodeResponse extends BaseResponse {
   type: string;
-  field_type: string;
   label: string;
+  field_type: string;
+  field_name?: string;
   //
   config: Record<string, unknown>;
   validation_rules: Record<string, string | number>[];

@@ -13,6 +13,7 @@ export const NodeFormSchema = z
   .object({
     type: z.enum(NodeType),
     field_type: z.enum(NodeFieldType).optional(),
+    field_name: z.string().optional(),
     label: z.string().min(1, {
       message: 'Label must be at least 1 character',
     }),
@@ -21,7 +22,7 @@ export const NodeFormSchema = z
   .refine(
     (data) => {
       if (data.type == NodeType.Input) {
-        return data.field_type !== undefined;
+        return data.field_type !== undefined && data.field_name !== undefined;
       }
       return true;
     },
@@ -44,6 +45,7 @@ export function convertGraphNodeToNodeForm(node: GraphNode) {
     id: node.id,
     type: node.nodeType,
     field_type: node.fieldType,
+    field_name: node.fieldName,
     label: node.label,
     validation_rules: node.validations,
   };
@@ -74,6 +76,7 @@ export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
       node.field_type.length > 0
         ? (node.field_type as NodeFieldType)
         : undefined,
+    fieldName: node.field_name,
     label: node.label,
     selected: false,
     caption: node.label,

@@ -14,6 +14,7 @@ export interface GraphNode extends Node {
   //
   nodeType: NodeType;
   fieldType?: NodeFieldType;
+  fieldName?: string;
   //
   is_required?: boolean;
   //
