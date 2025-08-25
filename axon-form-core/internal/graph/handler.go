@@ -15,9 +15,13 @@ import (
 )
 
 func InitGraph(
-	filePath string,
+	jsonBytes []byte,
 ) Graph {
-	graphJson := util.ReadFile(filePath)
+	var graphJson map[string][]any
+	err := json.Unmarshal(jsonBytes, &graphJson)
+	if err != nil {
+		panic(err)
+	}
 
 	nodesJson := graphJson["nodes"]
 	edgesJson := graphJson["edges"]
@@ -45,6 +49,10 @@ func InitGraph(
 		conditionGroups = append(conditionGroups, conditionGroup)
 	}
 
+	fmt.Println("length of nodes >>", len(nodes))
+	fmt.Println("length of edges >>", len(edges))
+	fmt.Println("length of conditiongroups >>", len(conditionGroups))
+
 	return Graph{
 		Nodes:           nodes,
 		Edges:           edges,
@@ -52,7 +60,7 @@ func InitGraph(
 	}
 }
 
-func (g Graph) GetFormValue() {
+func (g Graph) GetFormValue() string {
 	result := make(map[string]any)
 
 	for _, n := range g.Nodes {
@@ -66,7 +74,7 @@ func (g Graph) GetFormValue() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(jsonBytes))
+	return string(jsonBytes)
 }
 
 func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
