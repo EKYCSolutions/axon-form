@@ -31,9 +31,6 @@ func (g Graph) GetFormValue() {
 
 	for _, n := range g.Nodes {
 		if n.NodeType == node.NodeTypeInput {
-			// if n.Value == nil {
-			// 	log.Panicf("%s field has no value", n.Label)
-			// }
 			result[n.FieldName] = n.Value
 		}
 	}

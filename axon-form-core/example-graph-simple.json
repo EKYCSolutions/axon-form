@@ -11,14 +11,14 @@
     {
       "id": "kq1sfch5ivka5wd",
       "type": "value",
-      "field_name": "",
+      "field_name": null,
       "label": "Laptop",
       "validation_rules": []
     },
     {
       "id": "31vvgplwq4ycwmo",
       "type": "value",
-      "field_name": "",
+      "field_name": null,
       "label": "Phone",
       "validation_rules": []
     },
@@ -59,14 +59,14 @@
     {
       "id": "50f49bcqb4ej4bz",
       "type": "value",
-      "field_name": "",
+      "field_name": null,
       "label": "Home Delivery",
       "validation_rules": []
     },
     {
       "id": "5nb3tdl76esj1et",
       "type": "value",
-      "field_name": "",
+      "field_name": null,
       "label": "Pickup",
       "validation_rules": []
     },
