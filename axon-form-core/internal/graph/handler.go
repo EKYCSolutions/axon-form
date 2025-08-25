@@ -14,15 +14,41 @@ import (
 	"axon-form/core/internal/util"
 )
 
-func NewGraph(
-	Nodes []node.Node,
-	Edges []edge.Edge,
-	ConditionGroups []edge.EdgeConditionGroup,
+func InitGraph(
+	filePath string,
 ) Graph {
+	graphJson := util.ReadFile(filePath)
+
+	nodesJson := graphJson["nodes"]
+	edgesJson := graphJson["edges"]
+	conditionGroupsJson := graphJson["condition_groups"]
+
+	var nodes []node.Node
+	var edges []edge.Edge
+	var conditionGroups []edge.EdgeConditionGroup
+
+	for _, n := range nodesJson {
+		nodeJson := n.(map[string]any)
+		newNode := node.NewNodeFromJSON(nodeJson)
+		nodes = append(nodes, newNode)
+	}
+
+	for _, e := range edgesJson {
+		edgeJson := e.(map[string]any)
+		newEdge := edge.NewEdgeFromJSON(edgeJson)
+		edges = append(edges, newEdge)
+	}
+
+	for _, e := range conditionGroupsJson {
+		conditionGroupJson := e.(map[string]any)
+		conditionGroup := edge.NewEdgeConditionGroupFromJSON(conditionGroupJson, edges)
+		conditionGroups = append(conditionGroups, conditionGroup)
+	}
+
 	return Graph{
-		Nodes:           Nodes,
-		Edges:           Edges,
-		ConditionGroups: ConditionGroups,
+		Nodes:           nodes,
+		Edges:           edges,
+		ConditionGroups: conditionGroups,
 	}
 }
 
