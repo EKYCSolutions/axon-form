@@ -113,12 +113,14 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 		_, edgeErrors := g.ValidateEdgeConditions(e, input)
 
 		// Update node visibility
-		if len(edgeErrors) == 0 {
-			nodeToUpdate := node.GetNodeByID(e.TargetNode, g.Nodes)
-			nodeToUpdate.IsVisible = true
-
-			g.UpdateConditionGroupEdgeValid(e.ID)
+		if len(edgeErrors) > 0 {
+			return false, edgeErrors
 		}
+
+		nodeToUpdate := node.GetNodeByID(e.TargetNode, g.Nodes)
+		nodeToUpdate.IsVisible = true
+
+		g.UpdateConditionGroupEdgeValid(e.ID)
 	}
 
 	for _, cg := range g.ConditionGroups {

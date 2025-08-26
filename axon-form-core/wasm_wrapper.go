@@ -16,7 +16,8 @@ func initGraph(this js.Value, args []js.Value) interface{} {
 	jsonData := make([]byte, uint8Array.Get("length").Int())
 	js.CopyBytesToGo(jsonData, uint8Array)
 
-	graph.InitGraph(jsonData)
+	tempGraph := graph.InitGraph(jsonData)
+	g = &tempGraph
 	return js.ValueOf(true)
 }
 
@@ -25,8 +26,16 @@ func validateNode(this js.Value, args []js.Value) interface{} {
 		NodeID: args[0].String(),
 		Value:  args[1].String(),
 	}
-	g.ValidateNode(input)
-	return nil
+
+	success, err := g.ValidateNode(input)
+	if err != nil {
+		errMessages := make([]interface{}, len(err))
+		for i, e := range err {
+			errMessages[i] = e.Error()
+		}
+		return js.ValueOf([]interface{}{success, js.ValueOf(errMessages)})
+	}
+	return js.ValueOf([]interface{}{success, js.ValueOf(nil)})
 }
 
 func getFormValue(this js.Value, args []js.Value) interface{} {
