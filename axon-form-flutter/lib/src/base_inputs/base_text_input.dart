@@ -98,9 +98,9 @@ class _BaseTextInputState extends State<BaseTextInput> {
                 initialValue: widget.initialValue,
                 autovalidateMode: widget.autovalidateMode,
                 validator: (String? s) {
-                  if ((s == null || s == '') && widget.required) {
-                    return "required";
-                  }
+                  // if ((s == null || s == '') && widget.required) {
+                  //   return "required";
+                  // }
 
                   return widget.validator?.call(s);
                 },

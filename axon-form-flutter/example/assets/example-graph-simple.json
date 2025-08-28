@@ -48,6 +48,13 @@
         }
       ]
     },
+      {
+      "id": "b6m1w00464sn4ed",
+      "type": "input",
+      "field_type": "datetime",
+      "label": "input-person-dob",
+      "validation_rules": []
+    },
     {
       "id": "byfr5rsuiidyvsq",
       "type": "input",

@@ -108,9 +108,9 @@ class BaseFormRadioGroupInput extends StatelessWidget {
   Widget build(BuildContext context) {
     return FormField<Node>(
       validator: (Node? s) {
-        if ((s == null || s.id == '') && required) {
-          return "required";
-        }
+        // if ((s == null || s.id == '') && required) {
+        //   return "required";
+        // }
         return validator?.call(s);
       },
       initialValue: initialValue,

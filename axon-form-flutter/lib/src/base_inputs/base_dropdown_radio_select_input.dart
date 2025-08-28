@@ -373,9 +373,9 @@ class _BaseRadioSelectInputState
       child: FormField<Node>(
         // name: widget.name,
         validator: (Node? s) {
-          if ((s == null || s == '') && widget.required) {
-            return "required";
-          }
+          // if ((s == null || s == '') && widget.required) {
+          //   return "required";
+          // }
           return widget.validator?.call(s);
         },
         initialValue: selectedOption,
