@@ -1,1 +1,1 @@
-GOOS=js GOARCH=wasm go build -o axon-form-core-js.wasm
+GOOS=js GOARCH=wasm go build -o build/libaxon.wasm wasm_wrapper.go
