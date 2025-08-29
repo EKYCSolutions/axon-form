@@ -49,12 +49,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   // Use 'late final' for variables initialized once in initState.
   FormGraph? formGraph;
+  AxonFormCore core = AxonFormCore();
 
   @override
   void initState() {
     populateFormGraph();
+    core.initialize('assets/example-graph-simple.json');
     super.initState();
-
   }
 
   populateFormGraph() async {

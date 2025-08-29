@@ -4,6 +4,7 @@
 //   int addOne(int value) => value + 1;
 // }
 
+export 'src/core/axon_form_core.dart';
 
 export 'src/base_inputs/base_input.dart';
 export 'src/extensions/extension.dart';

@@ -1,0 +1,21 @@
+PODS:
+  - axon_form_flutter (0.0.1)
+  - Flutter (1.0.0)
+
+DEPENDENCIES:
+  - axon_form_flutter (from `.symlinks/plugins/axon_form_flutter/ios`)
+  - Flutter (from `Flutter`)
+
+EXTERNAL SOURCES:
+  axon_form_flutter:
+    :path: ".symlinks/plugins/axon_form_flutter/ios"
+  Flutter:
+    :path: Flutter
+
+SPEC CHECKSUMS:
+  axon_form_flutter: 133107c6c463b5a5aa3eb2bd07d94453ba0f9ec3
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+
+PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
+
+COCOAPODS: 1.16.2
