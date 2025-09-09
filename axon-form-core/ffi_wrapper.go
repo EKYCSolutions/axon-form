@@ -1,8 +1,12 @@
+//go:build cgo
+
 package main
 
 /*
 #include <stdint.h>
+#include <stdlib.h>
 */
+
 import "C"
 
 import (
@@ -109,5 +113,8 @@ func ResultPtr() *C.char {
 func ResultLen() C.int {
 	return C.int(len(lastResult))
 }
+
+//export enforce_binding
+func enforce_binding() {}
 
 func main() {}
