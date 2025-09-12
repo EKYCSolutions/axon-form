@@ -3,7 +3,7 @@
 #!/bin/sh
 set -e
 
-LIB_NAME=axonlib
+LIB_NAME=libaxon
 MIN_VERSION=15
 
 # Output directories

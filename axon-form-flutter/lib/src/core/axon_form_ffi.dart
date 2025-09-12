@@ -36,17 +36,17 @@ class AxonFormFFI {
   late final GetFormValueDart _getFormValueDart;
 
   AxonFormFFI() {
-    _loadLibrary('assets/example-graph-simple.json');
+    _loadLibrary();
     _bindFunctions();
   }
 
-  void _loadLibrary(String libraryPath) async {
+  void _loadLibrary() async {
     try {
       _dylib = Platform.isAndroid
-          ? DynamicLibrary.open(libraryPath)
+          ? DynamicLibrary.open("axonlib.so")
           : DynamicLibrary.process();
     } catch (e) {
-      throw Exception('Failed to load library at $libraryPath: $e');
+      throw Exception('Failed to load library: $e');
     }
   }
 
