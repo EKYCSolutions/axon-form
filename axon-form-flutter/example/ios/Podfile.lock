@@ -1,6 +1,5 @@
 PODS:
-  - axon_form_flutter (0.0.1):
-    - Flutter
+  - axon_form_flutter (0.0.1)
   - Flutter (1.0.0)
   - image_picker_ios (0.0.1):
     - Flutter
@@ -19,10 +18,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
 
 SPEC CHECKSUMS:
-  axon_form_flutter: 2a2db80f0f6a726f7bb158653c88b6e235932f4c
+  axon_form_flutter: f73600da493f464138ca6f9ef62c327c78dbedb5
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   image_picker_ios: c560581cceedb403a6ff17f2f816d7fea1421fc1
 
-PODFILE CHECKSUM: 4305caec6b40dde0ae97be1573c53de1882a07e5
+PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
 
 COCOAPODS: 1.16.2
