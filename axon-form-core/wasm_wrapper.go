@@ -15,9 +15,7 @@ func initGraph(this js.Value, args []js.Value) interface{} {
 	uint8Array := args[0]
 	jsonData := make([]byte, uint8Array.Get("length").Int())
 	js.CopyBytesToGo(jsonData, uint8Array)
-
-	tempGraph := graph.InitGraph(jsonData)
-	g = &tempGraph
+	g.InitGraph(jsonData)
 	return js.ValueOf(true)
 }
 
