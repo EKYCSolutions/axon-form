@@ -9,12 +9,14 @@ type EdgeType int
 
 const (
 	EdgeTypeHasOption EdgeType = iota
+	EdgeTypeHasField
 	EdgeTypeValidates
 	EdgeTypeShows
 )
 
 var edgeType = map[EdgeType]string{
 	EdgeTypeHasOption: "has_options",
+	EdgeTypeHasField:  "has_field",
 	EdgeTypeValidates: "validates",
 	EdgeTypeShows:     "shows",
 }
@@ -32,6 +34,8 @@ func (et *EdgeType) UnmarshalJSON(data []byte) error {
 	switch s {
 	case "has_options":
 		*et = EdgeTypeHasOption
+	case "has_field":
+		*et = EdgeTypeHasField
 	case "validates":
 		*et = EdgeTypeValidates
 	case "shows":
