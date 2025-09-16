@@ -14,9 +14,9 @@ import (
 	"axon-form/core/internal/util"
 )
 
-func InitGraph(
+func (g *Graph) InitGraph(
 	jsonBytes []byte,
-) Graph {
+) bool {
 	var graphJson map[string][]any
 	err := json.Unmarshal(jsonBytes, &graphJson)
 	if err != nil {
@@ -27,41 +27,60 @@ func InitGraph(
 	edgesJson := graphJson["edges"]
 	conditionGroupsJson := graphJson["condition_groups"]
 
-	var nodes []node.Node
-	var edges []edge.Edge
-	var conditionGroups []edge.EdgeConditionGroup
+	// initialize nodes, edges and condition groups
+	g.Nodes = make(map[string]map[string]*node.Node)
+	g.Edges = make(map[string][]*edge.Edge)
+	g.ConditionGroups = make(map[string]*edge.EdgeConditionGroup)
+	//
+	g.InitNodeGroup("inputs")
+	g.InitNodeGroup("values")
+	g.InitNodeGroup("pages")
 
 	for _, n := range nodesJson {
 		nodeJson := n.(map[string]any)
 		newNode := node.NewNodeFromJSON(nodeJson)
-		nodes = append(nodes, newNode)
+		switch newNode.NodeType {
+		case node.NodeTypeInput:
+			g.Nodes["inputs"][newNode.ID] = &newNode
+		case node.NodeTypeValue:
+			g.Nodes["values"][newNode.ID] = &newNode
+		case node.NodeTypePage:
+			g.Nodes["pages"][newNode.ID] = &newNode
+		}
 	}
 
+	//
 	for _, e := range edgesJson {
 		edgeJson := e.(map[string]any)
 		newEdge := edge.NewEdgeFromJSON(edgeJson)
-		edges = append(edges, newEdge)
+		//
+		g.Edges[newEdge.SourceNode] = append(g.Edges[newEdge.SourceNode], &newEdge)
 	}
 
+	//
 	for _, e := range conditionGroupsJson {
 		conditionGroupJson := e.(map[string]any)
-		conditionGroup := edge.NewEdgeConditionGroupFromJSON(conditionGroupJson, edges)
-		conditionGroups = append(conditionGroups, conditionGroup)
+		conditionGroup := edge.NewEdgeConditionGroupFromJSON(conditionGroupJson)
+		//
+		g.ConditionGroups[conditionGroup.ID] = &conditionGroup
 	}
-	return Graph{
-		Nodes:           nodes,
-		Edges:           edges,
-		ConditionGroups: conditionGroups,
+
+	return true
+}
+
+func (g Graph) InitNodeGroup(group string) {
+	if _, ok := g.Nodes[group]; !ok {
+		g.Nodes[group] = make(map[string]*node.Node)
 	}
 }
 
 func (g Graph) GetFormValue() string {
 	result := make(map[string]any)
+	//
+	inputNodes := g.Nodes["inputs"]
 
-	for _, n := range g.Nodes {
-		if n.NodeType == node.NodeTypeInput {
-			result[n.FieldName] = n.Value
-		}
+	for _, n := range inputNodes {
+		result[n.FieldName] = n.Value
 	}
 
 	jsonBytes, err := json.Marshal(result)
@@ -73,9 +92,9 @@ func (g Graph) GetFormValue() string {
 }
 
 func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
-	var foundEdges []edge.Edge
+	var foundEdges []*edge.Edge
 
-	foundNode := node.GetNodeByID(input.NodeID, g.Nodes)
+	foundNode := node.GetNodeByID(input.NodeID, g.Nodes["inputs"])
 
 	if foundNode == nil {
 		panic("Node not found")
@@ -83,22 +102,17 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 
 	_, fieldErrors := g.ValidateNodeValidationRules(input, *foundNode)
 
-	// Update node value
-	foundNode.Value = input.Value
-
 	// Return errors if there is an invalid field validation
 	if len(fieldErrors) > 0 {
 		return false, fieldErrors
 	}
 
 	// Find edges related to the node
-	for i := range g.Edges {
-		if g.Edges[i].SourceNode == foundNode.ID || g.Edges[i].TargetNode == foundNode.ID {
-			foundEdges = append(foundEdges, g.Edges[i])
-		}
-	}
+	foundEdges = g.Edges[input.NodeID]
 
 	if len(foundEdges) == 0 {
+		// Update node value
+		foundNode.Value = input.Value
 		return true, nil
 	}
 
@@ -106,32 +120,34 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	for _, e := range foundEdges {
 		//
 		// ONLY Validate conditions for edges with type show and roots from the node
-		if e.Type != edge.EdgeTypeShows || e.SourceNode != foundNode.ID {
+		if e.Type != edge.EdgeTypeShows {
 			continue
 		}
 		//
-		_, edgeErrors := g.ValidateEdgeConditions(e, input)
+		_, edgeErrors := g.ValidateEdgeConditions(*e, input)
 
 		// Update node visibility
 		if len(edgeErrors) > 0 {
 			return false, edgeErrors
 		}
 
-		nodeToUpdate := node.GetNodeByID(e.TargetNode, g.Nodes)
+		nodeToUpdate := node.GetNodeByID(e.TargetNode, g.Nodes["inputs"])
 		nodeToUpdate.IsVisible = true
 
 		g.UpdateConditionGroupEdgeValid(e.ID)
 	}
 
 	for _, cg := range g.ConditionGroups {
-		valid := g.ValidateConditionGroup(cg)
+		valid := g.ValidateConditionGroup(*cg)
 		//
 		if valid {
-			node := node.GetNodeByID(cg.NodeID, g.Nodes)
+			node := node.GetNodeByID(cg.NodeID, g.Nodes["inputs"])
 			node.IsVisible = true
 		}
 	}
-	//
+
+	// Update node value
+	foundNode.Value = input.Value
 
 	return true, nil
 }

@@ -10,11 +10,13 @@ type NodeType int
 const (
 	NodeTypeInput NodeType = iota
 	NodeTypeValue
+	NodeTypePage
 )
 
 var nodeType = map[NodeType]string{
 	NodeTypeInput: "input",
 	NodeTypeValue: "value",
+	NodeTypePage:  "page",
 }
 
 func (nt NodeType) String() string {
@@ -32,6 +34,8 @@ func (nt *NodeType) UnmarshalJSON(data []byte) error {
 		*nt = NodeTypeInput
 	case "value":
 		*nt = NodeTypeValue
+	case "page":
+		*nt = NodeTypePage
 
 	default:
 		return fmt.Errorf("unknown NodeType: %s", s)

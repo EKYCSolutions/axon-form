@@ -6,9 +6,9 @@ import (
 )
 
 type Graph struct {
-	Nodes           []node.Node
-	Edges           []edge.Edge
-	ConditionGroups []edge.EdgeConditionGroup
+	Nodes           map[string]map[string]*node.Node
+	Edges           map[string][]*edge.Edge
+	ConditionGroups map[string]*edge.EdgeConditionGroup
 }
 
 type VerifyNodeInput struct {
