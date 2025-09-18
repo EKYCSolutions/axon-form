@@ -4,4 +4,5 @@ export enum PocketBaseCollection {
   CONDITIONS = 'conditions',
   CONDITION_GROUPS = 'condition_groups',
   VALIDATIONS = 'validations',
+  PAGES = 'pages',
 }

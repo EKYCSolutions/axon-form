@@ -1,8 +1,14 @@
 import { ConditionGroupExpression, EdgeType } from '@/configs/graph';
-import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
+import type {
+  EdgeConditionGroup,
+  GraphEdge,
+  GraphNode,
+  Page,
+} from '@/types/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import { convertGraphEdgeToEdgeForm } from '@/validations/EdgeValidation';
 import { convertGraphNodeToNodeForm } from '@/validations/NodeValidation';
+import { convertPageToPageForm } from '@/validations/PageValidation';
 
 export const convertConditionGroupToConditionString = (
   data: ConditionGroupFormSchemaData,
@@ -107,12 +113,17 @@ export const convertGraphToJSON = (
   nodes: GraphNode[],
   edges: GraphEdge[],
   conditionGroups: EdgeConditionGroup[],
+  pages: Page[],
 ): Record<string, unknown> => {
   //
   const nodeJson = nodes.map((node) => convertGraphNodeToNodeForm(node));
   const edgeJson = edges.map((edge) => convertGraphEdgeToEdgeForm(edge));
+  const pageJson = pages.map((page) => convertPageToPageForm(page));
 
   return {
+    layout: {
+      pages: pageJson,
+    },
     nodes: nodeJson,
     edges: edgeJson,
     condition_groups: conditionGroups,

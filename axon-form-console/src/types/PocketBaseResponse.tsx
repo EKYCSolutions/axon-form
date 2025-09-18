@@ -40,3 +40,9 @@ export interface ConditionGroupResponse extends BaseResponse {
   node: string;
   conditions: string;
 }
+
+export interface PageResponse extends BaseResponse {
+  title: string;
+  description: string;
+  field_ids: Record<string, string[]>;
+}

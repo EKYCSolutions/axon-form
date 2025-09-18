@@ -35,6 +35,7 @@ export default function GraphMenuBar({ className }: IProps) {
     nodes,
     edges,
     conditionGroups,
+    pages,
     isEdgeMode,
     sourceNode,
     searchText,
@@ -175,6 +176,16 @@ export default function GraphMenuBar({ className }: IProps) {
               <Plus size={20} />
               Condition Group
             </MenubarTrigger>
+            <MenubarTrigger
+              onClick={() => {
+                setSheetOpen(true);
+                setSheetType(GraphSheetType.AddPage);
+              }}
+              className='w-fit items-center gap-1 whitespace-nowrap rounded-md text-xs leading-none transition-all bg-input hover:bg-input/80 h-7 px-2 py-1  font-normal'
+            >
+              <Plus size={20} />
+              Page
+            </MenubarTrigger>
           </MenubarMenu>
           <Separator orientation='vertical' />
           <div className='relative'>
@@ -243,9 +254,9 @@ export default function GraphMenuBar({ className }: IProps) {
                     nodes,
                     edges,
                     conditionGroups,
+                    pages,
                   );
 
-                  console.log('json >>', json);
                   exportJSON(json, 'graph.json');
                 }}
               >
