@@ -1,6 +1,7 @@
 export enum NodeType {
   Input = 'input',
   Value = 'value',
+  Page = 'page',
 }
 
 export enum NodeFieldType {

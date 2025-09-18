@@ -15,6 +15,7 @@ import {
 import { Input } from '@/components/ui/input';
 import type { PageFormSchemaData } from '@/validations/PageValidation';
 
+import { NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
 import { useState } from 'react';
 import { useGraph } from '../hooks/useGraph';
@@ -102,7 +103,7 @@ export default function PageForm({ className, form, onSubmit }: IProps) {
               <FormItem>
                 <FormLabel>Fields</FormLabel>
                 <SelectNodeCombobox
-                  nodes={nodeList}
+                  nodes={nodeList.filter((n) => n.nodeType == NodeType.Input)}
                   selectedNode={selectedNode}
                   onNodeSelect={(selectedNode) => {
                     const foundNode = nodesKanbanItem.find(

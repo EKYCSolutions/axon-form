@@ -11,7 +11,6 @@ import {
   createCondition as createConditionService,
   createEdge as createEdgeService,
   createNode as createNodeService,
-  createPage as createPageService,
   deleteCondition as deleteConditionService,
   deleteEdge as deleteEdgeService,
   deleteNode as deleteNodeService,
@@ -360,7 +359,6 @@ export function GraphProvider({
 
         const newNodes = [...nodes, newNode];
         setNodes(newNodes);
-        console.log('new nodes >>', newNodes);
         updateGraphVisualization(newNodes, edges);
       } catch (error) {
         handleError(error);
@@ -444,15 +442,58 @@ export function GraphProvider({
     [],
   );
 
-  const addPage = useCallback(async (data: PageFormSchemaData) => {
-    try {
-      const createPageRes = await createPageService(data);
+  const addPage = useCallback(
+    async (data: PageFormSchemaData) => {
+      try {
+        // await createPageService(data);
 
-      console.log('create page res >>', createPageRes);
-    } catch (error) {
-      handleError(error);
-    }
-  }, []);
+        const pageNode: NodeFormSchemaData = {
+          type: NodeType.Page,
+          label: data.title ?? '',
+          validation_rules: [],
+          metadata: {
+            title: data.title,
+            description: data.description,
+          },
+        };
+
+        const addNodeRes = await createNodeService(pageNode);
+
+        let newNode: GraphNode = {
+          id: addNodeRes.id,
+          caption: addNodeRes.label,
+          label: addNodeRes.label,
+          fieldType: undefined,
+          nodeType: NodeType.Page,
+          color: generateRandomRgbColor(NodeType.Page),
+          edges: [],
+          activated: true,
+        };
+
+        newNode = {
+          ...newNode,
+          id: addNodeRes.id,
+        };
+
+        const newNodes = [...nodes, newNode];
+        setNodes(newNodes);
+        updateGraphVisualization(newNodes, edges);
+        //
+        data.field_ids.forEach(async (id) => {
+          const data: EdgeFormSchemaData = {
+            label: `${pageNode.label}-has-field`,
+            source_node: addNodeRes.id,
+            target_node: id,
+            type: EdgeType.HasField,
+          };
+          await addEdge(data);
+        });
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [nodes, edges, updateGraphVisualization, handleError],
+  );
 
   const removeNode = useCallback(
     async (nodeId: string) => {
