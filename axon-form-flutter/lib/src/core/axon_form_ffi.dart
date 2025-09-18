@@ -7,6 +7,11 @@ import 'package:ffi/ffi.dart';
 typedef InitGraphC = Int32 Function(Pointer<Void> dataPtr, Int32 dataLen);
 typedef InitGraphDart = int Function(Pointer<Void> dataPtr, int dataLen);
 
+typedef IsNodeVisibleC =
+    Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
+typedef IsNodeVisibleDart =
+    int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
+
 typedef ValidateNodeC =
     Int32 Function(
       Pointer<Void> nodeIdPtr,
@@ -31,6 +36,7 @@ typedef GetFormValueDart = int Function();
 class AxonFormFFI {
   late final DynamicLibrary _dylib;
   late final InitGraphDart _initGraphDart;
+  late final IsNodeVisibleDart _isNodeVisibleDart;
   late final ValidateNodeDart _validateNodeDart;
   late final GetResultDart _getResult;
   late final GetFormValueDart _getFormValueDart;
@@ -56,6 +62,10 @@ class AxonFormFFI {
           .lookup<NativeFunction<InitGraphC>>('InitGraph')
           .asFunction();
 
+      _isNodeVisibleDart = _dylib
+          .lookup<NativeFunction<IsNodeVisibleC>>('IsNodeVisible')
+          .asFunction();
+
       _validateNodeDart = _dylib
           .lookup<NativeFunction<ValidateNodeC>>('ValidateNode')
           .asFunction();
@@ -79,6 +89,23 @@ class AxonFormFFI {
     nativeBytes.setAll(0, fileBytes);
     _initGraphDart(nativeData.cast<Void>(), fileBytes.length);
     malloc.free(nativeData);
+  }
+
+  //
+  bool isNodeVisible(String nodeId) {
+    final nodeIdBytes = nodeId.toNativeUtf8();
+
+    // Call native function
+    _isNodeVisibleDart(nodeIdBytes.cast<Void>(), nodeId.length);
+
+    //
+    malloc.free(nodeIdBytes);
+
+    final ptr = _getResult();
+    final jsonString = ptr.toDartString();
+
+    final decoded = jsonDecode(jsonString);
+    return decoded[0];
   }
 
   //

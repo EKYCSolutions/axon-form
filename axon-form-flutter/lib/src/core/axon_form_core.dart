@@ -17,6 +17,15 @@ class AxonFormCore {
   }
 
   //
+  bool isNodeVisible(String nodeId) {
+    try {
+      return coreFFI.isNodeVisible(nodeId);
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  //
   Map<String, dynamic> validateField(String nodeId, String value) {
     try {
       return coreFFI.validateNode(nodeId, value);
