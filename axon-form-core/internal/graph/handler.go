@@ -3,7 +3,6 @@ package graph
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"regexp"
 	"strconv"
@@ -91,6 +90,16 @@ func (g Graph) GetFormValue() string {
 	return string(jsonBytes)
 }
 
+func (g Graph) IsNodeVisible(nodeID string) bool {
+	foundNode := node.GetNodeByID(nodeID, g.Nodes["inputs"])
+
+	if foundNode == nil {
+		panic("Node not found")
+	}
+
+	return foundNode.IsVisible
+}
+
 func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	var foundEdges []*edge.Edge
 
@@ -118,7 +127,6 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 
 	// Validate edges connected to the node
 	for _, e := range foundEdges {
-		//
 		// ONLY Validate conditions for edges with type show and roots from the node
 		if e.Type != edge.EdgeTypeShows {
 			continue
@@ -128,7 +136,7 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 
 		// Update node visibility
 		if len(edgeErrors) > 0 {
-			return false, edgeErrors
+			continue
 		}
 
 		nodeToUpdate := node.GetNodeByID(e.TargetNode, g.Nodes["inputs"])
@@ -205,14 +213,12 @@ func (g Graph) ValidateRule(r node.ValidationRule, v string) (bool, error) {
 	switch r.Type {
 	//
 	case node.ValidationRuleTypeRequired:
-		fmt.Println("=== Performing ValidationRuleTypeRequired")
 		if len(v) > 0 {
 			return true, nil
 		}
 		return false, errors.New(r.Message)
 	//
 	case node.ValidationRuleTypeMinLength:
-		fmt.Println("=== Performing ValidationRuleTypeMinLength")
 		minLength, err := strconv.Atoi(r.Value)
 		if err != nil {
 			panic(err)
@@ -220,7 +226,6 @@ func (g Graph) ValidateRule(r node.ValidationRule, v string) (bool, error) {
 		return len(v) >= minLength, errors.New(r.Message)
 	//
 	case node.ValidationRuleTypeMaxLength:
-		fmt.Println("=== Performing ValidationRuleTypeMaxLength")
 		maxLength, err := strconv.Atoi(r.Value)
 		if err != nil {
 			panic(err)
@@ -228,21 +233,17 @@ func (g Graph) ValidateRule(r node.ValidationRule, v string) (bool, error) {
 		return len(v) <= maxLength, errors.New(r.Message)
 	//
 	case node.ValidationRuleTypeMin:
-		fmt.Println("=== Performing ValidationRuleTypeMin")
 		return v >= r.Value, errors.New(r.Message)
 	//
 	case node.ValidationRuleTypeMax:
-		fmt.Println("=== Performing ValidationRuleTypeMax")
 		return v <= r.Value, errors.New(r.Message)
 	//
 	case node.ValidationRuleTypePattern:
-		fmt.Println("=== Performing ValidationRuleTypePattern")
 		regex := r.Value
 		match, _ := regexp.MatchString(regex, v)
 		return match, errors.New("value does not pass regex validation")
 	//
 	case node.ValidationRuleTypeEmail:
-		fmt.Println("=== Performing ValidationRuleTypeEmail")
 		emailRegex := `^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`
 		match, _ := regexp.MatchString(emailRegex, v)
 		return match, errors.New(r.Message)
@@ -256,39 +257,30 @@ func (g Graph) ValidateCondition(c edge.EdgeCondition, v string) (bool, error) {
 	switch c.Expression {
 	//
 	case edge.ConditionExpressionEqual:
-		fmt.Println("=== Performing ConditionExpressionEqual")
 		return v == c.ExpectedValue, errors.New("condition not met: equal")
 	//
 	case edge.ConditionExpressionMoreThan:
-		fmt.Println("=== Performing ConditionExpressionMoreThan")
 		return v > c.ExpectedValue, errors.New("condition not met: more than")
 	//
 	case edge.ConditionExpressionLessThan:
-		fmt.Println("=== Performing ConditionExpressionLessThan")
 		return v < c.ExpectedValue, errors.New("condition not met: less than")
 	//
 	case edge.ConditionExpressionMoreThanOrEqual:
-		fmt.Println("=== Performing ConditionExpressionMoreThanOrEqual")
 		return v >= c.ExpectedValue, errors.New("condition not met: more than or equal")
 	//
 	case edge.ConditionExpressionLessThanOrEqual:
-		fmt.Println("=== Performing ConditionExpressionLessThanOrEqual")
 		return v <= c.ExpectedValue, errors.New("condition not met: less than or equal")
 	//
 	case edge.ConditionExpressionNotEqual:
-		fmt.Println("=== Performing ConditionExpressionNotEqual")
 		return v != c.ExpectedValue, errors.New("condition not met: not equal")
 	//
 	case edge.ConditionExpressionContains:
-		fmt.Println("=== Performing ConditionExpressionContains")
 		return strings.Contains(v, c.ExpectedValue), errors.New("condition not met: contains")
 	//
 	case edge.ConditionExpressionStartsWith:
-		fmt.Println("=== Performing ConditionExpressionStartsWith")
 		return strings.HasPrefix(v, c.ExpectedValue), errors.New("condition not met: starts with")
 	//
 	case edge.ConditionExpressionEndsWith:
-		fmt.Println("=== Performing ConditionExpressionEndsWith")
 		return strings.HasSuffix(v, c.ExpectedValue), errors.New("condition not met: ends with")
 	}
 

@@ -65,7 +65,8 @@ func main() {
 	} else {
 		fmt.Println("delivery option input validation errors:", errs)
 	}
-	fmt.Println("passed delivery options")
+
+	fmt.Println("node visible >> ", g.IsNodeVisible(delivery_option_input.NodeID))
 
 	result := g.GetFormValue()
 	fmt.Println("form value result >>", result)

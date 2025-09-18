@@ -19,6 +19,13 @@ func initGraph(this js.Value, args []js.Value) interface{} {
 	return js.ValueOf(true)
 }
 
+func isNodeVisible(this js.Value, args []js.Value) interface{} {
+	nodeId := args[0].String()
+
+	isVisible := g.IsNodeVisible(nodeId)
+	return js.ValueOf([]interface{}{isVisible, js.ValueOf(nil)})
+}
+
 func validateNode(this js.Value, args []js.Value) interface{} {
 	input := graph.VerifyNodeInput{
 		NodeID: args[0].String(),
@@ -42,6 +49,7 @@ func getFormValue(this js.Value, args []js.Value) interface{} {
 
 func main() {
 	js.Global().Set("initGraph", js.FuncOf(initGraph))
+	js.Global().Set("isNodeVisible", js.FuncOf(isNodeVisible))
 	js.Global().Set("validateNode", js.FuncOf(validateNode))
 	js.Global().Set("getFormValue", js.FuncOf(getFormValue))
 	c := make(chan struct{})
