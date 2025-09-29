@@ -16,6 +16,7 @@ import {
   deleteNode as deleteNodeService,
   getAllConditionGroups,
   getAllNodes,
+  getAllPages,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
@@ -24,10 +25,12 @@ import type {
   EdgeConditionGroup,
   GraphEdge,
   GraphNode,
+  Page,
 } from '@/types/Graph.js';
 import type {
   ConditionGroupResponse,
   NodeResponse,
+  PageResponse,
 } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import { convertConditionGroupToConditionString } from '@/utils/Graph';
@@ -42,6 +45,7 @@ import {
   convertNodeResponseToGraphNode,
   type NodeFormSchemaData,
 } from '@/validations/NodeValidation.js';
+import type { PageFormSchemaData } from '@/validations/PageValidation';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
 import { useQueries } from '@tanstack/react-query';
@@ -60,6 +64,7 @@ interface GraphProviderProps {
   initialNodes?: GraphNode[];
   initialEdges?: GraphEdge[];
   initialConditionGroups?: EdgeConditionGroup[];
+  initialPages?: Page[];
 }
 
 const DEFAULT_ZOOM_LEVEL = 0.75;
@@ -69,6 +74,7 @@ export function GraphProvider({
   initialNodes = [],
   initialEdges = [],
   initialConditionGroups = [],
+  initialPages = [],
 }: GraphProviderProps) {
   const nvlRef = useRef<NVL | null>(null);
 
@@ -78,6 +84,7 @@ export function GraphProvider({
   const [conditionGroups, setConditionGroups] = useState<EdgeConditionGroup[]>(
     initialConditionGroups,
   );
+  const [pages, setPages] = useState<Page[]>(initialPages);
 
   // UI state
   const [selectedNode, setSelectedNode] = useState<GraphNode | undefined>();
@@ -110,6 +117,14 @@ export function GraphProvider({
       {
         queryKey: ['conditionGroups'],
         queryFn: () => getAllConditionGroups(),
+      },
+    ],
+  });
+  const [pageQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ['pages'],
+        queryFn: () => getAllPages(),
       },
     ],
   });
@@ -150,6 +165,19 @@ export function GraphProvider({
         });
 
       setConditionGroups(conditionGroupRes);
+    }
+
+    if (pageQuery.status && pageQuery.data) {
+      const pageRes: Page[] = pageQuery.data?.map((p: PageResponse) => {
+        return {
+          id: p.id,
+          title: p.title,
+          description: p.description,
+          field_ids: p.field_ids['ids'],
+        };
+      });
+
+      setPages(pageRes);
     }
   }, [
     nodesQuery.status,
@@ -331,7 +359,6 @@ export function GraphProvider({
 
         const newNodes = [...nodes, newNode];
         setNodes(newNodes);
-        console.log('new nodes >>', newNodes);
         updateGraphVisualization(newNodes, edges);
       } catch (error) {
         handleError(error);
@@ -413,6 +440,59 @@ export function GraphProvider({
       }
     },
     [],
+  );
+
+  const addPage = useCallback(
+    async (data: PageFormSchemaData) => {
+      try {
+        // await createPageService(data);
+
+        const pageNode: NodeFormSchemaData = {
+          type: NodeType.Page,
+          label: data.title ?? '',
+          validation_rules: [],
+          metadata: {
+            title: data.title,
+            description: data.description,
+          },
+        };
+
+        const addNodeRes = await createNodeService(pageNode);
+
+        let newNode: GraphNode = {
+          id: addNodeRes.id,
+          caption: addNodeRes.label,
+          label: addNodeRes.label,
+          fieldType: undefined,
+          nodeType: NodeType.Page,
+          color: generateRandomRgbColor(NodeType.Page),
+          edges: [],
+          activated: true,
+        };
+
+        newNode = {
+          ...newNode,
+          id: addNodeRes.id,
+        };
+
+        const newNodes = [...nodes, newNode];
+        setNodes(newNodes);
+        updateGraphVisualization(newNodes, edges);
+        //
+        data.field_ids.forEach(async (id) => {
+          const data: EdgeFormSchemaData = {
+            label: `${pageNode.label}-has-field`,
+            source_node: addNodeRes.id,
+            target_node: id,
+            type: EdgeType.HasField,
+          };
+          await addEdge(data);
+        });
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [nodes, edges, updateGraphVisualization, handleError],
   );
 
   const removeNode = useCallback(
@@ -729,6 +809,7 @@ export function GraphProvider({
     nodes,
     edges,
     conditionGroups,
+    pages,
 
     // Search text
     searchText,
@@ -764,6 +845,7 @@ export function GraphProvider({
     duplicateNode,
     addEdge,
     addConditionGroup,
+    addPage,
     removeNode,
     removeEdge,
     updateNode,

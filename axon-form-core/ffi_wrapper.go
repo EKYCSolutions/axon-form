@@ -44,6 +44,23 @@ func InitGraph(dataPtr unsafe.Pointer, dataLen C.int) C.int {
 	return 1
 }
 
+//export IsNodeVisible
+func IsNodeVisible(nodeIDPtr unsafe.Pointer, nodeIDLen C.int) C.int {
+	if g == nil {
+		setResult([]byte(`["graph not initialized", null]`))
+		return 0
+	}
+
+	nodeID := string(C.GoBytes(nodeIDPtr, nodeIDLen))
+	isVisible := g.IsNodeVisible(nodeID)
+
+	if isVisible {
+		return 1
+	}
+
+	return 0
+}
+
 //export ValidateNode
 func ValidateNode(nodeIDPtr unsafe.Pointer, nodeIDLen C.int, valuePtr unsafe.Pointer, valueLen C.int) C.int {
 	if g == nil {

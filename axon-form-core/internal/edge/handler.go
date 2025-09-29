@@ -56,7 +56,7 @@ func NewEdgeFromJSON(edgeJson map[string]any) Edge {
 	return edge
 }
 
-func NewEdgeConditionGroupFromJSON(conditionGroupJson map[string]any, edges []Edge) EdgeConditionGroup {
+func NewEdgeConditionGroupFromJSON(conditionGroupJson map[string]any) EdgeConditionGroup {
 	var conditionGroup EdgeConditionGroup
 	conditionGroup.ValidEdges = make(map[string]bool)
 

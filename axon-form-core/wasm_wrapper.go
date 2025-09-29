@@ -15,10 +15,15 @@ func initGraph(this js.Value, args []js.Value) interface{} {
 	uint8Array := args[0]
 	jsonData := make([]byte, uint8Array.Get("length").Int())
 	js.CopyBytesToGo(jsonData, uint8Array)
-
-	tempGraph := graph.InitGraph(jsonData)
-	g = &tempGraph
+	g.InitGraph(jsonData)
 	return js.ValueOf(true)
+}
+
+func isNodeVisible(this js.Value, args []js.Value) interface{} {
+	nodeId := args[0].String()
+
+	isVisible := g.IsNodeVisible(nodeId)
+	return js.ValueOf([]interface{}{isVisible, js.ValueOf(nil)})
 }
 
 func validateNode(this js.Value, args []js.Value) interface{} {
@@ -44,6 +49,7 @@ func getFormValue(this js.Value, args []js.Value) interface{} {
 
 func main() {
 	js.Global().Set("initGraph", js.FuncOf(initGraph))
+	js.Global().Set("isNodeVisible", js.FuncOf(isNodeVisible))
 	js.Global().Set("validateNode", js.FuncOf(validateNode))
 	js.Global().Set("getFormValue", js.FuncOf(getFormValue))
 	c := make(chan struct{})

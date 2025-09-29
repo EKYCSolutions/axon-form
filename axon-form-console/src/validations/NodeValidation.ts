@@ -18,6 +18,7 @@ export const NodeFormSchema = z
       message: 'Label must be at least 1 character',
     }),
     validation_rules: z.array(ValidationRuleFormSchema).optional(),
+    metadata: z.record(z.string(), z.any()).optional(),
   })
   .refine(
     (data) => {
@@ -38,6 +39,7 @@ export const NodeFormSchemaDefaultValue: NodeFormSchemaData = {
   type: NodeType.Input,
   field_type: undefined,
   label: '',
+  validation_rules: [],
 };
 
 export function convertGraphNodeToNodeForm(node: GraphNode) {

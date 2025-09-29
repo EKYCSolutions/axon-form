@@ -25,14 +25,12 @@ func NewNode(
 	}
 }
 
-func GetNodeByID(id string, nodes []Node) *Node {
-	for i := range nodes {
-		if nodes[i].ID == id {
-			return &nodes[i]
-		}
+func GetNodeByID(id string, nodes map[string]*Node) *Node {
+	node, ok := nodes[id]
+	if !ok {
+		return nil
 	}
-
-	return nil
+	return node
 }
 
 func NewNodeFromJSON(nodeJson map[string]any) Node {

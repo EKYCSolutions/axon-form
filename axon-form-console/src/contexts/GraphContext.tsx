@@ -3,10 +3,12 @@ import type {
   EdgeConditionGroup,
   GraphEdge,
   GraphNode,
+  Page,
 } from '@/types/Graph.js';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
+import type { PageFormSchemaData } from '@/validations/PageValidation';
 import type NVL from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
 import { createContext, type RefObject } from 'react';
@@ -24,6 +26,7 @@ export interface GraphContextType {
   edges: GraphEdge[];
   selectedEdge: GraphEdge | undefined;
   conditionGroups: EdgeConditionGroup[];
+  pages: Page[];
   zoom: number;
   //
   sheetOpen: boolean;
@@ -64,6 +67,8 @@ export interface GraphContextType {
   removeEdge: (edgeId: string) => void;
   //
   resetEdgeMode: () => void;
+  //
+  addPage: (data: PageFormSchemaData) => void;
   //
   resetSelectedNodes: () => void;
   removeSelectedNodes: () => void;

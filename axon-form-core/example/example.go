@@ -9,13 +9,14 @@ import (
 
 func main() {
 	// Read the JSON file
-	jsonData, err := os.ReadFile("example/assets/example-graph-simple.json")
-	fmt.Println("json length >>", len(jsonData))
+	jsonData, err := os.ReadFile("/Users/panharithsun/Documents/EYKC/axon-form/axon-form-core/example/assets/example-graph-simple.json")
 	if err != nil {
 		fmt.Printf("Error reading JSON file: %v", err)
 	}
 
-	g := graph.InitGraph(jsonData)
+	g := graph.Graph{}
+
+	g.InitGraph(jsonData)
 
 	product_type_input := graph.VerifyNodeInput{
 		NodeID: "t494fub1vww8jv2",
@@ -37,10 +38,36 @@ func main() {
 		Value:  "Pickup",
 	}
 
-	g.ValidateNode(product_type_input)
-	g.ValidateNode(customer_name_input)
-	g.ValidateNode(email_input)
-	g.ValidateNode(delivery_option_input)
+	succ, errs := g.ValidateNode(product_type_input)
+	if len(errs) == 0 {
+		fmt.Println("product type validation success:", succ)
+	} else {
+		fmt.Println("product type validation errors:", errs)
+	}
+	//
+	succ, errs = g.ValidateNode(customer_name_input)
+	if len(errs) == 0 {
+		fmt.Println("customer name input validation success:", succ)
+	} else {
+		fmt.Println("customer name input validation errors:", errs)
+	}
+	//
+	succ, errs = g.ValidateNode(email_input)
+	if len(errs) == 0 {
+		fmt.Println("email input validation success:", succ)
+	} else {
+		fmt.Println("email input validation errors:", errs)
+	}
+	//
+	succ, errs = g.ValidateNode(delivery_option_input)
+	if len(errs) == 0 {
+		fmt.Println("delivery option input validation success:", succ)
+	} else {
+		fmt.Println("delivery option input validation errors:", errs)
+	}
 
-	g.GetFormValue()
+	fmt.Println("node visible >> ", g.IsNodeVisible(delivery_option_input.NodeID))
+
+	result := g.GetFormValue()
+	fmt.Println("form value result >>", result)
 }

@@ -10,6 +10,7 @@ export function generateRandomRgbColor(nodeType?: NodeType): string {
   const colorPalette = {
     [NodeType.Input]: 'rgb(173, 216, 230)', // Light Blue
     [NodeType.Value]: 'rgb(255, 223, 186)', // Light Orange
+    [NodeType.Page]: 'rgb(133, 199, 166)', // Light Green
   };
 
   if (nodeType && colorPalette[nodeType]) {

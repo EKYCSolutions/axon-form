@@ -57,3 +57,11 @@ export interface ValidationRule {
   value?: string | number;
   message: string;
 }
+
+export interface Page {
+  id: string;
+  //
+  title: string;
+  description: string;
+  field_ids: string[];
+}

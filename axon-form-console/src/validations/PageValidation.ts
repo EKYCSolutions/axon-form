@@ -1,0 +1,25 @@
+import type { Page } from '@/types/Graph';
+import z from 'zod';
+
+export const PageFormSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+  field_ids: z.array(z.string()).min(1, {
+    message: 'Array must contain at least one element.',
+  }),
+});
+
+export type PageFormSchemaData = z.infer<typeof PageFormSchema>;
+
+export const PageFormSchemaDefaultValue: PageFormSchemaData = {
+  field_ids: [],
+};
+
+export function convertPageToPageForm(page: Page) {
+  return {
+    id: page.id,
+    title: page.title,
+    description: page.description,
+    field_ids: page.field_ids,
+  };
+}

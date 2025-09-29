@@ -107,6 +107,22 @@
       "source_node": "byfr5rsuiidyvsq",
       "target_node": "5nb3tdl76esj1et",
       "type": "has_options"
+    },
+    {
+      "id": "cmfp0wqfd0001284258nbn3hw",
+      "label": "show-delivery-option",
+      "source_node": "b8mvlvxveal87lw",
+      "target_node": "byfr5rsuiidyvsq",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cmfp0xphz000128427qd2xk8o",
+          "node": "b8mvlvxveal87lw",
+          "edge": "cmfp0wqfd0001284258nbn3hw",
+          "expr": "equal",
+          "value": "NJohn"
+        }
+      ]
     }
   ],
   "condition_groups": []

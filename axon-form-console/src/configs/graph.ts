@@ -1,6 +1,7 @@
 export enum NodeType {
   Input = 'input',
   Value = 'value',
+  Page = 'page',
 }
 
 export enum NodeFieldType {
@@ -17,6 +18,7 @@ export enum NodeFieldType {
 
 export enum EdgeType {
   HasOption = 'has_options',
+  HasField = 'has_field',
   Validates = 'validates',
   Shows = 'shows',
 }
@@ -31,6 +33,9 @@ export enum GraphSheetType {
   AddConditionGroup = 'add_condition_group',
   EditConditionGroup = 'edit_condition_group',
   ShowConditionGroup = 'show_condition_group',
+  AddPage = 'add_page',
+  EditPage = 'edit_page',
+  ShowPage = 'show_page',
 }
 
 export enum ConditionExpression {

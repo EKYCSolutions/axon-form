@@ -7,6 +7,7 @@ import NodeDetail from './NodeDetail';
 import AddConditionGroupForm from './forms/AddConditionGroupForm';
 import AddEdgeForm from './forms/AddEdgeForm';
 import AddNodeForm from './forms/AddNodeForm';
+import AddPageForm from './forms/AddPageForm';
 import EditEdgeForm from './forms/EditEdgeForm';
 import EditNodeForm from './forms/EditNodeForm';
 import { Button } from './ui/button';
@@ -109,6 +110,13 @@ export default function RenderSheetContent({
             Add Condition Group
           </SheetTitle>
           <AddConditionGroupForm />
+        </>
+      );
+    case GraphSheetType.AddPage:
+      return (
+        <>
+          <SheetTitle className='text-xl font-medium'>Add Page</SheetTitle>
+          <AddPageForm />
         </>
       );
     default:

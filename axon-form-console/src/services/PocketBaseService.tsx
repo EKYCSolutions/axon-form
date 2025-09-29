@@ -3,11 +3,13 @@ import type {
   ConditionGroupResponse,
   EdgeResponse,
   NodeResponse,
+  PageResponse,
 } from '@/types/PocketBaseResponse';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
+import type { PageFormSchemaData } from '@/validations/PageValidation';
 import PocketBase from 'pocketbase';
 
 const token = import.meta.env.VITE_POCKETBASE_TOKEN || '';
@@ -165,4 +167,35 @@ export const deleteConditionGroup = async (id: string): Promise<unknown> => {
   return await client
     .collection(PocketBaseCollection.CONDITION_GROUPS)
     .delete(id);
+};
+
+export const getAllPages = async (): Promise<PageResponse[]> => {
+  return await client.collection(PocketBaseCollection.PAGES).getFullList({});
+};
+
+export const createPage = async (
+  data: PageFormSchemaData,
+): Promise<PageResponse> => {
+  return await client.collection(PocketBaseCollection.PAGES).create({
+    title: data.title,
+    description: data.description,
+    field_ids: {
+      ids: data.field_ids,
+    },
+  });
+};
+
+export const getPage = async (id: string): Promise<NodeResponse> => {
+  return await client.collection(PocketBaseCollection.PAGES).getOne(id);
+};
+
+export const updatePage = async (
+  id: string,
+  data: Partial<NodeFormSchemaData>,
+): Promise<NodeResponse> => {
+  return await client.collection(PocketBaseCollection.PAGES).update(id, data);
+};
+
+export const deletePage = async (id: string): Promise<boolean> => {
+  return await client.collection(PocketBaseCollection.PAGES).delete(id);
 };

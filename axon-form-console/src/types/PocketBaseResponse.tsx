@@ -10,7 +10,7 @@ export interface NodeResponse extends BaseResponse {
   field_type: string;
   field_name?: string;
   //
-  config: Record<string, unknown>;
+  metadata: Record<string, unknown>;
   validation_rules: Record<string, string | number>[];
   //
   expand?: {
@@ -39,4 +39,10 @@ export interface ConditionResponse extends BaseResponse {
 export interface ConditionGroupResponse extends BaseResponse {
   node: string;
   conditions: string;
+}
+
+export interface PageResponse extends BaseResponse {
+  title: string;
+  description: string;
+  field_ids: Record<string, string[]>;
 }
