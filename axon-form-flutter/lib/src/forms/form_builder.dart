@@ -1,3 +1,4 @@
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/base_inputs/base_input.dart';
 import 'package:axon_form_flutter/src/extensions/extension.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:flutter/material.dart';
 import '../models/model.dart';
 
 class FormBuilder extends StatefulWidget {
-  final FormGraph formGraph;
+  final FormGraph formGraph; 
   const FormBuilder({super.key, required this.formGraph});
 
   @override
@@ -78,7 +79,10 @@ class _FormBuilderState extends State<FormBuilder> {
             _formData[node.fieldName!] = value;
           },
           validator: (value) {
-            return Validators.validate(value.toString(), node.validationRules ?? []);
+            return Validators.validate(
+              value.toString(),
+              node.validationRules ?? [],
+            );
           },
           builder: (context, field) {
             return SizedBox(
@@ -153,24 +157,31 @@ class _FormBuilderState extends State<FormBuilder> {
     return Form(
       key: _formKey,
 
-      child: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          ...nodes.map(_buildField),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                print("Collected Data: $_formData");
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Form submitted: $_formData")),
-                );
-              }
-            },
-            child: const Text("Submit"),
+      child: Padding(
+        padding: EdgeInsetsGeometry.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ...nodes.map(_buildField),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+
+                    
+
+
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Form submitted: $_formData")),
+                    );
+                  }
+                },
+                child: const Text("Submit"),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

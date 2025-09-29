@@ -3,7 +3,6 @@ import 'package:axon_form_flutter/src/shared_widgets.dart/shared_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-
 enum FormCheckMarkPosition { left, right }
 
 class BaseFormRadioGroupOption<T> {
@@ -45,7 +44,7 @@ class _OptionCard extends StatelessWidget {
         height: compact ? 56 : 80,
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 8),
-       
+
         child: Row(
           children: [
             if (checkMarkPosition == FormCheckMarkPosition.left) ...[
@@ -65,8 +64,8 @@ class _OptionCard extends StatelessWidget {
             //   ),
             //   const SizedBox(width: 8),
             // ],
-            Text(option.label??"LABEL",),
-            
+            Text(option.label ?? "LABEL"),
+
             const Spacer(),
             if (checkMarkPosition == FormCheckMarkPosition.right)
               BaseCheckbox(checked: selected),
@@ -125,28 +124,25 @@ class BaseFormRadioGroupInput extends StatelessWidget {
             errorText: field.errorText,
           ),
           child: Column(
-            children:
-                options
-                    .map(
-                      (option) => _OptionCard(
-                        option: option,
-                        selected: field.value == option,
-                        checkMarkPosition: checkMarkPosition,
-                        compact: compact,
-                        onSelected:
-                            enabled
-                                ? () {
-                                  final choice =
-                                      field.value != option
-                                          ? option
-                                          : null;
-                                  field.didChange(choice);
-                                  onSelected?.call(choice);
-                                }
-                                : null,
-                      ),
-                    )
-                    .toList(),
+            children: options
+                .map(
+                  (option) => _OptionCard(
+                    option: option,
+                    selected: field.value == option,
+                    checkMarkPosition: checkMarkPosition,
+                    compact: compact,
+                    onSelected: enabled
+                        ? () {
+                            final choice = field.value != option
+                                ? option
+                                : null;
+                            field.didChange(choice);
+                            onSelected?.call(choice);
+                          }
+                        : null,
+                  ),
+                )
+                .toList(),
           ),
         );
       },

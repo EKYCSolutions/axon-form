@@ -1,4 +1,27 @@
 {
+  "layout": {
+    "pages": [
+      {
+        "id": "1",
+        "title": "PAGE 1",
+        "desc": "Page 1",
+        "fields": [
+          "t494fub1vww8jv2",
+          "b8mvlvxveal87lw",
+          "7fzhb9en55ntbeh"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Page 2",
+        "desc": "Page 2",
+        "fields": [
+          "byfr5rsuiidyvsq",
+          "m0yy2ffq10njrbf"
+        ]
+      }
+    ]
+  },
   "nodes": [
     {
       "id": "t494fub1vww8jv2",

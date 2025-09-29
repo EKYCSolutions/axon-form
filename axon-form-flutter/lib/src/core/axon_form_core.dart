@@ -8,8 +8,6 @@ class AxonFormCore {
     try {
       final ByteData file = await rootBundle.load(filePath);
       final Uint8List fileBytes = file.buffer.asUint8List();
-
-      //
       coreFFI.initialize(fileBytes);
     } catch (error) {
       rethrow;

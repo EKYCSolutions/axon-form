@@ -1,3 +1,4 @@
+import 'package:axon_form_flutter/src/extensions/theme_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -91,7 +92,13 @@ class _BaseTextInputState extends State<BaseTextInput> {
                         // autofillHints: widget.autofillHints,
                         prefix: widget.prefixIcon,
                       ),
-                      if (field.hasError) Text(field.errorText!),
+                      if (field.hasError)
+                        Text(
+                          field.errorText!,
+                          style: context.textTheme.bodyMedium?.copyWith(
+                            color: context.colorScheme.error
+                          ),
+                        ),
                     ],
                   );
                 },
