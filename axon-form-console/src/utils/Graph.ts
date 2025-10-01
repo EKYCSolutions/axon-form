@@ -1,4 +1,8 @@
-import { ConditionGroupExpression, EdgeType } from '@/configs/graph';
+import {
+  ConditionGroupExpression,
+  EdgeType,
+  NodeFieldType,
+} from '@/configs/graph';
 import type {
   EdgeConditionGroup,
   GraphEdge,
@@ -128,4 +132,34 @@ export const convertGraphToJSON = (
     edges: edgeJson,
     condition_groups: conditionGroups,
   };
+};
+
+export const parseNodeFieldType = (type: string): NodeFieldType => {
+  switch (type) {
+    case 'text':
+      return NodeFieldType.Text;
+    case 'textarea':
+      return NodeFieldType.TextArea;
+    case 'number':
+      return NodeFieldType.Number;
+    case 'date':
+      return NodeFieldType.Date;
+    case 'multi_select':
+      return NodeFieldType.MultiSelect;
+    case 'select':
+      return NodeFieldType.Select;
+    case 'radio':
+      return NodeFieldType.Radio;
+    case 'dropdown':
+      return NodeFieldType.Dropdown;
+    case 'checkbox':
+      return NodeFieldType.Checkbox;
+    case 'file':
+      return NodeFieldType.File;
+    case 'password':
+      return NodeFieldType.Password;
+
+    default:
+      return NodeFieldType.Text;
+  }
 };

@@ -1,13 +1,13 @@
 import { ConditionGroupExpression } from '@/configs/graph';
-import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation.js';
+import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import { type UseFormReturn } from 'react-hook-form';
 
-import type { GraphEdge } from '@/types/Graph.js';
-import { convertPascalCaseToTitleCase } from '@/utils/string.js';
-import { useGraph } from '../hooks/useGraph.js';
-import RecursiveCollapsibleConditionGroup from '../RecursiveCollapsibleConditionGroup.js';
-import { SelectNodeCombobox } from '../SelectNodeCombobox.js';
-import { Button } from '../ui/button.js';
+import type { GraphEdge } from '@/types/Graph';
+import { convertPascalCaseToTitleCase } from '@/utils/string';
+import { useGraph } from '../hooks/useGraph';
+import RecursiveCollapsibleConditionGroup from '../RecursiveCollapsibleConditionGroup';
+import { SelectNodeCombobox } from '../SelectNodeCombobox';
+import { Button } from '../ui/button';
 import {
   Form,
   FormControl,
@@ -15,15 +15,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form.js';
+} from '../ui/form';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select.js';
-import { Separator } from '../ui/separator.js';
+} from '../ui/select';
+import { Separator } from '../ui/separator';
 
 interface IProps {
   className?: string;

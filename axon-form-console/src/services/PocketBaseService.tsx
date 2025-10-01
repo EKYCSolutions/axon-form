@@ -6,9 +6,9 @@ import type {
   PageResponse,
 } from '@/types/PocketBaseResponse';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
-import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
-import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
-import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
+import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
+import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
+import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageValidation';
 import PocketBase from 'pocketbase';
 

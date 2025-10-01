@@ -7,9 +7,9 @@ import {
   MenubarTrigger,
 } from '@/components/ui/menubar';
 import { GraphSheetType } from '@/configs/graph';
-import { cn } from '@/lib/utils.js';
-import { exportJSON } from '@/utils/File.js';
-import { convertGraphToJSON } from '@/utils/Graph.js';
+import { cn } from '@/lib/utils';
+import { exportJSON } from '@/utils/File';
+import { convertGraphToJSON } from '@/utils/Graph';
 import {
   ChevronUp,
   Download,
@@ -20,11 +20,11 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce'; // Import useDebouncedCallback from 'use-debounce'
-import CustomAlertDialog from '../CustomAlertDialog.js';
-import { useGraph } from '../hooks/useGraph.js';
-import { Alert, AlertDescription } from '../ui/alert.js';
-import { Input } from '../ui/input.js';
-import { Separator } from '../ui/separator.js';
+import CustomAlertDialog from '../CustomAlertDialog';
+import { useGraph } from '../hooks/useGraph';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Input } from '../ui/input';
+import { Separator } from '../ui/separator';
 
 interface IProps {
   className?: string;

@@ -6,9 +6,11 @@ export enum NodeType {
 
 export enum NodeFieldType {
   Text = 'text',
+  TextArea = 'textarea',
   Number = 'number',
-  Datetime = 'datetime',
+  Date = 'date',
   MultiSelect = 'multi_select',
+  Select = 'select',
   Radio = 'radio',
   Dropdown = 'dropdown',
   Checkbox = 'checkbox',

@@ -1,24 +1,24 @@
 import { ConditionGroupExpression } from '@/configs/graph';
 import type { GraphEdge } from '@/types/Graph';
-import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation.js';
+import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import { ChevronsUpDown, Plus } from 'lucide-react';
 import { useFieldArray, type UseFormReturn } from 'react-hook-form';
-import DeleteButton from './DeleteButton.js';
-import { useGraph } from './hooks/useGraph.js';
-import { SelectEdgeCombobox } from './SelectEdgeCombobox.js';
-import { Button } from './ui/button.js';
+import DeleteButton from './DeleteButton';
+import { useGraph } from './hooks/useGraph';
+import { SelectEdgeCombobox } from './SelectEdgeCombobox';
+import { Button } from './ui/button';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from './ui/collapsible.js';
+} from './ui/collapsible';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from './ui/select.js';
+} from './ui/select';
 
 type FieldArrayName =
   | 'edges'

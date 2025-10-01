@@ -1,7 +1,7 @@
 import type { Page } from '@/types/Graph';
 import z from 'zod';
 
-export const PageFormSchema = z.object({
+export const OldPageFormSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   field_ids: z.array(z.string()).min(1, {
@@ -9,9 +9,9 @@ export const PageFormSchema = z.object({
   }),
 });
 
-export type PageFormSchemaData = z.infer<typeof PageFormSchema>;
+export type OldPageFormSchemaData = z.infer<typeof OldPageFormSchema>;
 
-export const PageFormSchemaDefaultValue: PageFormSchemaData = {
+export const OldPageFormSchemaDefaultValue: OldPageFormSchemaData = {
   field_ids: [],
 };
 

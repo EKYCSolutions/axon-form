@@ -3,9 +3,8 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import {
   NodeFormSchema,
-  NodeFormSchemaDefaultValue,
   type NodeFormSchemaData,
-} from '@/validations/NodeValidation.js';
+} from '@/validations/NodeValidation';
 import { toast } from 'sonner';
 import { useGraph } from '../hooks/useGraph';
 import NodeForm from './NodeForm';
@@ -19,7 +18,6 @@ export default function AddNodeForm({ className }: IProps) {
 
   const form = useForm<NodeFormSchemaData>({
     resolver: zodResolver(NodeFormSchema),
-    defaultValues: NodeFormSchemaDefaultValue,
     mode: 'onChange',
   });
 

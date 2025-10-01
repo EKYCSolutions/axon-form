@@ -26,7 +26,7 @@ import type {
   GraphEdge,
   GraphNode,
   Page,
-} from '@/types/Graph.js';
+} from '@/types/Graph';
 import type {
   ConditionGroupResponse,
   NodeResponse,
@@ -39,12 +39,12 @@ import {
   convertConditionFormToGraphEdgeCondition,
   type ConditionFormSchemaData,
 } from '@/validations/ConditionValidation';
-import { type EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
+import { type EdgeFormSchemaData } from '@/validations/EdgeValidation';
 import {
   convertGraphNodeToNodeForm,
   convertNodeResponseToGraphNode,
   type NodeFormSchemaData,
-} from '@/validations/NodeValidation.js';
+} from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageValidation';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';

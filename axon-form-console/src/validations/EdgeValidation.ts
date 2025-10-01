@@ -6,7 +6,7 @@ import {
   ConditionFormSchema,
   convertConditionResponseToGraphEdgeCondition,
   convertGraphEdgeConditionToConditionForm,
-} from './ConditionValidation.js';
+} from './ConditionValidation';
 
 export const EdgeFormSchema = z
   .object({

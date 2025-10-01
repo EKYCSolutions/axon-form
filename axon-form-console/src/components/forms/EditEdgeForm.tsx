@@ -5,10 +5,10 @@ import {
   convertGraphEdgeToEdgeForm,
   EdgeFormSchema,
   type EdgeFormSchemaData,
-} from '@/validations/EdgeValidation.js';
+} from '@/validations/EdgeValidation';
 import { useEffect } from 'react';
-import { useGraph } from '../hooks/useGraph.js';
-import EdgeForm from './EdgeForm.js';
+import { useGraph } from '../hooks/useGraph';
+import EdgeForm from './EdgeForm';
 
 interface IProps {
   className?: string;

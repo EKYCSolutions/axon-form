@@ -5,7 +5,7 @@ import {
   NodeFormSchema,
   convertGraphNodeToNodeForm,
   type NodeFormSchemaData,
-} from '@/validations/NodeValidation.js';
+} from '@/validations/NodeValidation';
 import { useGraph } from '../hooks/useGraph';
 import NodeForm from './NodeForm';
 
