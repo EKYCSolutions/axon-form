@@ -15,8 +15,8 @@ import { ConditionExpression, EdgeType } from '@/configs/graph';
 import { convertPascalCaseToTitleCase } from '@/utils/string';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
 import { Plus } from 'lucide-react';
+import { useGraph } from '../../hooks/useGraph.js';
 import DeleteButton from '../DeleteButton';
-import { useGraph } from '../hooks/useGraph';
 import { Input } from '../ui/input';
 import {
   Select,

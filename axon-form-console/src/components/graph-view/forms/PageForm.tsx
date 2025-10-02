@@ -18,7 +18,7 @@ import type { PageFormSchemaData } from '@/validations/PageValidation.js';
 import { NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
 import { useState } from 'react';
-import { useGraph } from '../hooks/useGraph.js';
+import { useGraph } from '../../hooks/useGraph.js';
 import { SelectNodeCombobox } from '../SelectNodeCombobox';
 import {
   KanbanBoard,

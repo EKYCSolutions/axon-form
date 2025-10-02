@@ -1,13 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
+import { toast } from 'sonner';
+
+import { useGraph } from '@/hooks/useGraph';
 import {
   PageFormSchema,
-  PageFormSchemaDefaultValue,
   type PageFormSchemaData,
-} from '@/validations/PageValidation';
-import { toast } from 'sonner';
-import { useGraph } from '../hooks/useGraph';
+} from '@/validations/PageFormValidation';
 import PageForm from './PageForm';
 
 interface IProps {
@@ -19,7 +19,6 @@ export default function AddPageForm({ className }: IProps) {
 
   const form = useForm<PageFormSchemaData>({
     resolver: zodResolver(PageFormSchema),
-    defaultValues: PageFormSchemaDefaultValue,
     mode: 'onChange',
     reValidateMode: 'onChange',
   });

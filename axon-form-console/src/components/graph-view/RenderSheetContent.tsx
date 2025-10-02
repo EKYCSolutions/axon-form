@@ -1,7 +1,9 @@
 import { GraphSheetType } from '@/configs/graph';
 import { CopyPlusIcon, PenIcon } from 'lucide-react';
-import CustomAlertDialog from './CustomAlertDialog';
-import DeleteButton from './DeleteButton';
+import CustomAlertDialog from '../CustomAlertDialog.js';
+import DeleteButton from '../DeleteButton.js';
+import { Button } from '../ui/button.js';
+import { SheetTitle } from '../ui/sheet.js';
 import EdgeDetail from './EdgeDetail';
 import NodeDetail from './NodeDetail';
 import AddConditionGroupForm from './forms/AddConditionGroupForm';
@@ -10,8 +12,6 @@ import AddNodeForm from './forms/AddNodeForm';
 import AddPageForm from './forms/AddPageForm';
 import EditEdgeForm from './forms/EditEdgeForm';
 import EditNodeForm from './forms/EditNodeForm';
-import { Button } from './ui/button';
-import { SheetTitle } from './ui/sheet';
 
 interface IProps {
   sheetType: GraphSheetType;

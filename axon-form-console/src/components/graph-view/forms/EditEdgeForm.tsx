@@ -7,7 +7,7 @@ import {
   type EdgeFormSchemaData,
 } from '@/validations/EdgeValidation';
 import { useEffect } from 'react';
-import { useGraph } from '../hooks/useGraph';
+import { useGraph } from '../../hooks/useGraph.js';
 import EdgeForm from './EdgeForm';
 
 interface IProps {

@@ -3,8 +3,8 @@ import type { GraphEdge } from '@/types/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import { ChevronsUpDown, Plus } from 'lucide-react';
 import { useFieldArray, type UseFormReturn } from 'react-hook-form';
+import { useGraph } from '../hooks/useGraph.js';
 import DeleteButton from './DeleteButton';
-import { useGraph } from './hooks/useGraph';
 import { SelectEdgeCombobox } from './SelectEdgeCombobox';
 import { Button } from './ui/button';
 import {

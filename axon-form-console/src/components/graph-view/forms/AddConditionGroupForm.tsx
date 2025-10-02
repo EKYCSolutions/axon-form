@@ -6,7 +6,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { useGraph } from '../hooks/useGraph';
+import { useGraph } from '../../hooks/useGraph.js';
 import ConditionGroupForm from './ConditionGroupForm';
 
 export default function AddConditionGroupForm() {

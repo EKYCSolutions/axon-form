@@ -4,7 +4,7 @@ import { type UseFormReturn } from 'react-hook-form';
 
 import type { GraphEdge } from '@/types/Graph';
 import { convertPascalCaseToTitleCase } from '@/utils/string';
-import { useGraph } from '../hooks/useGraph';
+import { useGraph } from '../../hooks/useGraph.js';
 import RecursiveCollapsibleConditionGroup from '../RecursiveCollapsibleConditionGroup';
 import { SelectNodeCombobox } from '../SelectNodeCombobox';
 import { Button } from '../ui/button';

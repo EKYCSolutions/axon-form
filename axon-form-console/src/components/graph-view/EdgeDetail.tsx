@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { capitalize, convertSnakeCaseToTitleCase } from '@/utils/string';
-import { useGraph } from './hooks/useGraph';
+import { useGraph } from '../hooks/useGraph.js';
 import ReadonlyContainer from './ReadonlyContainer';
 
 interface IProps {

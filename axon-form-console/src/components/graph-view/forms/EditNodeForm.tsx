@@ -3,22 +3,23 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import {
   NodeFormSchema,
+  convertGraphNodeToNodeForm,
   type NodeFormSchemaData,
 } from '@/validations/NodeValidation';
-import { toast } from 'sonner';
-import { useGraph } from '../hooks/useGraph';
+import { useGraph } from '../../hooks/useGraph.js';
 import NodeForm from './NodeForm';
 
 interface IProps {
   className?: string;
 }
 
-export default function AddNodeForm({ className }: IProps) {
-  const { addNode, setSheetOpen } = useGraph();
+export default function EditNodeForm({ className }: IProps) {
+  const { selectedNode, updateNode, setSheetOpen } = useGraph();
 
   const form = useForm<NodeFormSchemaData>({
     resolver: zodResolver(NodeFormSchema),
-    mode: 'onChange',
+    defaultValues: convertGraphNodeToNodeForm(selectedNode!),
+    reValidateMode: 'onChange',
   });
 
   const fieldArray = useFieldArray({
@@ -27,11 +28,13 @@ export default function AddNodeForm({ className }: IProps) {
   });
 
   function onSubmit(data: NodeFormSchemaData) {
-    addNode(data);
+    if (!selectedNode?.id) {
+      return;
+    }
 
-    form.reset();
+    updateNode(selectedNode?.id, data);
+    //
     setSheetOpen(false);
-    toast.success('Added node successfully');
   }
 
   return (

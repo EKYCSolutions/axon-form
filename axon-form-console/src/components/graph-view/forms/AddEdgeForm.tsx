@@ -8,7 +8,7 @@ import {
 } from '@/validations/EdgeValidation';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { useGraph } from '../hooks/useGraph';
+import { useGraph } from '../../hooks/useGraph.js';
 import EdgeForm from './EdgeForm';
 
 interface IProps {

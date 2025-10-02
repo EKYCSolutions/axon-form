@@ -20,8 +20,8 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce'; // Import useDebouncedCallback from 'use-debounce'
+import { useGraph } from '../../hooks/useGraph.js';
 import CustomAlertDialog from '../CustomAlertDialog';
-import { useGraph } from '../hooks/useGraph';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Input } from '../ui/input';
 import { Separator } from '../ui/separator';

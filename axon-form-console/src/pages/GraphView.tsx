@@ -1,9 +1,9 @@
-import GraphMenubar from '@/components/graphs/GraphMenuBar';
-import GraphVisualizationWrapper from '@/components/graphs/GraphVisualizationWrapper';
-import { useGraph } from '@/components/hooks/useGraph';
-import RenderSheetContent from '@/components/RenderSheetContent';
+import GraphMenubar from '@/components/graph-view/GraphMenuBar';
+import GraphVisualizationWrapper from '@/components/graph-view/GraphVisualizationWrapper';
+import RenderSheetContent from '@/components/graph-view/RenderSheetContent';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { GraphSheetType } from '@/configs/graph';
+import { useGraph } from '@/hooks/useGraph.js';
 import { cn } from '@/lib/utils';
 
 export default function GraphView() {
