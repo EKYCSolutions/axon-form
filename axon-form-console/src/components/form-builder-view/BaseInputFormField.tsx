@@ -111,6 +111,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
 
               return (
                 <OptionFormField
+                  key={field.id}
                   fieldId={field.id}
                   fieldIndex={fieldIndex}
                   optionIndex={index}
@@ -144,6 +145,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
           {validationRuleFields.map((field, index) => {
             return (
               <ValidationRuleFormField
+                key={field.id}
                 fieldId={field.id}
                 fieldIndex={fieldIndex}
                 validationRuleIndex={index}

@@ -14,11 +14,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { NodeFieldType, NodeType, ValidationRuleType } from '@/configs/graph';
+import { NodeFieldType, NodeType } from '@/configs/graph';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import { cn } from '@/lib/utils';
 import {
+  convertPageToPageFormSchema,
   PageFormSchema,
   type PageFormSchemaData,
 } from '@/validations/PageFormValidation';
@@ -29,64 +30,19 @@ import {
 } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
+import { useEffect } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 
-export default function CreatePageForm() {
+export default function PageDetail() {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { addPage } = useFormBuilder();
+  const { pages, selectedPage, addPage, getPage } = useFormBuilder();
 
   const form = useForm<PageFormSchemaData>({
     resolver: zodResolver(PageFormSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: {
-      title: 'page title',
-      description: 'description',
-      fields: [
-        {
-          type: NodeType.Input,
-          field_type: NodeFieldType.Text,
-          field_name: 'field-name',
-          label: 'Field Label',
-          placeholder: 'placeholder',
-          validation_rules: [
-            {
-              type: ValidationRuleType.MaxLength,
-              value: 10,
-              message: 'Max length is 10',
-            },
-          ],
-        },
-        {
-          type: NodeType.Input,
-          field_type: NodeFieldType.Radio,
-          field_name: 'field-name-select',
-          label: 'Field Label Select',
-          placeholder: 'placeholder select',
-          select_options: [
-            {
-              label: 'Option 1',
-              value: 'option-1',
-            },
-            {
-              label: 'Option 2',
-              value: 'option-2',
-            },
-            {
-              label: 'Option 3',
-              value: 'option-3',
-            },
-          ],
-          validation_rules: [
-            {
-              type: ValidationRuleType.Required,
-              message: 'This field is required',
-            },
-          ],
-        },
-      ],
-    },
   });
 
   const {
@@ -99,13 +55,18 @@ export default function CreatePageForm() {
     name: 'fields',
   });
 
+  useEffect(() => {
+    if (id) {
+      getPage(id);
+    }
+    if (selectedPage) {
+      form.reset(convertPageToPageFormSchema(selectedPage));
+    }
+  }, [id, getPage, selectedPage, form]);
+
   function onSubmit(data: PageFormSchemaData) {
     console.log(data);
-    addPage(data);
-
-    // form.reset();
-    // setSheetOpen(false);
-    // toast.success('Added group condition successfully');
+    // addPage(data);
   }
 
   function onAddFormField(fieldType: NodeFieldType) {
@@ -126,7 +87,6 @@ export default function CreatePageForm() {
     const newIndex = formFields.findIndex((f) => f.id === over.id);
 
     move(oldIndex, newIndex);
-    return;
   }
 
   return (
@@ -222,9 +182,8 @@ export default function CreatePageForm() {
                       key={field.id}
                       fieldId={field.id}
                       fieldIndex={idx}
-                      fieldType={field.field_type}
+                      fieldType={field.field_type!}
                       fieldLabel={form.watch(`fields.${idx}.label`)}
-                      //
                       onFieldDelete={() => remove(idx)}
                     />
                   );

@@ -22,10 +22,7 @@ export default function FormAccordionDropdown({ onDelete }: IProps) {
           asChild
           variant='ghost'
           className='px-0 py-0 h-auto'
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('dog');
-          }}
+          onClick={(e) => e.stopPropagation()}
         >
           <Ellipsis size={15} />
         </Button>

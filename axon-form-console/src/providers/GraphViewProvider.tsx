@@ -14,9 +14,6 @@ import {
   deleteCondition as deleteConditionService,
   deleteEdge as deleteEdgeService,
   deleteNode as deleteNodeService,
-  getAllConditionGroups,
-  getAllNodes,
-  getAllPages,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
   updateNode as updateNodeService,
@@ -27,11 +24,7 @@ import type {
   GraphNode,
   Page,
 } from '@/types/Graph';
-import type {
-  ConditionGroupResponse,
-  NodeResponse,
-  PageResponse,
-} from '@/types/PocketBaseResponse';
+import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import { convertConditionGroupToConditionString } from '@/utils/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
@@ -42,20 +35,12 @@ import {
 import { type EdgeFormSchemaData } from '@/validations/EdgeValidation';
 import {
   convertGraphNodeToNodeForm,
-  convertNodeResponseToGraphNode,
   type NodeFormSchemaData,
 } from '@/validations/NodeValidation';
-import type { PageFormSchemaData } from '@/validations/PageValidation';
+import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { HitTargets, Node, NVL, Relationship } from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';
-import { useQueries } from '@tanstack/react-query';
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useRef, useState, type ReactNode } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -69,7 +54,7 @@ interface GraphProviderProps {
 
 const DEFAULT_ZOOM_LEVEL = 0.75;
 
-export function GraphProvider({
+export function GraphViewProvider({
   children,
   initialNodes = [],
   initialEdges = [],
@@ -104,87 +89,79 @@ export function GraphProvider({
   // Search state
   const [searchText, setSearchText] = useState<string>('');
 
-  const [nodesQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['nodes', searchText],
-        queryFn: () => getAllNodes(searchText),
-      },
-    ],
-  });
-  const [conditionGroupsQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['conditionGroups'],
-        queryFn: () => getAllConditionGroups(),
-      },
-    ],
-  });
-  const [pageQuery] = useQueries({
-    queries: [
-      {
-        queryKey: ['pages'],
-        queryFn: () => getAllPages(),
-      },
-    ],
-  });
+  // const [nodesQuery] = useQueries({
+  //   queries: [
+  //     {
+  //       queryKey: ['nodes', searchText],
+  //       queryFn: () => getAllNodes(searchText),
+  //     },
+  //   ],
+  // });
+  // const [conditionGroupsQuery] = useQueries({
+  //   queries: [
+  //     {
+  //       queryKey: ['conditionGroups'],
+  //       queryFn: () => getAllConditionGroups(),
+  //     },
+  //   ],
+  // });
+  // const [pageQuery] = useQueries({
+  //   queries: [
+  //     {
+  //       queryKey: ['pages'],
+  //       queryFn: () => getAllPages(),
+  //     },
+  //   ],
+  // });
 
-  useEffect(() => {
-    if (nodesQuery.status === 'success' && nodesQuery.data) {
-      console.log('Fetching nodes data from query');
-
-      const nodeRes: GraphNode[] = nodesQuery.data?.map((node: NodeResponse) =>
-        convertNodeResponseToGraphNode(node),
-      );
-      const nodeIds = nodeRes.map((node) => node.id);
-
-      const edgeRes: GraphEdge[] = nodeRes
-        .filter((node) => node.edges.length > 0)
-        .flatMap((node) => node.edges);
-
-      const ids = new Set();
-      const uniqueEdges = edgeRes.filter(
-        ({ id }) => !ids.has(id) && ids.add(id),
-      );
-      const edgesWithNodes = uniqueEdges.filter(
-        (edge) => nodeIds.includes(edge.from) && nodeIds.includes(edge.to),
-      );
-
-      setNodes(nodeRes);
-      setEdges(edgesWithNodes);
-    }
-
-    if (conditionGroupsQuery.status && conditionGroupsQuery.data) {
-      const conditionGroupRes: EdgeConditionGroup[] =
-        conditionGroupsQuery.data?.map((cd: ConditionGroupResponse) => {
-          return {
-            id: cd.id,
-            node: cd.node,
-            conditions: cd.conditions,
-          };
-        });
-
-      setConditionGroups(conditionGroupRes);
-    }
-
-    if (pageQuery.status && pageQuery.data) {
-      const pageRes: Page[] = pageQuery.data?.map((p: PageResponse) => {
-        return {
-          id: p.id,
-          title: p.title,
-          description: p.description,
-          field_ids: p.field_ids['ids'],
-        };
-      });
-
-      setPages(pageRes);
-    }
-  }, [
-    nodesQuery.status,
-    nodesQuery.data,
-    conditionGroupsQuery.status,
-    conditionGroupsQuery.data,
-  ]); // Only depend on query status and data
+  // useEffect(() => {
+  //   // if (nodesQuery.status === 'success' && nodesQuery.data) {
+  //   //   console.log('Fetching nodes data from query');
+  //   //   const nodeRes: GraphNode[] = nodesQuery.data?.map((node: NodeResponse) =>
+  //   //     convertNodeResponseToGraphNode(node),
+  //   //   );
+  //   //   const nodeIds = nodeRes.map((node) => node.id);
+  //   //   const edgeRes: GraphEdge[] = nodeRes
+  //   //     .filter((node) => node.edges.length > 0)
+  //   //     .flatMap((node) => node.edges);
+  //   //   const ids = new Set();
+  //   //   const uniqueEdges = edgeRes.filter(
+  //   //     ({ id }) => !ids.has(id) && ids.add(id),
+  //   //   );
+  //   //   const edgesWithNodes = uniqueEdges.filter(
+  //   //     (edge) => nodeIds.includes(edge.from) && nodeIds.includes(edge.to),
+  //   //   );
+  //   //   setNodes(nodeRes);
+  //   //   setEdges(edgesWithNodes);
+  //   // }
+  //   // if (conditionGroupsQuery.status && conditionGroupsQuery.data) {
+  //   //   const conditionGroupRes: EdgeConditionGroup[] =
+  //   //     conditionGroupsQuery.data?.map((cd: ConditionGroupResponse) => {
+  //   //       return {
+  //   //         id: cd.id,
+  //   //         node: cd.node,
+  //   //         conditions: cd.conditions,
+  //   //       };
+  //   //     });
+  //   //   setConditionGroups(conditionGroupRes);
+  //   // }
+  //   // if (pageQuery.status && pageQuery.data) {
+  //   //   const pageRes: Page[] = pageQuery.data?.map((p: PageResponse) => {
+  //   //     return {
+  //   //       id: p.id,
+  //   //       title: p.title,
+  //   //       description: p.description,
+  //   //       field_ids: p.field_ids['ids'],
+  //   //     };
+  //   //   });
+  //   //   setPages(pageRes);
+  //   // }
+  // }, [
+  //   nodesQuery.status,
+  //   nodesQuery.data,
+  //   conditionGroupsQuery.status,
+  //   conditionGroupsQuery.data,
+  // ]); // Only depend on query status and data
 
   // Helper function to update graph visualization
   const updateGraphVisualization = useCallback(

@@ -3,9 +3,9 @@ import type {
   EdgeType,
   NodeFieldType,
   NodeType,
-  ValidationRuleType,
 } from '@/configs/graph';
 import type { Node, Relationship } from '@neo4j-nvl/base';
+import type { ValidationRule } from 'react-hook-form';
 
 export interface GraphNode extends Node {
   id: string;
@@ -50,18 +50,4 @@ export interface EdgeConditionGroup {
   //
   node: string;
   conditions: string;
-}
-
-export interface ValidationRule {
-  type: ValidationRuleType;
-  value?: string | number;
-  message: string;
-}
-
-export interface Page {
-  id: string;
-  //
-  title: string;
-  description: string;
-  field_ids: string[];
 }

@@ -1,9 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
-import { toast } from 'sonner';
-
-import { useGraph } from '@/hooks/useGraph';
+import { useFormBuilder } from '@/hooks/useFormBuilder';
 import {
   PageFormSchema,
   type PageFormSchemaData,
@@ -15,7 +13,7 @@ interface IProps {
 }
 
 export default function AddPageForm({ className }: IProps) {
-  const { setSheetOpen, addPage } = useGraph();
+  const { addPage } = useFormBuilder();
 
   const form = useForm<PageFormSchemaData>({
     resolver: zodResolver(PageFormSchema),
@@ -26,9 +24,9 @@ export default function AddPageForm({ className }: IProps) {
   function onSubmit(data: PageFormSchemaData) {
     addPage(data);
 
-    form.reset();
-    setSheetOpen(false);
-    toast.success('Added group condition successfully');
+    // form.reset();
+    // setSheetOpen(false);
+    // toast.success('Added group condition successfully');
   }
 
   return <PageForm form={form} onSubmit={onSubmit} className={className} />;

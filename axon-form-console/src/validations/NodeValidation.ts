@@ -1,5 +1,6 @@
 import { NodeFieldType, NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
+import type { Node } from '@/types/Node';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
@@ -12,7 +13,7 @@ import {
 
 export const NodeFormSchema = z.object({
   type: z.enum(NodeType),
-  field_type: z.enum(NodeFieldType),
+  field_type: z.enum(NodeFieldType).optional(),
   field_name: z.string().optional(),
   default_value: z.string().optional(),
   placeholder: z.string().optional(),
@@ -25,6 +26,22 @@ export const NodeFormSchema = z.object({
 });
 
 export type NodeFormSchemaData = z.infer<typeof NodeFormSchema>;
+
+export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
+  return {
+    type: node.type as NodeType,
+    label: node.label,
+    field_type: node.field_type as NodeFieldType,
+    field_name: node.field_name,
+    select_options: node.options?.map((option) => ({
+      label: option.label,
+      value: option.value,
+    })),
+    validation_rules: node.validation_rules?.map((rule) =>
+      convertValidationRuleResponseToValidationRule(rule),
+    ),
+  };
+}
 
 export function convertGraphNodeToNodeForm(node: GraphNode) {
   return {

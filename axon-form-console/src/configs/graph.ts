@@ -18,6 +18,14 @@ export enum NodeFieldType {
   Password = 'password',
 }
 
+export const NodeFieldTypeWithOptions = [
+  NodeFieldType.MultiSelect,
+  NodeFieldType.Select,
+  NodeFieldType.Radio,
+  NodeFieldType.Dropdown,
+  NodeFieldType.Checkbox,
+];
+
 export enum EdgeType {
   HasOption = 'has_options',
   HasField = 'has_field',
