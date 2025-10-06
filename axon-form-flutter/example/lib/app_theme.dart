@@ -15,7 +15,7 @@ final colorScheme = ColorScheme(
     error: Color(0xFFCB444A),
     onError: Color(0xFFFFFFFF),
     surface: Color(0xFFF6F7F8),
-    surfaceDim: Color(0xFFE1E3E6),
+    surfaceDim: Color.fromARGB(255, 201, 204, 208),
     onSurface: Color(0xFF000000),
     onSurfaceVariant: Color(0xFF919599),
     tertiary: Color(0xFF53A451),

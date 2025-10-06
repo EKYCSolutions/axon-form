@@ -32,16 +32,16 @@ func GetResult() *C.char {
 
 //export InitGraph
 func InitGraph(dataPtr unsafe.Pointer, dataLen C.int) C.int {
-	if dataLen == 0 || dataPtr == nil {
-		setResult([]byte(`["invalid input", null]`))
-		return 0
-	}
-
-	jsonData := C.GoBytes(dataPtr, dataLen)
-	tempGraph := graph.InitGraph(jsonData)
-	g = &tempGraph
-
-	return 1
+ if dataLen == 0 || dataPtr == nil {
+  setResult([]byte(`["invalid input", null]`))
+  return 0
+ }
+ jsonData := C.GoBytes(dataPtr, dataLen)
+ if g == nil {
+  g = &graph.Graph{}
+ }
+ g.InitGraph(jsonData)
+ return 1
 }
 
 //export IsNodeVisible

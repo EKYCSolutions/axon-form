@@ -1,4 +1,5 @@
 // import 'package:flutter/material.dart' as DialogUtil show showBottomSheet;
+import 'package:axon_form_flutter/src/extensions/theme_extension.dart';
 import 'package:axon_form_flutter/src/models/model.dart';
 import 'package:axon_form_flutter/src/shared_widgets.dart/shared_widget.dart';
 import 'package:flutter/foundation.dart';
@@ -93,7 +94,7 @@ class _OptionWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    option.label??"LABEL",
+                    option.label ?? "LABEL",
                     // style: context.textTheme.labelMedium,
                   ),
                   if (showSubLabel && option.subLabel != null)
@@ -197,12 +198,15 @@ class _OptionListState extends State<_OptionList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: 20),
-        Text(
-          widget.title,
-          // style: context.textTheme.bodyMedium,
+
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            widget.title,
+            // style: context.textTheme.bodyMedium,
+          ),
         ),
-        const SizedBox(height: 16),
+
         if (widget.searchable)
           Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -343,16 +347,12 @@ class BaseDropdownRadioSelectInput extends StatefulWidget {
       _BaseRadioSelectInputState();
 }
 
-class _BaseRadioSelectInputState
-    extends State<BaseDropdownRadioSelectInput> {
+class _BaseRadioSelectInputState extends State<BaseDropdownRadioSelectInput> {
   Node? selectedOption;
 
   @override
   void initState() {
     super.initState();
-
-    print("widget.initialValue ::::: ${widget.initialValue}");
-
     if (widget.initialValue != null && widget.options.isNotEmpty) {
       setState(() {
         selectedOption = widget.options.firstWhereOrNull(
@@ -360,7 +360,6 @@ class _BaseRadioSelectInputState
         );
       });
     }
-    print("selectedOption ::::: ${selectedOption?.id}");
   }
 
   @override
@@ -412,7 +411,8 @@ class _BaseRadioSelectInputState
                                       widget.onSelected?.call(value as Node?);
                                     },
                                     onSelected: (option) {
-                                      final choice = field.value?.id != option.id
+                                      final choice =
+                                          field.value?.id != option.id
                                           ? option
                                           : null;
 
@@ -467,18 +467,16 @@ class _BaseRadioSelectInputState
                         Text(
                           widget.label,
 
-                          // style: context.textTheme.titleMedium!.copyWith(
-                          //   color: field.hasError
-                          //       ? context.colorScheme.error
-                          //       : context.colorScheme.primary,
-                          // ),
+                          style: TextStyle(
+                            color: field.hasError
+                                ? context.colorScheme.error
+                                : context.colorScheme.primary,
+                          ),
                         ),
                         if (widget.required)
                           Text(
                             "*",
-                            // style: context.textTheme.titleMedium!.copyWith(
-                            //   color: context.colorScheme.error,
-                            // ),
+                            style: TextStyle(color: context.colorScheme.error),
                           ),
                         const Spacer(),
                       ],
@@ -486,15 +484,31 @@ class _BaseRadioSelectInputState
                     InputDecorator(
                       decoration: InputDecoration(
                         counterText: "",
+                        hintText: widget.label,
                         isDense: true,
                         errorText: field.errorText,
+
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 18 + 8,
+                          maxWidth: 18 + 8,
+                          minHeight: 18,
+                          maxHeight: 18,
+                        ),
+                        suffixIconConstraints: const BoxConstraints(
+                          minWidth: 18 + 8,
+                          maxWidth: 18 + 8,
+                          minHeight: 18,
+                          maxHeight: 18,
+                        ),
                         border: InputBorder.none,
                         prefixIcon: widget.prefixIcon,
-                        // suffixIcon: SvgPicture.asset(
-                        //   context.icons.dropDown!,
-                        //   color: context.colorScheme.onSurface,
-                        //   width: 9,
-                        // ),
+
+                        // suffix: widget.prefixIcon,
+                        suffixIcon: Icon(
+                          Icons.arrow_drop_down_rounded,
+                          color: context.colorScheme.surfaceDim,
+                          size: 9,
+                        ),
                       ),
                       child: Builder(
                         builder: (context) {
@@ -510,7 +524,7 @@ class _BaseRadioSelectInputState
 
                           if (value == null && widget.allowCustomOption) {
                             return Text(
-                              field.value?.label ?? "Custom"  ,
+                              field.value?.label ?? "Custom",
                               // style: context.textTheme.bodyMedium,
                             );
                           }
@@ -548,9 +562,10 @@ class _BaseRadioSelectInputState
                 //       child: const AiAutoFilledMarker(),
                 //     ),
                 //   ),
-                // ),
+                // )
               ],
             ),
+
           );
         },
       ),

@@ -3,18 +3,19 @@
     "pages": [
       {
         "id": "1",
-        "title": "PAGE 1",
-        "desc": "Page 1",
+        "title": "Page 1",
+        "desc": "Page 1 Info",
         "fields": [
           "t494fub1vww8jv2",
           "b8mvlvxveal87lw",
-          "7fzhb9en55ntbeh"
+          "7fzhb9en55ntbeh",
+          "b6m1w00464sn4ed"
         ]
       },
       {
         "id": "2",
         "title": "Page 2",
-        "desc": "Page 2",
+        "desc": "Page 2 Info",
         "fields": [
           "byfr5rsuiidyvsq",
           "m0yy2ffq10njrbf"
@@ -84,7 +85,12 @@
       "field_type": "radio",
       "field_name": "delivery_option",
       "label": "Delivery Option",
-      "validation_rules": []
+      "validation_rules": [
+         {
+          "type": "required",
+          "message": "Delivery Option is required"
+        }
+      ]
     },
     {
       "id": "50f49bcqb4ej4bz",

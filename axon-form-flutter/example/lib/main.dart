@@ -34,24 +34,32 @@ class _MyHomePageState extends State<MyHomePage> {
   // Use 'late final' for variables initialized once in initState.
   FormGraph? formGraph;
   AxonFormCore core = AxonFormCore();
+  Map<String, dynamic> formData = {};
 
   @override
   void initState() {
-    populateFormGraph();
-    core.initialize('assets/example-graph-simple.json');
+    populateFormGraph(jsonPath: 'assets/example-graph-simple.json');
+    // 'assets/example-graph.json',
+
     super.initState();
   }
 
-  populateFormGraph() async {
-    final String jsonString = await rootBundle.loadString(
-      // 'assets/example-graph.json',
-      'assets/example-graph-simple.json',
-    );
+  populateFormGraph({required String jsonPath}) async {
+    // core.initialize(jsonPath);
+    final String jsonString = await rootBundle.loadString(jsonPath);
     final Map<String, dynamic> jsonMap = json.decode(jsonString);
 
     setState(() {
       formGraph = FormGraph.fromJson(jsonMap);
     });
+  }
+
+  void _handleFormChange(Map<String, dynamic> data) {
+    // Handle form data changes here
+    formData = data;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Form submitted: $formData")));
   }
 
   @override
@@ -63,7 +71,25 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: formGraph == null
           ? const Center(child: CircularProgressIndicator())
-          : FormBuilder(formGraph: formGraph!),
+          : FormBuilder(
+              formGraph: formGraph!,
+              onChanged: _handleFormChange,
+
+              customFieldBuilders: {
+              //   FieldType.text: (context, node, onSaved) {
+              //     return TextFormField(
+              //       decoration: InputDecoration(
+              //         labelText: node.label,
+              //         hintText: node.subLabel,
+              //       ),
+              //       initialValue: formData[node.fieldName]?.toString() ?? '',
+              //       onChanged: (value) {
+              //         // Handle value change
+              //       },
+              //     );
+              //   },
+              },
+            ),
     );
   }
 }

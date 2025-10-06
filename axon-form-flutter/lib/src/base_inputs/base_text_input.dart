@@ -8,7 +8,6 @@ class BaseTextInput extends StatefulWidget {
     super.key,
     required this.label,
     this.required = false,
-
     this.prefixIcon,
     this.autovalidateMode = AutovalidateMode.onUserInteraction,
     this.enabled = true,
@@ -78,7 +77,15 @@ class _BaseTextInputState extends State<BaseTextInput> {
                     children: [
                       CupertinoTextField(
                         controller: _controller,
-                        decoration: BoxDecoration(color: Colors.transparent),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            // left: BorderSide(color: Colors.red),
+                            // top: BorderSide(color: Colors.orange),
+                            // right: BorderSide(color: Colors.yellow),
+                            bottom: BorderSide(color:context.colorScheme.outline),
+                          ),
+                        ),
+
                         crossAxisAlignment: CrossAxisAlignment.start,
                         maxLines: widget.maxLines,
                         onChanged: (String s) {
@@ -96,7 +103,7 @@ class _BaseTextInputState extends State<BaseTextInput> {
                         Text(
                           field.errorText!,
                           style: context.textTheme.bodyMedium?.copyWith(
-                            color: context.colorScheme.error
+                            color: context.colorScheme.error,
                           ),
                         ),
                     ],

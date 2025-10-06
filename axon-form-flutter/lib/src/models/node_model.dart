@@ -1,8 +1,20 @@
 
+
+enum FieldType {
+  text,
+  dropdown,
+  datetime,
+  radio,
+  file,
+  option,
+  unknown,
+}
+
+
 class Node {
   final String? id;
   final String? type;
-  final String? fieldType;
+  final FieldType? fieldType;
   final String? fieldName;
   final String? subLabel;
   final String? label;
@@ -22,7 +34,7 @@ class Node {
     return Node(
       id: json['id'],
       type: json['type'],
-      fieldType: json['field_type'],
+      fieldType: json['field_type'] == null? null: _parseFieldType(json['field_type']),
       label: json['label'],
       fieldName: json['field_name'],
       subLabel: json['sub_label'],
@@ -31,6 +43,27 @@ class Node {
           .toList(),
     );
   }
+
+
+  static FieldType _parseFieldType(String type) {
+    switch (type) {
+      case 'text':
+        return FieldType.text;
+      case 'dropdown':
+        return FieldType.dropdown;
+      case 'datetime':
+        return FieldType.datetime;
+      case 'radio':
+        return FieldType.radio;
+      case 'file':
+        return FieldType.file;
+      case 'option':
+        return FieldType.option;
+      default:
+        return FieldType.unknown;
+    }
+  }
+
 }
 
 class ValidationRule {

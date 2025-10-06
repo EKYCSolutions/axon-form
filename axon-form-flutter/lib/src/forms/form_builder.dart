@@ -1,187 +1,258 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
-import 'package:axon_form_flutter/src/base_inputs/base_input.dart';
-import 'package:axon_form_flutter/src/extensions/extension.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Page;
 
-import '../models/model.dart';
+typedef FieldBuilder =
+    Widget Function(
+      BuildContext context,
+      Node node,
+      FormFieldSetter<String> onSaved,
+    );
 
 class FormBuilder extends StatefulWidget {
-  final FormGraph formGraph; 
-  const FormBuilder({super.key, required this.formGraph});
+  final FormGraph formGraph;
+  final Map<FieldType, FieldBuilder>? customFieldBuilders;
+  final void Function(Map<String, dynamic>)? onChanged;
 
+  const FormBuilder({
+    super.key,
+    required this.formGraph,
+    this.customFieldBuilders,
+    this.onChanged,
+  });
   @override
   State<FormBuilder> createState() => _FormBuilderState();
 }
 
 class _FormBuilderState extends State<FormBuilder> {
+  @override
+  void initState() {
+    _fieldBuilders = _initializeBuilders();
+    super.initState();
+  }
+
   final Map<String, dynamic> _formData = {};
   final _formKey = GlobalKey<FormState>();
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  late final Map<FieldType, FieldBuilder> _fieldBuilders;
 
-  Widget _buildField(Node node) {
-    switch (node.fieldType) {
-      case "text":
-        return BaseTextInput(
-          label: node.label ?? "LABEL",
-
-          onChanged: (value) {
-            _formData[node.fieldName!] = value;
-          },
-          validator: (value) {
-            return Validators.validate(value, node.validationRules ?? []);
-          },
-        );
-
-      case "dropdown":
+  Map<FieldType, FieldBuilder> _initializeBuilders() {
+    final Map<FieldType, FieldBuilder> defaultBuilders = {
+      FieldType.text: (context, node, onSaved) => BaseTextInput(
+        label: node.label ?? "LABEL",
+        onChanged: (value) => _formData[node.fieldName!] = value,
+        validator: (value) =>
+            Validators.validate(value, node.validationRules ?? []),
+      ),
+      FieldType.dropdown: (context, node, onSaved) {
         final options = widget.formGraph.getOptionsForNode(node.id ?? "");
         return BaseDropdownRadioSelectInput(
           options: options,
           sheetLabel: "Select",
           label: node.label ?? "LABEL",
           onSelected: (value) {
-            setState(() {
-              _formData[node.fieldName!] = value;
-            });
+            _formData[node.fieldName!] = value?.label ?? "";
           },
-          validator: (value) {
-            return Validators.validate(value?.id, node.validationRules ?? []);
-          },
+          validator: (value) =>
+              Validators.validate(value?.id, node.validationRules ?? []),
         );
-
-      case "radio":
+      },
+      FieldType.datetime: (context, node, onSaved) => BaseDatePickerInput(
+        onChanged: (value) =>
+            _formData[node.fieldName ?? node.label ?? ""] = value,
+        label: node.label ?? "LABEL",
+        validator: (value) =>
+            Validators.validate(value, node.validationRules ?? []),
+      ),
+      FieldType.radio: (context, node, onSaved) {
         final options = widget.formGraph.getOptionsForNode(node.id ?? "");
         return BaseFormRadioGroupInput(
           options: options,
           labelText: node.label,
-
           onSelected: (value) {
-            setState(() {
-              _formData[node.fieldName!] = value;
-            });
+            _formData[node.fieldName!] = value?.label;
           },
-          validator: (value) {
-            return Validators.validate(value?.id, node.validationRules ?? []);
-          },
+          validator: (value) =>
+              Validators.validate(value?.id, node.validationRules ?? []),
         );
-      case "datetime":
-        return BaseDatePickerInput(
-          onChanged: (value) {
-            _formData[node.fieldName!] = value;
-          },
-          label: node.label ?? "LABEL",
-          validator: (value) {
-            return Validators.validate(value, node.validationRules ?? []);
-          },
-        );
+      },
 
-      case "file":
-        return BaseFileInput(
-          onChanged: (value) {
-            _formData[node.fieldName!] = value;
-          },
-          validator: (value) {
-            return Validators.validate(
-              value.toString(),
-              node.validationRules ?? [],
-            );
-          },
-          builder: (context, field) {
-            return SizedBox(
-              height: 60,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Stack(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(0),
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            // color: context.colorScheme.secondary.withOpacity(0.1),
-                          ),
-                          child: Center(
-                            child: Icon(Icons.file_present_rounded),
-                          ),
-                        ),
+      FieldType.file: (context, node, onSaved) => BaseFileInput(
+        onChanged: (value) => _formData[node.fieldName!] = value,
+        validator: (value) =>
+            Validators.validate(value.toString(), node.validationRules ?? []),
+        builder: (context, field) {
+          return SizedBox(
+            height: 60,
+            child: Row(
+              children: [
+                Stack(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
                       ),
-                      if (field.value != null)
-                        const Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: Icon(Icons.check_circle),
-                        ),
-                      if (field.value == null)
-                        Positioned(
-                          bottom: 4,
-                          right: 4,
-                          child: Icon(Icons.add_circle_rounded),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(flex: 5, child: Text(node.label ?? "LABEL")),
-                  const Spacer(),
-                  field.value == null
-                      ? Icon(Icons.arrow_drop_down_rounded)
-                      : IconButton(
-                          onPressed: () async {
-                            // bool confirm = await showConfirm(
-                            //   context: context,
-                            //   title: "លុបឯកសារ?",
-                            // );
-                            // if (confirm) {
-                            //   field.didChange(null);
-                            //   widget.onRemoved?.call();
-                            // }
-                          },
-                          icon: Icon(Icons.cancel),
-                        ),
-                ],
-              ),
-            );
-          },
-        );
+                      child: const Center(
+                        child: Icon(Icons.file_present_rounded),
+                      ),
+                    ),
+                    if (field.value != null)
+                      const Positioned(
+                        bottom: 4,
+                        right: 4,
+                        child: Icon(Icons.check_circle),
+                      )
+                    else
+                      const Positioned(
+                        bottom: 4,
+                        right: 4,
+                        child: Icon(Icons.add_circle_rounded),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+                Expanded(flex: 5, child: Text(node.label ?? "LABEL")),
+                const Spacer(),
+                field.value == null
+                    ? const Icon(Icons.arrow_drop_down_rounded)
+                    : IconButton(
+                        onPressed: () {
+                          field.didChange(null);
+                        },
+                        icon: const Icon(Icons.cancel),
+                      ),
+              ],
+            ),
+          );
+        },
+      ),
+    };
 
-      default:
-        return const SizedBox.shrink();
+    // If the user provides custom builders, merge them, giving precedence to the custom ones.
+    if (widget.customFieldBuilders != null) {
+      defaultBuilders.addAll(
+        widget.customFieldBuilders!,
+      ); // Add custom builders
     }
+    return defaultBuilders;
+  }
+
+  void _nextPage() {
+    if (_formKey.currentState!.validate()) {
+      if (_currentPage < widget.formGraph.layout.pages.length - 1) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _submitForm();
+      }
+    }
+  }
+
+  void _submitForm() {
+    _formKey.currentState!.save();
+
+    if (_formKey.currentState!.validate()) {
+      if (widget.onChanged != null) {
+        widget.onChanged!(_formData);
+      }
+    }
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("Form submitted: $_formData")));
   }
 
   @override
   Widget build(BuildContext context) {
-    final nodes = widget.formGraph.nodes.where((n) => n.type == "input");
-
+    final pages = widget.formGraph.layout.pages;
     return Form(
       key: _formKey,
+      child: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(), // Disable swiping
+              onPageChanged: (index) {
+                setState(() => _currentPage = index);
+              },
+              itemCount: pages.length,
+              itemBuilder: (context, pageIndex) {
+                final page = pages[pageIndex];
 
-      child: Padding(
-        padding: EdgeInsetsGeometry.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ...nodes.map(_buildField),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        page.title,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
 
-                    
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0, bottom: 12.0),
+                        child: Text(page.desc),
+                      ),
+                      ...page.fields.map((fieldId) {
+                        final node = widget.formGraph.getNodeById(fieldId);
+                        if (node == null) {
+                          return Text('Field with ID $fieldId not found');
+                        }
+                        final builder = _fieldBuilders[node.fieldType];
 
-
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Form submitted: $_formData")),
-                    );
-                  }
-                },
-                child: const Text("Submit"),
-              ),
-            ],
+                        if (builder != null) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: builder(
+                              context,
+                              node,
+                              (value) => _formData[node.fieldName!] = value,
+                            ),
+                          );
+                        } else {
+                          // Fallback for an unsupported field type
+                          return Text(
+                            'Unsupported field type: ${node.fieldType}',
+                          );
+                        }
+                      }).toList(),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
-        ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                if (_currentPage > 0)
+                  ElevatedButton(
+                    onPressed: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
+                    child: const Text("Back"),
+                  ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: _nextPage,
+                  child: Text(
+                    _currentPage == pages.length - 1 ? "Submit" : "Next",
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
       ),
     );
   }

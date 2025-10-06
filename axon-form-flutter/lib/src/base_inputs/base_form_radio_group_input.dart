@@ -1,3 +1,4 @@
+import 'package:axon_form_flutter/src/extensions/theme_extension.dart';
 import 'package:axon_form_flutter/src/models/model.dart';
 import 'package:axon_form_flutter/src/shared_widgets.dart/shared_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -41,8 +42,18 @@ class _OptionCard extends StatelessWidget {
       onPressed: onSelected,
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Container(
+        decoration: BoxDecoration(
+          color: context.colorScheme.surface,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected
+                ? context.colorScheme.primary
+                : context.colorScheme.outline,
+            width: selected ? 2 : 1,
+          ),
+        ),
         height: compact ? 56 : 80,
-        margin: const EdgeInsets.symmetric(vertical: 4),
+        // margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 8),
 
         child: Row(
@@ -86,7 +97,7 @@ class BaseFormRadioGroupInput extends StatelessWidget {
     this.autoValidateMode = AutovalidateMode.onUserInteraction,
     this.enabled = true,
     this.validator,
-    this.compact = false,
+    this.compact = true,
     this.required = false,
     this.checkMarkPosition = FormCheckMarkPosition.right,
   });

@@ -1,8 +1,7 @@
-import 'package:axon_form_flutter/src/extensions/extension.dart';
+import 'package:axon_form_flutter/src/extensions/theme_extension.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
 
 class BaseDatePickerInput extends StatefulWidget {
   const BaseDatePickerInput({
@@ -75,10 +74,9 @@ class _BaseDatePickerInputState extends State<BaseDatePickerInput> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime? initialValue =
-        widget.initialDateString != null
-            ? DateTime.tryParse(widget.initialDateString!)
-            : null;
+    DateTime? initialValue = widget.initialDateString != null
+        ? DateTime.tryParse(widget.initialDateString!)
+        : null;
 
     if (initialValue != null &&
         widget.lastDate != null &&
@@ -94,7 +92,7 @@ class _BaseDatePickerInputState extends State<BaseDatePickerInput> {
 
       //   return widget.validator?.call(s);
       // },
-     validator: widget.validator,
+      validator: widget.validator,
       enabled: widget.enabled,
       builder: (field) {
         return GestureDetector(
@@ -146,14 +144,28 @@ class _BaseDatePickerInputState extends State<BaseDatePickerInput> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CupertinoTextField(
-                          controller: _controller,
-                          decoration: BoxDecoration(color: Colors.transparent),
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          // style: context.textTheme.labelMedium,
-                          enabled: false,
-                          prefix: widget.prefixIcon,
-                          
+                        Container(
+                          // decoration: BoxDecoration(
+                          //   border: Border.all(
+                          //     color: context.colorScheme.outline,
+                          //   ),
+                          //   borderRadius: BorderRadius.circular(8),
+                          // ),
+                          // padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (widget.prefixIcon != null) widget.prefixIcon!,
+                              Expanded(
+                                child: Text(
+                                  _controller.text.isNotEmpty
+                                      ? _controller.text
+                                      : 'Select date',
+                                  // style: context.textTheme.labelMedium,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         if (field.hasError)
                           Text(

@@ -84,6 +84,7 @@ extern "C" {
 
 extern char* GetResult(void);
 extern int InitGraph(void* dataPtr, int dataLen);
+extern int IsNodeVisible(void* nodeIDPtr, int nodeIDLen);
 extern int ValidateNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);
 extern int GetFormValue(void);
 extern char* ResultPtr(void);
