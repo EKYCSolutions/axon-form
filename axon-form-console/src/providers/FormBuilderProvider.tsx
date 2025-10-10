@@ -12,15 +12,25 @@ import {
   createEdge as createEdgeService,
   createNode as createNodeService,
   createPage as createPageService,
+  getAllConditionGroups,
+  getAllNodes,
   getAllPages,
   getPageById,
   getValueNodes,
+  updatePageOrder as updatePageOrderService,
+  updatePage as updatePageService,
 } from '@/services/PocketBaseService';
+import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
 import { parseNodeResponse } from '@/types/Node';
 import type { Page } from '@/types/Page';
+import { exportJSON } from '@/utils/File';
+import { convertGraphToJSON } from '@/utils/Graph';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
-import { type NodeFormSchemaData } from '@/validations/NodeValidation';
+import {
+  convertNodeResponseToGraphNode,
+  type NodeFormSchemaData,
+} from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
 import { useQueries, useQuery } from '@tanstack/react-query';
@@ -34,7 +44,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const [selectedPageId, setSelectedPageId] = useState<string>();
 
   // Fetch all pages
-  const { data: pagesData } = useQuery({
+  const { data: pagesData, refetch: refreshPages } = useQuery({
     queryKey: ['pages'],
     queryFn: getAllPages,
   });
@@ -46,16 +56,33 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     enabled: !!selectedPageId,
   });
 
+  //
+  const { refetch: fetchNodes } = useQuery({
+    queryKey: ['nodes'],
+    queryFn: () => getAllNodes(),
+    enabled: false,
+  });
+
+  //
+  const { refetch: fetchConditionGroups } = useQuery({
+    queryKey: ['conditionGroups'],
+    queryFn: () => getAllConditionGroups(),
+    enabled: false,
+  });
+
   // Transform pages data
   const pages = useMemo(() => {
     if (!pagesData) return [];
 
-    return pagesData.map((page) => ({
-      id: page.id,
-      title: page.title,
-      description: page.description,
-      fields: page.expand.fields.map(parseNodeResponse),
-    }));
+    return pagesData
+      .map((page) => ({
+        id: page.id,
+        order: page.order,
+        title: page.title,
+        description: page.description,
+        fields: page.expand.fields.map(parseNodeResponse),
+      }))
+      .sort((a, b) => a.order - b.order);
   }, [pagesData]);
 
   // Transform selected page data
@@ -64,6 +91,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
     return {
       id: singlePageData.id,
+      order: singlePageData.order,
       title: singlePageData.title,
       description: singlePageData.description,
       fields: singlePageData.expand.fields.map(parseNodeResponse),
@@ -204,6 +232,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         await createPageService(data, nodeIdsFiltered);
         handleSuccess('Add Page Success');
+
+        await refreshPages();
       } catch (error) {
         handleError(error);
       }
@@ -216,11 +246,130 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     setSelectedPageId(id);
   }, []);
 
+  //
+  const updatePage = useCallback(
+    async (id: string, data: Partial<PageFormSchemaData>) => {
+      try {
+        const updateBody: Partial<PageFormSchemaData> = {
+          title: data.title,
+          description: data.description,
+        };
+
+        if (!data.fields) {
+          return;
+        }
+
+        const fieldIds = [];
+
+        // Get all existing field ids
+        const existingFieldIds = data.fields
+          .filter((field) => field.id)
+          .map((field) => field.id!);
+        //
+        if (existingFieldIds) fieldIds.push(...existingFieldIds);
+
+        // Get new fields
+        const newFields = data.fields?.filter((field) => !field.id);
+
+        // Create node for each of the new fields
+        if (newFields) {
+          const newFieldIdsRes = await Promise.all(
+            newFields.map(async (field) => {
+              const res = await addNode(field);
+              return res?.id;
+            }),
+          );
+
+          const newFieldIds = newFieldIdsRes.filter(
+            (id): id is string => typeof id === 'string',
+          );
+
+          fieldIds?.push(...newFieldIds);
+        }
+
+        //
+        updatePageService(id, updateBody, fieldIds);
+
+        //
+        handleSuccess('Update Page Success');
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [],
+  );
+
+  //
+  const updatePageOrder = useCallback(async (pages: Page[]) => {
+    try {
+      await Promise.all(
+        pages.map(
+          async (page) =>
+            await updatePageOrderService(page.id, {
+              order: page.order,
+            }),
+        ),
+      );
+    } catch (err) {
+      handleError(err);
+    }
+  }, []);
+
+  //
+  const exportForm = useCallback(
+    async (fileName: string) => {
+      try {
+        const { data: nodesData } = await fetchNodes();
+        const { data: conditionGroupsData } = await fetchConditionGroups();
+
+        const nodes = nodesData?.map((node) =>
+          convertNodeResponseToGraphNode(node),
+        );
+
+        if (!nodes) {
+          return;
+        }
+
+        const edges = parseEdges(nodes);
+        const conditionGroups: EdgeConditionGroup[] = (
+          conditionGroupsData ?? []
+        ).map((cd) => ({
+          id: cd.id,
+          node: cd.node,
+          conditions: cd.conditions,
+        }));
+
+        const json = convertGraphToJSON(nodes, edges, conditionGroups, pages);
+
+        exportJSON(json, fileName);
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [pages],
+  );
+
+  const parseEdges = (nodes: GraphNode[]) => {
+    const nodeIds = nodes.map((node) => node.id);
+    const edgeRes: GraphEdge[] = nodes
+      .filter((node) => node.edges.length > 0)
+      .flatMap((node) => node.edges);
+    const ids = new Set();
+    const uniqueEdges = edgeRes.filter(({ id }) => !ids.has(id) && ids.add(id));
+    return uniqueEdges.filter(
+      (edge) => nodeIds.includes(edge.from) && nodeIds.includes(edge.to),
+    );
+  };
+
   const value: FormBuilderContextType = {
     pages,
     selectedPage,
+    refreshPages,
     addPage,
     getPage,
+    updatePage,
+    updatePageOrder,
+    exportForm,
   };
 
   return (

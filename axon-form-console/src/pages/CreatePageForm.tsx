@@ -47,6 +47,14 @@ export default function CreatePageForm() {
         {
           type: NodeType.Input,
           field_type: NodeFieldType.Text,
+          field_name: 'field-with-condition',
+          label: 'Field Label with Condition',
+          placeholder: 'field with condition placeholder',
+          validation_rules: [],
+        },
+        {
+          type: NodeType.Input,
+          field_type: NodeFieldType.Text,
           field_name: 'field-name',
           label: 'Field Label',
           placeholder: 'placeholder',
@@ -102,10 +110,9 @@ export default function CreatePageForm() {
   function onSubmit(data: PageFormSchemaData) {
     console.log(data);
     addPage(data);
-
+    //
     // form.reset();
-    // setSheetOpen(false);
-    // toast.success('Added group condition successfully');
+    // navigate('/page', {});
   }
 
   function onAddFormField(fieldType: NodeFieldType) {
@@ -222,7 +229,7 @@ export default function CreatePageForm() {
                       key={field.id}
                       fieldId={field.id}
                       fieldIndex={idx}
-                      fieldType={field.field_type}
+                      fieldType={field.field_type!}
                       fieldLabel={form.watch(`fields.${idx}.label`)}
                       //
                       onFieldDelete={() => remove(idx)}

@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from './providers/ThemeProvider';
 
-import { createBrowserRouter, RouterProvider } from 'react-router';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import CreatePageForm from './pages/CreatePageForm';
 import MainPage from './pages/MainPage';
 import PageDetail from './pages/PageDetail';
@@ -14,7 +14,7 @@ export default function App() {
 
   const router = createBrowserRouter([
     {
-      path: '/',
+      path: '/page',
       element: <MainPage />,
     },
     {
@@ -25,6 +25,7 @@ export default function App() {
       path: '/page/:id',
       element: <PageDetail />,
     },
+    { path: '*', element: <Navigate to='/page' replace /> },
   ]);
 
   return (

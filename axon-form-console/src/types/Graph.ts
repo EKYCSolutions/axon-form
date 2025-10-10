@@ -43,7 +43,7 @@ export interface EdgeCondition {
   check_node: string;
   //
   expression: ConditionExpression;
-  expected_value: string | number | boolean;
+  expected_value: string;
 }
 export interface EdgeConditionGroup {
   id: string;

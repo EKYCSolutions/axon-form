@@ -13,6 +13,7 @@ import { Plus } from 'lucide-react';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
+import ConditionFormField from './ConditionFormField';
 import OptionFormField from './OptionFormField';
 import ValidationRuleFormField from './ValidationRuleFormField';
 
@@ -41,6 +42,14 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
     name: `fields.${fieldIndex}.select_options`,
   });
 
+  const {
+    fields: conditionFields,
+    append: appendConditionField,
+    remove: removeConditionField,
+  } = useFieldArray<PageFormSchemaData>({
+    name: `fields.${fieldIndex}.conditions`,
+  });
+
   return (
     <div className='space-y-2 grid grid-cols-2 gap-4'>
       <FormField
@@ -48,8 +57,8 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
         name={`fields.${fieldIndex}.field_name`}
         render={({ field }) => {
           return (
-            <FormItem>
-              <FormLabel>Field name</FormLabel>
+            <FormItem className='h-16'>
+              <FormLabel>Field Name</FormLabel>
               <FormControl>
                 <Input
                   className='font-light text-sm'
@@ -67,7 +76,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
         name={`fields.${fieldIndex}.label`}
         render={({ field }) => {
           return (
-            <FormItem>
+            <FormItem className='h-16'>
               <FormLabel>Field Label</FormLabel>
               <FormControl>
                 <Input
@@ -168,6 +177,37 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
         >
           <Plus />
           Add Validation
+        </Button>
+      </div>
+      <div className='col-span-full'>
+        <FormLabel className='mb-3'>Condition</FormLabel>
+        <div className='flex flex-col gap-2'>
+          {conditionFields.map((field, index) => {
+            return (
+              <ConditionFormField
+                key={field.id}
+                fieldId={field.id}
+                fieldIndex={fieldIndex}
+                conditionIndex={index}
+                onRemoveCondition={() => removeConditionField(index)}
+              />
+            );
+          })}
+        </div>
+
+        <Button
+          type='button'
+          className='w-full'
+          variant='outline'
+          onClick={() =>
+            appendConditionField({
+              type: '' as ValidationRuleType,
+              message: '',
+            })
+          }
+        >
+          <Plus />
+          Add Condition
         </Button>
       </div>
     </div>

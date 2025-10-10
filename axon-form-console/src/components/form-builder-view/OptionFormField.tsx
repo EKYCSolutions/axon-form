@@ -45,7 +45,7 @@ export default function OptionFormField({
           <div className='w-full flex items-center justify-between gap-2'>
             <div className='flex items-center gap-2'>
               <p className='font-light text-xs'>
-                {formatIndex(fieldIndex + 1)}
+                {formatIndex(optionIndex + 1)}
               </p>
               <Badge variant='secondary'>
                 {label && label.length > 0 ? label : 'Enter option label'}

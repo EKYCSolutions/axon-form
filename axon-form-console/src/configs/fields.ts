@@ -21,9 +21,9 @@ export const inputFieldTypes: InputFieldTypeSelectItem[] = [
     type: NodeFieldType.Number,
   },
   {
-    label: 'Datetime',
-    value: 'datetime',
-    type: NodeFieldType.Datetime,
+    label: 'Date',
+    value: 'date',
+    type: NodeFieldType.Date,
   },
   {
     label: 'Multi Select',

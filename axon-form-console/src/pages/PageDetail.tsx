@@ -30,14 +30,17 @@ import {
 } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
 
 export default function PageDetail() {
   const { id } = useParams();
+  const { selectedPage, getPage, updatePage } = useFormBuilder();
+  //
+  const [dirtyInputFields, setDirtyInputFields] = useState([]);
+  //
   const navigate = useNavigate();
-  const { pages, selectedPage, addPage, getPage } = useFormBuilder();
 
   const form = useForm<PageFormSchemaData>({
     resolver: zodResolver(PageFormSchema),
@@ -59,15 +62,11 @@ export default function PageDetail() {
     if (id) {
       getPage(id);
     }
+
     if (selectedPage) {
       form.reset(convertPageToPageFormSchema(selectedPage));
     }
   }, [id, getPage, selectedPage, form]);
-
-  function onSubmit(data: PageFormSchemaData) {
-    console.log(data);
-    // addPage(data);
-  }
 
   function onAddFormField(fieldType: NodeFieldType) {
     append({
@@ -89,6 +88,14 @@ export default function PageDetail() {
     move(oldIndex, newIndex);
   }
 
+  function onSubmit(data: PageFormSchemaData) {
+    if (!id) {
+      return;
+    }
+
+    updatePage(id, data);
+  }
+
   return (
     <FormBuilderViewLayout>
       <NavButton
@@ -98,6 +105,7 @@ export default function PageDetail() {
         className='mt-4'
       />
       <Separator className='mt-4 mb-6' />
+      <p>{JSON.stringify(form.formState.dirtyFields)}</p>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -111,7 +119,10 @@ export default function PageDetail() {
                   : 'Enter a page title'
               }
             />
-            <Button variant='secondary' disabled={!form.formState.isValid}>
+            <Button
+              variant='secondary'
+              disabled={!form.formState.isValid || !form.formState.isDirty}
+            >
               Save
             </Button>
           </div>

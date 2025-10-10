@@ -3,16 +3,12 @@ import {
   EdgeType,
   NodeFieldType,
 } from '@/configs/graph';
-import type {
-  EdgeConditionGroup,
-  GraphEdge,
-  GraphNode,
-  Page,
-} from '@/types/Graph';
+import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
+import type { Page } from '@/types/Page';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import { convertGraphEdgeToEdgeForm } from '@/validations/EdgeValidation';
 import { convertGraphNodeToNodeForm } from '@/validations/NodeValidation';
-import { convertPageToPageForm } from '@/validations/PageValidation';
+import { convertPageToPageForm } from '@/validations/PageFormValidation';
 
 export const convertConditionGroupToConditionString = (
   data: ConditionGroupFormSchemaData,

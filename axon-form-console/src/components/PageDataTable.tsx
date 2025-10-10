@@ -28,15 +28,25 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useFormBuilder } from '@/hooks/useFormBuilder';
 import type { Page } from '@/types/Page';
+import { formatIndex } from '@/utils/String';
 import { GripVertical } from 'lucide-react';
-import { useId, useMemo, useState, type MouseEventHandler } from 'react';
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+  type MouseEventHandler,
+} from 'react';
 import { useNavigate } from 'react-router';
 
 function DraggableRow({
+  idx,
   row,
   onRowClick,
 }: {
+  idx: number;
   row: Page;
   onRowClick: MouseEventHandler<HTMLTableRowElement>;
 }) {
@@ -71,6 +81,7 @@ function DraggableRow({
           <GripVertical size={15} color='gray' />
         </div>
       </TableCell>
+      <TableCell>{formatIndex(idx + 1)}</TableCell>
       <TableCell>{row.title}</TableCell>
       <TableCell>{row.description}</TableCell>
       <TableCell>{row.fields.length}</TableCell>
@@ -79,12 +90,32 @@ function DraggableRow({
 }
 
 interface IProps {
-  pages: Page[];
+  reOrderedPages: Page[];
+  shouldResetOrder: boolean;
+  handleReordering: (status: boolean, pages: Page[]) => void;
 }
 
-export function PageDataTable({ pages }: IProps) {
+export function PageDataTable({
+  reOrderedPages,
+  shouldResetOrder,
+  handleReordering,
+}: IProps) {
   const navigate = useNavigate();
+  const { pages } = useFormBuilder();
+  //
+  const [initialData, setInitialData] = useState(pages);
   const [data, setData] = useState(pages);
+
+  useEffect(() => {
+    if (shouldResetOrder) {
+      setData(initialData);
+    }
+  }, [shouldResetOrder]);
+
+  useEffect(() => {
+    setData(pages);
+    setInitialData(pages);
+  }, [pages]);
 
   const sortableId = useId();
   const sensors = useSensors(
@@ -104,7 +135,22 @@ export function PageDataTable({ pages }: IProps) {
       setData((data) => {
         const oldIndex = dataIds.indexOf(active.id);
         const newIndex = dataIds.indexOf(over.id);
-        return arrayMove(data, oldIndex, newIndex);
+
+        // Move the item in the array
+        const newData = arrayMove(data, oldIndex, newIndex);
+
+        // Update order field
+        const updatedData = newData.map((item, index) => ({
+          ...item,
+          order: index,
+        }));
+
+        handleReordering(
+          JSON.stringify(initialData) !== JSON.stringify(updatedData),
+          data,
+        );
+
+        return updatedData;
       });
     }
   }
@@ -122,8 +168,9 @@ export function PageDataTable({ pages }: IProps) {
           <TableHeader className='bg-muted sticky top-0 z-10'>
             <TableRow>
               <TableHead className='w-8'></TableHead>
-              <TableHead>ID</TableHead>
+              <TableHead>No.</TableHead>
               <TableHead>Title</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>No. of Fields</TableHead>
             </TableRow>
           </TableHeader>
@@ -132,9 +179,10 @@ export function PageDataTable({ pages }: IProps) {
               items={dataIds}
               strategy={verticalListSortingStrategy}
             >
-              {data.map((data) => (
+              {data.map((data, idx) => (
                 <DraggableRow
                   key={data.id}
+                  idx={idx}
                   row={data}
                   onRowClick={() => navigate(`/page/${data.id}`)}
                 />

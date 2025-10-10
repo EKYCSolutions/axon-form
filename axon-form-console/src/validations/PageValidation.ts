@@ -1,4 +1,3 @@
-import type { Page } from '@/types/Graph';
 import z from 'zod';
 
 export const OldPageFormSchema = z.object({
@@ -14,12 +13,3 @@ export type OldPageFormSchemaData = z.infer<typeof OldPageFormSchema>;
 export const OldPageFormSchemaDefaultValue: OldPageFormSchemaData = {
   field_ids: [],
 };
-
-export function convertPageToPageForm(page: Page) {
-  return {
-    id: page.id,
-    title: page.title,
-    description: page.description,
-    field_ids: page.field_ids,
-  };
-}

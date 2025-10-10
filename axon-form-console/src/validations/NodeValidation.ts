@@ -4,6 +4,7 @@ import type { Node } from '@/types/Node';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
+import { ConditionFormSchema } from './ConditionValidation';
 import { convertEdgeResponseToGraphEdge } from './EdgeValidation';
 import { SelectOptionFormSchema } from './SelectOptionValidation';
 import {
@@ -12,23 +13,25 @@ import {
 } from './ValidationRulesValidation';
 
 export const NodeFormSchema = z.object({
+  id: z.string().optional(),
   type: z.enum(NodeType),
   field_type: z.enum(NodeFieldType).optional(),
   field_name: z.string().optional(),
   default_value: z.string().optional(),
   placeholder: z.string().optional(),
-  label: z.string().min(1, {
-    message: 'Label must be at least 1 character',
-  }),
-  validation_rules: z.array(ValidationRuleFormSchema).optional(),
+  label: z.string().min(1),
   select_options: z.array(SelectOptionFormSchema).optional(),
   metadata: z.record(z.string(), z.any()).optional(),
+  order: z.number().optional(),
+  validation_rules: z.array(ValidationRuleFormSchema).optional(),
+  conditions: z.array(ConditionFormSchema).optional(),
 });
 
 export type NodeFormSchemaData = z.infer<typeof NodeFormSchema>;
 
 export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
   return {
+    id: node.id,
     type: node.type as NodeType,
     label: node.label,
     field_type: node.field_type as NodeFieldType,
@@ -85,7 +88,7 @@ export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
     validations:
-      node.validation_rules.length > 0
+      node.validation_rules && node.validation_rules.length > 0
         ? node.validation_rules.map((validation) =>
             convertValidationRuleResponseToValidationRule(validation),
           )

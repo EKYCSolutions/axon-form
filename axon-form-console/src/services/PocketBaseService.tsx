@@ -211,6 +211,25 @@ export const getPage = async (id: string): Promise<NodeResponse> => {
 
 export const updatePage = async (
   id: string,
+  data: Partial<PageFormSchemaData>,
+  field_ids: string[],
+): Promise<PageResponse> => {
+  //
+  if (field_ids.length > 0) {
+    return await client.collection(PocketBaseCollection.PAGES).update(id, {
+      title: data.title,
+      description: data.description,
+      fields: field_ids,
+    });
+  }
+
+  // return await client.collection(PocketBaseCollection.PAGES).update(id, data);
+
+  return await client.collection(PocketBaseCollection.PAGES).getOne(id);
+};
+
+export const updatePageOrder = async (
+  id: string,
   data: Partial<NodeFormSchemaData>,
 ): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).update(id, data);

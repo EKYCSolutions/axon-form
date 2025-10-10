@@ -86,7 +86,9 @@ export default function ValidationRuleFormField({
         )}
       />
       {ValidationRuleTypeWithValue.includes(
-        watch(`validation_rules.${validationRuleIndex}.type`),
+        watch(
+          `fields.${fieldIndex}.validation_rules.${validationRuleIndex}.type`,
+        ),
       ) && (
         <FormField
           control={control}

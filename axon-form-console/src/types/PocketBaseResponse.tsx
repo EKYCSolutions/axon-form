@@ -43,6 +43,7 @@ export interface ConditionGroupResponse extends BaseResponse {
 }
 
 export interface PageResponse extends BaseResponse {
+  order: number;
   title: string;
   description: string;
   fields: NodeResponse[];

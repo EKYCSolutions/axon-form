@@ -18,3 +18,12 @@ export function convertPageToPageFormSchema(page: Page): PageFormSchemaData {
     fields: page.fields.map((node) => convertNodeToNodeForm(node)),
   };
 }
+
+export function convertPageToPageForm(page: Page) {
+  return {
+    id: page.id,
+    title: page.title,
+    description: page.description,
+    field_ids: page.fields.map((field) => field.id),
+  };
+}
