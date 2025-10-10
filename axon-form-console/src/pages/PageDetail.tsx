@@ -105,7 +105,6 @@ export default function PageDetail() {
         className='mt-4'
       />
       <Separator className='mt-4 mb-6' />
-      <p>{JSON.stringify(form.formState.dirtyFields)}</p>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

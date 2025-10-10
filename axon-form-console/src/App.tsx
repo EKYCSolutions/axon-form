@@ -7,7 +7,7 @@ import CreatePageForm from './pages/CreatePageForm';
 import MainPage from './pages/MainPage';
 import PageDetail from './pages/PageDetail';
 import { FormBuilderProvider } from './providers/FormBuilderProvider';
-import { GraphViewProvider } from './providers/GraphviewProvider';
+import { GraphViewProvider } from './providers/GraphViewProvider';
 
 export default function App() {
   const queryClient = new QueryClient();
