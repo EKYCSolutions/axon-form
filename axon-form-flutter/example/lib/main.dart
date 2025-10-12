@@ -38,7 +38,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    populateFormGraph(jsonPath: 'assets/example-graph-simple.json');
+    populateFormGraph(jsonPath: 'assets/example.json');
     // 'assets/example-graph.json',
 
     super.initState();

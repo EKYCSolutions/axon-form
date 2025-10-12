@@ -198,7 +198,6 @@ class _OptionListState extends State<_OptionList> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-
         Padding(
           padding: const EdgeInsets.all(20),
           child: Text(
@@ -365,7 +364,15 @@ class _BaseRadioSelectInputState extends State<BaseDropdownRadioSelectInput> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: widget.enabled
+              ? context.colorScheme.outline
+              : context.colorScheme.outlineVariant,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
       // backgroundColor: widget.enabled
       //     ? context.colorScheme.surface
       //     : context.colorScheme.surfaceDim,
@@ -481,70 +488,80 @@ class _BaseRadioSelectInputState extends State<BaseDropdownRadioSelectInput> {
                         const Spacer(),
                       ],
                     ),
-                    InputDecorator(
-                      decoration: InputDecoration(
-                        counterText: "",
-                        hintText: widget.label,
-                        isDense: true,
-                        errorText: field.errorText,
-
-                        prefixIconConstraints: const BoxConstraints(
-                          minWidth: 18 + 8,
-                          maxWidth: 18 + 8,
-                          minHeight: 18,
-                          maxHeight: 18,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: InputDecorator(
+                            decoration: InputDecoration(
+                              counterText: "",
+                              hintText: widget.label,
+                              isDense: true,
+                              errorText: field.errorText,
+                          
+                              prefixIconConstraints: const BoxConstraints(
+                                minWidth: 18 + 8,
+                                maxWidth: 18 + 8,
+                                minHeight: 18,
+                                maxHeight: 18,
+                              ),
+                              suffixIconConstraints: const BoxConstraints(
+                                minWidth: 18 + 8,
+                                maxWidth: 18 + 8,
+                                minHeight: 18,
+                                maxHeight: 18,
+                              ),
+                              border: InputBorder.none,
+                              prefixIcon: widget.prefixIcon,
+                          
+                              // suffix: widget.prefixIcon,
+                              suffixIcon: Icon(
+                                Icons.arrow_drop_down_rounded,
+                                color: context.colorScheme.surfaceDim,
+                                size: 9,
+                              ),
+                            ),
+                            child: Builder(
+                              builder: (context) {
+                                if (field.value == null) {
+                                  return Text(
+                                    "Select",
+                                    // style: context.textTheme.bodyMedium,
+                                  );
+                                }
+                                final value = widget.options.firstWhereOrNull(
+                                  (o) => o.id == field.value?.id,
+                                );
+                          
+                                if (value == null && widget.allowCustomOption) {
+                                  return Text(
+                                    field.value?.label ?? "Custom",
+                                    // style: context.textTheme.bodyMedium,
+                                  );
+                                }
+                                if (value == null && !widget.allowCustomOption) {
+                                  return Text(
+                                    "Select",
+                                    // style: context.textTheme.bodyMedium,
+                                  );
+                                }
+                          
+                                return Text(
+                                  value?.label ?? field.value?.label ?? "",
+                                  // style: field.hasError
+                                  //     ? context.textTheme.bodyMedium!.copyWith(
+                                  //         color: context.colorScheme.error,
+                                  //       )
+                                  //     : null,
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                        suffixIconConstraints: const BoxConstraints(
-                          minWidth: 18 + 8,
-                          maxWidth: 18 + 8,
-                          minHeight: 18,
-                          maxHeight: 18,
-                        ),
-                        border: InputBorder.none,
-                        prefixIcon: widget.prefixIcon,
-
-                        // suffix: widget.prefixIcon,
-                        suffixIcon: Icon(
-                          Icons.arrow_drop_down_rounded,
-                          color: context.colorScheme.surfaceDim,
-                          size: 9,
-                        ),
-                      ),
-                      child: Builder(
-                        builder: (context) {
-                          if (field.value == null) {
-                            return Text(
-                              "Select",
-                              // style: context.textTheme.bodyMedium,
-                            );
-                          }
-                          final value = widget.options.firstWhereOrNull(
-                            (o) => o.id == field.value?.id,
-                          );
-
-                          if (value == null && widget.allowCustomOption) {
-                            return Text(
-                              field.value?.label ?? "Custom",
-                              // style: context.textTheme.bodyMedium,
-                            );
-                          }
-                          if (value == null && !widget.allowCustomOption) {
-                            return Text(
-                              "Select",
-                              // style: context.textTheme.bodyMedium,
-                            );
-                          }
-
-                          return Text(
-                            value?.label ?? field.value?.label ?? "",
-                            // style: field.hasError
-                            //     ? context.textTheme.bodyMedium!.copyWith(
-                            //         color: context.colorScheme.error,
-                            //       )
-                            //     : null,
-                          );
-                        },
-                      ),
+                      Icon(
+                        Icons.arrow_drop_down_rounded
+                      )
+                      
+                      ],
                     ),
                   ],
                 ),
@@ -565,7 +582,6 @@ class _BaseRadioSelectInputState extends State<BaseDropdownRadioSelectInput> {
                 // )
               ],
             ),
-
           );
         },
       ),

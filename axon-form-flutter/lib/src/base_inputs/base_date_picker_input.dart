@@ -29,7 +29,7 @@ class BaseDatePickerInput extends StatefulWidget {
   final DateTime? firstDate;
   final String? Function(String?)? validator;
   final bool autofilled;
-  final void Function(DateTime?)? onChanged;
+  final void Function(String?)? onChanged;
   final Widget? prefixIcon;
   final AutovalidateMode? autovalidateMode;
 
@@ -108,7 +108,7 @@ class _BaseDatePickerInputState extends State<BaseDatePickerInput> {
 
               _controller.text = displayDateFormat.format(selectedDate);
 
-              widget.onChanged?.call(selectedDate);
+              widget.onChanged?.call(dateString);
               field.didChange(dateString); // Update the field value
             }
           },

@@ -51,8 +51,9 @@ class _FormBuilderState extends State<FormBuilder> {
           sheetLabel: "Select",
           label: node.label ?? "LABEL",
           onSelected: (value) {
-            _formData[node.fieldName!] = value?.label ?? "";
+            _formData[node.fieldName!] = value;
           },
+          initialValue: _formData[node.fieldName!],
           validator: (value) =>
               Validators.validate(value?.id, node.validationRules ?? []),
         );
@@ -70,8 +71,9 @@ class _FormBuilderState extends State<FormBuilder> {
           options: options,
           labelText: node.label,
           onSelected: (value) {
-            _formData[node.fieldName!] = value?.label;
+            _formData[node.fieldName!] = value;
           },
+          initialValue: _formData[node.fieldName!],
           validator: (value) =>
               Validators.validate(value?.id, node.validationRules ?? []),
         );
@@ -119,6 +121,7 @@ class _FormBuilderState extends State<FormBuilder> {
                     ? const Icon(Icons.arrow_drop_down_rounded)
                     : IconButton(
                         onPressed: () {
+                          _formData[node.fieldName!] = null;
                           field.didChange(null);
                         },
                         icon: const Icon(Icons.cancel),

@@ -44,5 +44,14 @@
 	<string>XFWK</string>
 	<key>XCFrameworkFormatVersion</key>
 	<string>1.0</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to your camera to capture photos and videos for features identity verification, profile updates, or document scanning.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app uses Face ID to securely authenticate your identity for faster and more convenient login.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires microphone access to record audio for features voice commands or playing instructions audio.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to upload images for features profile picture, document.</string>
+	
 </dict>
 </plist>

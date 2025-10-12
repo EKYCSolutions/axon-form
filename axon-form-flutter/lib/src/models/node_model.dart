@@ -69,7 +69,7 @@ class Node {
 class ValidationRule {
   final String? type;
   final String? message;
-  final String? value;
+  final int? value;
 
   ValidationRule({
     this.type,

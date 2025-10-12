@@ -11,7 +11,7 @@ BUILD_DIR=build
 BUILD_DIR_iphonesimulator=build/iphonesimulator
 BUILD_DIR_iphoneos=build/iphoneos
 BUILD_DIR_HEADER=build/header
-IOS_DIR=build
+# IOS_DIR=build
 IOS_DIR=ios
 echo "🧹 Cleaning old build files..."
 rm -rf $BUILD_DIR $IOS_DIR

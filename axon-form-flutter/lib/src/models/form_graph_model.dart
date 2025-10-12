@@ -63,8 +63,8 @@ class Page {
     return Page(
       id: json['id'],
       title: json['title'],
-      desc: json['desc'],
-      fields: (json['fields'] as List).map((f) => f.toString()).toList(),
+      desc: json['desc'] ?? json['description'] ??"N/A",
+      fields: json['fields'] != null?  (json['fields'] as List).map((f) => f.toString()).toList() : (json['field_ids'] as List).map((f) => f.toString()).toList(),
     );
   }
 }
