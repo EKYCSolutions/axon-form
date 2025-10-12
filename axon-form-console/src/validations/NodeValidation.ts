@@ -1,46 +1,50 @@
 import { NodeFieldType, NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
+import type { Node } from '@/types/Node';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
 import { generateRandomRgbColor } from '@/utils/Color';
 import z from 'zod';
+import { ConditionFormSchema } from './ConditionValidation';
 import { convertEdgeResponseToGraphEdge } from './EdgeValidation';
+import { SelectOptionFormSchema } from './SelectOptionValidation';
 import {
   convertValidationRuleResponseToValidationRule,
   ValidationRuleFormSchema,
 } from './ValidationRulesValidation';
 
-export const NodeFormSchema = z
-  .object({
-    type: z.enum(NodeType),
-    field_type: z.enum(NodeFieldType).optional(),
-    field_name: z.string().optional(),
-    label: z.string().min(1, {
-      message: 'Label must be at least 1 character',
-    }),
-    validation_rules: z.array(ValidationRuleFormSchema).optional(),
-    metadata: z.record(z.string(), z.any()).optional(),
-  })
-  .refine(
-    (data) => {
-      if (data.type == NodeType.Input) {
-        return data.field_type !== undefined && data.field_name !== undefined;
-      }
-      return true;
-    },
-    {
-      message: 'Please select a field type',
-      path: ['field_type'],
-    },
-  );
+export const NodeFormSchema = z.object({
+  id: z.string().optional(),
+  type: z.enum(NodeType),
+  field_type: z.enum(NodeFieldType).optional(),
+  field_name: z.string().optional(),
+  default_value: z.string().optional(),
+  placeholder: z.string().optional(),
+  label: z.string().min(1),
+  select_options: z.array(SelectOptionFormSchema).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
+  order: z.number().optional(),
+  validation_rules: z.array(ValidationRuleFormSchema).optional(),
+  conditions: z.array(ConditionFormSchema).optional(),
+});
 
 export type NodeFormSchemaData = z.infer<typeof NodeFormSchema>;
 
-export const NodeFormSchemaDefaultValue: NodeFormSchemaData = {
-  type: NodeType.Input,
-  field_type: undefined,
-  label: '',
-  validation_rules: [],
-};
+export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
+  return {
+    id: node.id,
+    type: node.type as NodeType,
+    label: node.label,
+    field_type: node.field_type as NodeFieldType,
+    field_name: node.field_name,
+    select_options: node.options?.map((option) => ({
+      label: option.label,
+      value: option.value,
+    })),
+    validation_rules: node.validation_rules?.map((rule) =>
+      convertValidationRuleResponseToValidationRule(rule),
+    ),
+  };
+}
 
 export function convertGraphNodeToNodeForm(node: GraphNode) {
   return {
@@ -84,7 +88,7 @@ export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
     caption: node.label,
     color: generateRandomRgbColor(node.type as NodeType),
     validations:
-      node.validation_rules.length > 0
+      node.validation_rules && node.validation_rules.length > 0
         ? node.validation_rules.map((validation) =>
             convertValidationRuleResponseToValidationRule(validation),
           )

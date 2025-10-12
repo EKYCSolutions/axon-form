@@ -21,7 +21,7 @@ export const ValidationRuleTypeWithValue = [
 ];
 
 export const convertValidationRuleResponseToValidationRule = (
-  validation_rule: Record<string, string | number>,
+  validation_rule: ValidationRule,
 ): ValidationRule => {
   return {
     type: validation_rule.type as ValidationRuleType,

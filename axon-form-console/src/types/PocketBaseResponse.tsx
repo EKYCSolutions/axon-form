@@ -5,8 +5,9 @@ export interface BaseResponse {
 }
 
 export interface NodeResponse extends BaseResponse {
-  type: string;
   label: string;
+  value: string;
+  type: string;
   field_type: string;
   field_name?: string;
   //
@@ -42,7 +43,12 @@ export interface ConditionGroupResponse extends BaseResponse {
 }
 
 export interface PageResponse extends BaseResponse {
+  order: number;
   title: string;
   description: string;
-  field_ids: Record<string, string[]>;
+  fields: NodeResponse[];
+  //
+  expand: {
+    fields: NodeResponse[];
+  };
 }

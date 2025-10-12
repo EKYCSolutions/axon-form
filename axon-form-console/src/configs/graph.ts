@@ -6,15 +6,25 @@ export enum NodeType {
 
 export enum NodeFieldType {
   Text = 'text',
+  TextArea = 'textarea',
   Number = 'number',
-  Datetime = 'datetime',
+  Date = 'date',
   MultiSelect = 'multi_select',
+  Select = 'select',
   Radio = 'radio',
   Dropdown = 'dropdown',
   Checkbox = 'checkbox',
   File = 'file',
   Password = 'password',
 }
+
+export const NodeFieldTypeWithOptions = [
+  NodeFieldType.MultiSelect,
+  NodeFieldType.Select,
+  NodeFieldType.Radio,
+  NodeFieldType.Dropdown,
+  NodeFieldType.Checkbox,
+];
 
 export enum EdgeType {
   HasOption = 'has_options',

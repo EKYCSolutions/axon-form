@@ -6,10 +6,10 @@ import type {
   PageResponse,
 } from '@/types/PocketBaseResponse';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
-import type { ConditionFormSchemaData } from '@/validations/ConditionValidation.js';
-import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
-import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
-import type { PageFormSchemaData } from '@/validations/PageValidation';
+import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
+import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
+import type { NodeFormSchemaData } from '@/validations/NodeValidation';
+import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import PocketBase from 'pocketbase';
 
 const token = import.meta.env.VITE_POCKETBASE_TOKEN || '';
@@ -39,6 +39,8 @@ export const createNode = async (
   return await client.collection(PocketBaseCollection.NODES).create({
     label: data.label,
     type: data.type,
+    value: data.default_value,
+    field_name: data.field_name,
     field_type: data.field_type,
     fieldType: data.field_type,
     nodeType: data.type,
@@ -48,6 +50,17 @@ export const createNode = async (
 
 export const getNode = async (id: string): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).getOne(id);
+};
+
+export const getValueNodes = async (
+  sourceNodeId: string,
+): Promise<NodeResponse[]> => {
+  const edges = await client.collection('edges').getFullList({
+    filter: `source_node="${sourceNodeId}" && type="has_options"`,
+    expand: 'target_node',
+  });
+
+  return edges.map((edge) => edge.expand?.target_node).filter(Boolean);
 };
 
 export const updateNode = async (
@@ -170,18 +183,25 @@ export const deleteConditionGroup = async (id: string): Promise<unknown> => {
 };
 
 export const getAllPages = async (): Promise<PageResponse[]> => {
-  return await client.collection(PocketBaseCollection.PAGES).getFullList({});
+  return await client.collection(PocketBaseCollection.PAGES).getFullList({
+    expand: 'fields',
+  });
+};
+
+export const getPageById = async (id: string): Promise<PageResponse> => {
+  return await client.collection(PocketBaseCollection.PAGES).getOne(id, {
+    expand: 'fields,edges_via_source_node',
+  });
 };
 
 export const createPage = async (
   data: PageFormSchemaData,
+  field_ids: string[],
 ): Promise<PageResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).create({
     title: data.title,
     description: data.description,
-    field_ids: {
-      ids: data.field_ids,
-    },
+    fields: field_ids,
   });
 };
 
@@ -190,6 +210,25 @@ export const getPage = async (id: string): Promise<NodeResponse> => {
 };
 
 export const updatePage = async (
+  id: string,
+  data: Partial<PageFormSchemaData>,
+  field_ids: string[],
+): Promise<PageResponse> => {
+  //
+  if (field_ids.length > 0) {
+    return await client.collection(PocketBaseCollection.PAGES).update(id, {
+      title: data.title,
+      description: data.description,
+      fields: field_ids,
+    });
+  }
+
+  // return await client.collection(PocketBaseCollection.PAGES).update(id, data);
+
+  return await client.collection(PocketBaseCollection.PAGES).getOne(id);
+};
+
+export const updatePageOrder = async (
   id: string,
   data: Partial<NodeFormSchemaData>,
 ): Promise<NodeResponse> => {

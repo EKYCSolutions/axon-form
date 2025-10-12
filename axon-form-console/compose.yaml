@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: ./Dockerfile.pb
+    ports:
+      - 8080:8080
+    volumes:
+      - ./pocketbase/pb_data:/pb/pb_data
+
+  console:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      VITE_POCKETBASE_URL: http://localhost
+      VITE_POCKETBASE_PORT: 8080
+      VITE_POCKETBASE_TOKEN:
+    depends_on:
+      - db
+    ports:
+      - 5173:5173
+
+networks:
+  default:
+    name: axon-console

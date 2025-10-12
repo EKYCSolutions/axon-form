@@ -4,10 +4,10 @@ import type {
   GraphEdge,
   GraphNode,
   Page,
-} from '@/types/Graph.js';
+} from '@/types/Graph';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
-import type { EdgeFormSchemaData } from '@/validations/EdgeValidation.js';
-import type { NodeFormSchemaData } from '@/validations/NodeValidation.js';
+import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
+import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageValidation';
 import type NVL from '@neo4j-nvl/base';
 import type { MouseEventCallbacks } from '@neo4j-nvl/react';

@@ -1,19 +1,42 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import MainPage from './pages/MainPage';
-import { GraphProvider } from './providers/GraphProvider';
 import { ThemeProvider } from './providers/ThemeProvider';
+
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import CreatePageForm from './pages/CreatePageForm';
+import MainPage from './pages/MainPage';
+import PageDetail from './pages/PageDetail';
+import { FormBuilderProvider } from './providers/FormBuilderProvider';
+import { GraphViewProvider } from './providers/GraphViewProvider';
 
 export default function App() {
   const queryClient = new QueryClient();
+
+  const router = createBrowserRouter([
+    {
+      path: '/page',
+      element: <MainPage />,
+    },
+    {
+      path: '/page/create',
+      element: <CreatePageForm />,
+    },
+    {
+      path: '/page/:id',
+      element: <PageDetail />,
+    },
+    { path: '*', element: <Navigate to='/page' replace /> },
+  ]);
 
   return (
     <div className='w-dvw h-dvh'>
       <ThemeProvider defaultTheme='dark' storageKey='vite-ui-theme'>
         <QueryClientProvider client={queryClient}>
-          <GraphProvider>
-            <MainPage />
-          </GraphProvider>
+          <GraphViewProvider>
+            <FormBuilderProvider>
+              <RouterProvider router={router} />
+            </FormBuilderProvider>
+          </GraphViewProvider>
         </QueryClientProvider>
       </ThemeProvider>
       <Toaster richColors />

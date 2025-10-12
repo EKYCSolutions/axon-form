@@ -57,3 +57,21 @@ export function convertPascalCaseToTitleCase(input: string): string {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 }
+
+/**
+ * Formats a numeric index as a two-digit string.
+ *
+ * If the index is less than 10, a leading zero is added.
+ *
+ * @param index - The numeric index to format.
+ * @returns The formatted two-digit string.
+ *
+ * @example
+ * ```typescript
+ * formatIndex(3); // "03"
+ * formatIndex(12); // "12"
+ * ```
+ */
+export function formatIndex(index: number): string {
+  return index < 10 ? `0${index}` : `${index}`;
+}
