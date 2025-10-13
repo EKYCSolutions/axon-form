@@ -1,3 +1,4 @@
+import CustomAlertDialog from '@/components/CustomAlertDialog';
 import DragAndDropWrapper from '@/components/DragAndDropWrapper.js';
 import FormAccordion from '@/components/form-builder-view/FormAccordion';
 import PageHeader from '@/components/form-builder-view/PageHeader';
@@ -108,11 +109,10 @@ export default function CreatePageForm() {
   });
 
   function onSubmit(data: PageFormSchemaData) {
-    console.log(data);
     addPage(data);
     //
-    // form.reset();
-    // navigate('/page', {});
+    form.reset();
+    navigate('/page', {});
   }
 
   function onAddFormField(fieldType: NodeFieldType) {
@@ -138,12 +138,32 @@ export default function CreatePageForm() {
 
   return (
     <FormBuilderViewLayout>
-      <NavButton
-        title='Back'
-        icon={<ArrowLeft />}
-        onClick={() => navigate(-1)}
-        className='mt-4'
-      />
+      {!form.formState.isValid ? (
+        <NavButton
+          title='Back'
+          icon={<ArrowLeft />}
+          onClick={() => {
+            navigate(-1);
+          }}
+          className='mt-4 mb-5'
+        />
+      ) : (
+        <CustomAlertDialog
+          title='Unsaved Changes'
+          description='You have unsaved changes. Are you sure you want to go back? Any changes will be lost.'
+          continueText='Proceed'
+          onContinueClick={() => {
+            navigate(-1);
+          }}
+        >
+          <NavButton
+            title='Back'
+            icon={<ArrowLeft />}
+            onClick={() => {}}
+            className='mt-4'
+          />
+        </CustomAlertDialog>
+      )}
       <Separator className='mt-4 mb-6' />
       <Form {...form}>
         <form
