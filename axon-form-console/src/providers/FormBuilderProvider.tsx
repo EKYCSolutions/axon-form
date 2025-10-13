@@ -17,6 +17,7 @@ import {
   getAllPages,
   getPageById,
   getValueNodes,
+  updateNode,
   updatePageOrder as updatePageOrderService,
   updatePage as updatePageService,
 } from '@/services/PocketBaseService';
@@ -262,11 +263,17 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         const fieldIds = [];
 
         // Get all existing field ids
-        const existingFieldIds = data.fields
-          .filter((field) => field.id)
-          .map((field) => field.id!);
+        const existingFields = data.fields.filter((field) => field.id);
         //
-        if (existingFieldIds) fieldIds.push(...existingFieldIds);
+        if (existingFields) {
+          await Promise.all(
+            existingFields.map(async (field) => {
+              await updateNode(field.id!, field);
+            }),
+          );
+          //
+          fieldIds.push(...existingFields.map((field) => field.id!));
+        }
 
         // Get new fields
         const newFields = data.fields?.filter((field) => !field.id);

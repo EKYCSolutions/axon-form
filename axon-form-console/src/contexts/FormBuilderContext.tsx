@@ -8,7 +8,7 @@ export interface FormBuilderContextType {
   refreshPages: () => void;
   addPage: (data: PageFormSchemaData) => void;
   getPage: (id: string) => void;
-  updatePage: (id: string, data: PageFormSchemaData) => void;
+  updatePage: (id: string, data: Partial<PageFormSchemaData>) => void;
   updatePageOrder: (pages: Page[]) => void;
   //
   exportForm: (fileName: string) => void;
