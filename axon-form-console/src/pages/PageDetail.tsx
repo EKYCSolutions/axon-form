@@ -37,12 +37,11 @@ import { useNavigate, useParams } from 'react-router';
 
 export default function PageDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { selectedPage, getPage, updatePage } = useFormBuilder();
   //
-  const [dirtyInputFields, setDirtyInputFields] = useState([]);
+  const [loading, setLoading] = useState<boolean>(true);
   //
-  const navigate = useNavigate();
-
   const form = useForm<PageFormSchemaData>({
     resolver: zodResolver(PageFormSchema),
     mode: 'onChange',
@@ -66,6 +65,7 @@ export default function PageDetail() {
 
     if (selectedPage) {
       form.reset(convertPageToPageFormSchema(selectedPage));
+      setLoading(false);
     }
   }, [id, getPage, selectedPage, form]);
 
@@ -95,6 +95,16 @@ export default function PageDetail() {
     }
 
     updatePage(id, data);
+  }
+
+  if (loading) {
+    return (
+      <FormBuilderViewLayout>
+        <div className='flex items-center justify-center h-full'>
+          <p>Loading Page...</p>
+        </div>
+      </FormBuilderViewLayout>
+    );
   }
 
   return (

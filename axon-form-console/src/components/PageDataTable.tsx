@@ -147,7 +147,7 @@ export function PageDataTable({
 
         handleReordering(
           JSON.stringify(initialData) !== JSON.stringify(updatedData),
-          data,
+          updatedData,
         );
 
         return updatedData;

@@ -38,7 +38,7 @@ export default function CustomAlertDialog({
   return (
     <>
       <AlertDialog>
-        <AlertDialogTrigger>{children}</AlertDialogTrigger>
+        <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{title}</AlertDialogTitle>

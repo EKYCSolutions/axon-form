@@ -41,6 +41,9 @@ export default function FormPageList() {
         <div className='flex gap-2'>
           {isReordering ? (
             <>
+              <Button variant='outline' onClick={() => handleCancel()}>
+                Cancel
+              </Button>
               <Button variant='secondary' onClick={() => handleSaveReorder()}>
                 Save Changes
               </Button>

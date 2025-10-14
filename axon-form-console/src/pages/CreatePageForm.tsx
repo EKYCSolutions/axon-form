@@ -46,6 +46,7 @@ export default function CreatePageForm() {
       description: 'description',
       fields: [
         {
+          id: crypto.randomUUID(),
           type: NodeType.Input,
           field_type: NodeFieldType.Text,
           field_name: 'field-with-condition',
@@ -54,6 +55,7 @@ export default function CreatePageForm() {
           validation_rules: [],
         },
         {
+          id: crypto.randomUUID(),
           type: NodeType.Input,
           field_type: NodeFieldType.Text,
           field_name: 'field-name',
@@ -68,6 +70,7 @@ export default function CreatePageForm() {
           ],
         },
         {
+          id: crypto.randomUUID(),
           type: NodeType.Input,
           field_type: NodeFieldType.Radio,
           field_name: 'field-name-select',
@@ -111,12 +114,13 @@ export default function CreatePageForm() {
   function onSubmit(data: PageFormSchemaData) {
     addPage(data);
     //
-    form.reset();
-    navigate('/page', {});
+    // form.reset();
+    // navigate('/page', {});
   }
 
   function onAddFormField(fieldType: NodeFieldType) {
     append({
+      id: crypto.randomUUID(),
       type: NodeType.Input,
       field_type: fieldType,
       label: '',

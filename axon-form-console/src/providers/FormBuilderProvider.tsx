@@ -9,6 +9,7 @@ import {
   type FormBuilderContextType,
 } from '@/contexts/FormBuilderContext';
 import {
+  createCondition,
   createEdge as createEdgeService,
   createNode as createNodeService,
   createPage as createPageService,
@@ -24,9 +25,11 @@ import {
 import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
 import { parseNodeResponse } from '@/types/Node';
 import type { Page } from '@/types/Page';
+import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
 import { exportJSON } from '@/utils/File';
 import { convertGraphToJSON } from '@/utils/Graph';
 import { handleError, handleSuccess } from '@/utils/Toast';
+import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
 import {
   convertNodeResponseToGraphNode,
@@ -36,6 +39,7 @@ import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { validate } from 'uuid';
 
 interface FormBuilderProviderProps {
   children: ReactNode;
@@ -153,13 +157,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   ]);
 
   // Add edge
-  const addEdge = useCallback(async (data: EdgeFormSchemaData) => {
-    try {
-      await createEdgeService(data);
-    } catch (error) {
-      handleError(error);
-    }
-  }, []);
+  const addEdge = useCallback(
+    async (data: EdgeFormSchemaData): Promise<EdgeResponse | undefined> => {
+      try {
+        const edgeRes = await createEdgeService(data);
+        return edgeRes;
+      } catch (error) {
+        handleError(error);
+        return undefined;
+      }
+    },
+    [],
+  );
 
   // Add value node with edge
   const addValueNode = useCallback(
@@ -188,9 +197,31 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [addEdge],
   );
 
+  const addCondition = useCallback(
+    async (target_node_id: string, condition: ConditionFormSchemaData) => {
+      try {
+        const showEdgeData: EdgeFormSchemaData = {
+          label: '',
+          source_node: condition.node_id!,
+          target_node: target_node_id,
+          type: EdgeType.Shows,
+        };
+
+        const edgeRes = await addEdge(showEdgeData);
+
+        const conditionData = condition;
+        condition.edge = edgeRes?.id;
+        await createCondition(conditionData);
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [addEdge],
+  );
+
   // Add node
   const addNode = useCallback(
-    async (data: NodeFormSchemaData) => {
+    async (data: NodeFormSchemaData): Promise<NodeResponse | undefined> => {
       try {
         const addNodeRes = await createNodeService(data);
 
@@ -202,10 +233,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             ),
           );
         }
-
         return addNodeRes;
       } catch (error) {
         handleError(error);
+        return undefined;
       }
     },
     [addValueNode],
@@ -215,31 +246,50 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const addPage = useCallback(
     async (data: PageFormSchemaData) => {
       try {
+        console.log('page schema >>', data);
+        console.log(
+          'field id >>',
+          data.fields.map((field) => validate(field.id!)),
+        );
+
         const nodeIds = await Promise.all(
           data.fields.map(async (field) => {
             const res = await addNode(field);
-            return res?.id;
+            return res!.id;
           }),
         );
 
-        const nodeIdsFiltered = nodeIds.filter(
-          (id): id is string => id !== undefined,
+        const nodeIdMap = data.fields.reduce(
+          (acc, field, idx) => {
+            acc[field.id as string] = nodeIds[idx];
+            return acc;
+          },
+          {} as Record<string, string>,
         );
 
-        if (nodeIdsFiltered.length === 0) {
-          handleError('Failed to create page');
-          return;
+        console.log('node id map >>', nodeIdMap);
+
+        for (const field of data.fields) {
+          if (field.conditions) {
+            const fieldId = nodeIdMap[field.id as string];
+
+            field.conditions.map((cond) => {
+              const conditionData = cond;
+              cond.node_id = nodeIdMap[cond.node_id as string];
+
+              addCondition(fieldId, conditionData);
+            });
+          }
         }
 
-        await createPageService(data, nodeIdsFiltered);
+        await createPageService(data, nodeIds);
         handleSuccess('Add Page Success');
-
         await refreshPages();
       } catch (error) {
         handleError(error);
       }
     },
-    [addNode],
+    [addNode, addCondition, refreshPages],
   );
 
   // Get page by ID
@@ -296,14 +346,12 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         //
         updatePageService(id, updateBody, fieldIds);
-
-        //
         handleSuccess('Update Page Success');
       } catch (err) {
         handleError(err);
       }
     },
-    [],
+    [addNode],
   );
 
   //

@@ -79,14 +79,18 @@ export default function ConditionFormField({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {getValues('fields').map((field: NodeFormSchemaData) => {
-                        console.log('field >>', field);
-                        return (
-                          <SelectItem key={field.id} value={field.id!}>
-                            {field.label}
-                          </SelectItem>
-                        );
-                      })}
+                      {getValues('fields')
+                        .filter(
+                          (f: NodeFormSchemaData) =>
+                            f.id != getValues(`fields.${fieldIndex}.id`),
+                        )
+                        .map((field: NodeFormSchemaData) => {
+                          return (
+                            <SelectItem key={field.id} value={field.id!}>
+                              {field.label}
+                            </SelectItem>
+                          );
+                        })}
                     </SelectContent>
                   </Select>
                 </FormControl>

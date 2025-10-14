@@ -110,7 +110,7 @@ export const createCondition = async (
   data: ConditionFormSchemaData,
 ): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).create({
-    check_node: data.node,
+    check_node: data.node_id,
     edge: data.edge,
     expression: data.expr,
     expected_value: data.value,
