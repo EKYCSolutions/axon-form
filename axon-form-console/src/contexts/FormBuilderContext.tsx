@@ -9,6 +9,7 @@ export interface FormBuilderContextType {
   addPage: (data: PageFormSchemaData) => void;
   getPage: (id: string) => void;
   updatePage: (id: string, data: Partial<PageFormSchemaData>) => void;
+  deletePage: (id: string) => void;
   updatePageOrder: (pages: Page[]) => void;
   //
   exportForm: (fileName: string) => void;

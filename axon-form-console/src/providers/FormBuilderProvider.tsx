@@ -13,6 +13,7 @@ import {
   createEdge as createEdgeService,
   createNode as createNodeService,
   createPage as createPageService,
+  deletePage as deletePageService,
   getAllConditionGroups,
   getAllNodes,
   getAllPages,
@@ -23,8 +24,8 @@ import {
   updatePage as updatePageService,
 } from '@/services/PocketBaseService';
 import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
-import { parseNodeResponse } from '@/types/Node';
-import type { Page } from '@/types/Page';
+import { parseNodeResponse, type NodeBody } from '@/types/Node';
+import type { Page, PageBody } from '@/types/Page';
 import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
 import { exportJSON } from '@/utils/File';
 import { convertGraphToJSON } from '@/utils/Graph';
@@ -39,7 +40,6 @@ import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
-import { validate } from 'uuid';
 
 interface FormBuilderProviderProps {
   children: ReactNode;
@@ -172,12 +172,20 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // Add value node with edge
   const addValueNode = useCallback(
-    async (parent_node_id: string, option: SelectOptionFormSchemaData) => {
+    async (
+      page_id: string,
+      parent_node_id: string,
+      option: SelectOptionFormSchemaData,
+    ) => {
       try {
-        const valueNodeData: NodeFormSchemaData = {
+        const valueNodeData: NodeBody = {
+          page: page_id,
           type: NodeType.Value,
           label: option.label,
-          default_value: option.value,
+          value: option.value,
+          field_name: undefined,
+          field_type: undefined,
+          validation_rules: [],
         };
 
         const addValueNodeRes = await createNodeService(valueNodeData);
@@ -221,15 +229,29 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // Add node
   const addNode = useCallback(
-    async (data: NodeFormSchemaData): Promise<NodeResponse | undefined> => {
+    async (
+      data: NodeFormSchemaData,
+      page_id: string,
+    ): Promise<NodeResponse | undefined> => {
       try {
-        const addNodeRes = await createNodeService(data);
+        const addNodeBody: NodeBody = {
+          page: page_id,
+          //
+          field_name: data.field_name,
+          field_type: data.field_type,
+          label: data.label,
+          value: data.default_value,
+          type: data.type,
+          validation_rules: data.validation_rules ?? [],
+        };
+
+        const addNodeRes = await createNodeService(addNodeBody);
 
         // Add value nodes if select options exist
         if (data.select_options?.length) {
           await Promise.all(
             data.select_options.map((option) =>
-              addValueNode(addNodeRes.id, option),
+              addValueNode(page_id, addNodeRes.id, option),
             ),
           );
         }
@@ -246,15 +268,11 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const addPage = useCallback(
     async (data: PageFormSchemaData) => {
       try {
-        console.log('page schema >>', data);
-        console.log(
-          'field id >>',
-          data.fields.map((field) => validate(field.id!)),
-        );
+        const pageRes = await createPageService(data);
 
         const nodeIds = await Promise.all(
           data.fields.map(async (field) => {
-            const res = await addNode(field);
+            const res = await addNode(field, pageRes.id);
             return res!.id;
           }),
         );
@@ -266,8 +284,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           },
           {} as Record<string, string>,
         );
-
-        console.log('node id map >>', nodeIdMap);
 
         for (const field of data.fields) {
           if (field.conditions) {
@@ -282,7 +298,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           }
         }
 
-        await createPageService(data, nodeIds);
+        const updatePageBody: PageBody = {
+          order: undefined,
+          title: data.title,
+          description: data.description,
+          fields: nodeIds,
+        };
+
+        await updatePageService(pageRes.id, updatePageBody);
+
         handleSuccess('Add Page Success');
         await refreshPages();
       } catch (error) {
@@ -301,11 +325,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const updatePage = useCallback(
     async (id: string, data: Partial<PageFormSchemaData>) => {
       try {
-        const updateBody: Partial<PageFormSchemaData> = {
-          title: data.title,
-          description: data.description,
-        };
-
         if (!data.fields) {
           return;
         }
@@ -332,7 +351,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         if (newFields) {
           const newFieldIdsRes = await Promise.all(
             newFields.map(async (field) => {
-              const res = await addNode(field);
+              const res = await addNode(field, id);
               return res?.id;
             }),
           );
@@ -344,14 +363,33 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           fieldIds?.push(...newFieldIds);
         }
 
-        //
-        updatePageService(id, updateBody, fieldIds);
+        const updatePageBody: PageBody = {
+          order: undefined,
+          title: data.title,
+          description: data.description,
+          fields: fieldIds,
+        };
+
+        await updatePageService(id, updatePageBody);
         handleSuccess('Update Page Success');
       } catch (err) {
         handleError(err);
       }
     },
     [addNode],
+  );
+
+  const deletePage = useCallback(
+    async (id: string) => {
+      try {
+        await deletePageService(id);
+        handleSuccess('Delete Page Success');
+        await refreshPages();
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [refreshPages],
   );
 
   //
@@ -423,6 +461,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     addPage,
     getPage,
     updatePage,
+    deletePage,
     updatePageOrder,
     exportForm,
   };

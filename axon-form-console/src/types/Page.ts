@@ -7,3 +7,10 @@ export interface Page {
   description: string;
   fields: Node[];
 }
+
+export interface PageBody {
+  order: number | undefined;
+  title: string | undefined;
+  description: string | undefined;
+  fields: string[];
+}

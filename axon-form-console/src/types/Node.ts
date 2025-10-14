@@ -1,3 +1,5 @@
+import type { NodeFieldType, NodeType } from '@/configs/graph';
+import type { ValidationRuleSchemaData } from '@/validations/ValidationRulesValidation';
 import type { ValidationRule } from 'react-hook-form';
 import type { NodeResponse } from './PocketBaseResponse';
 
@@ -28,4 +30,15 @@ export function parseNodeResponse(node: NodeResponse): Node {
     validation_rules: node.validation_rules as ValidationRule[],
     options: [],
   };
+}
+
+export interface NodeBody {
+  page: string;
+  //
+  field_name: string | undefined;
+  field_type: NodeFieldType | undefined;
+  label: string | undefined;
+  value: string | undefined;
+  type: NodeType | undefined;
+  validation_rules: ValidationRuleSchemaData[];
 }

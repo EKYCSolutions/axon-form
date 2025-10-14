@@ -114,8 +114,8 @@ export default function CreatePageForm() {
   function onSubmit(data: PageFormSchemaData) {
     addPage(data);
     //
-    // form.reset();
-    // navigate('/page', {});
+    form.reset();
+    navigate('/page', {});
   }
 
   function onAddFormField(fieldType: NodeFieldType) {

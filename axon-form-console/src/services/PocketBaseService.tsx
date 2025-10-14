@@ -1,4 +1,6 @@
 import { PocketBaseCollection } from '@/configs/collections';
+import type { NodeBody } from '@/types/Node';
+import type { PageBody } from '@/types/Page';
 import type {
   ConditionGroupResponse,
   EdgeResponse,
@@ -33,19 +35,8 @@ export const getAllNodes = async (
   });
 };
 
-export const createNode = async (
-  data: NodeFormSchemaData,
-): Promise<NodeResponse> => {
-  return await client.collection(PocketBaseCollection.NODES).create({
-    label: data.label,
-    type: data.type,
-    value: data.default_value,
-    field_name: data.field_name,
-    field_type: data.field_type,
-    fieldType: data.field_type,
-    nodeType: data.type,
-    validation_rules: data.validation_rules,
-  });
+export const createNode = async (data: NodeBody): Promise<NodeResponse> => {
+  return await client.collection(PocketBaseCollection.NODES).create(data);
 };
 
 export const getNode = async (id: string): Promise<NodeResponse> => {
@@ -196,12 +187,10 @@ export const getPageById = async (id: string): Promise<PageResponse> => {
 
 export const createPage = async (
   data: PageFormSchemaData,
-  field_ids: string[],
 ): Promise<PageResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).create({
     title: data.title,
     description: data.description,
-    fields: field_ids,
   });
 };
 
@@ -211,21 +200,14 @@ export const getPage = async (id: string): Promise<NodeResponse> => {
 
 export const updatePage = async (
   id: string,
-  data: Partial<PageFormSchemaData>,
-  field_ids: string[],
+  data: Partial<PageBody>,
 ): Promise<PageResponse> => {
   //
-  if (field_ids.length > 0) {
-    return await client.collection(PocketBaseCollection.PAGES).update(id, {
-      title: data.title,
-      description: data.description,
-      fields: field_ids,
-    });
-  }
+  return await client.collection(PocketBaseCollection.PAGES).update(id, data);
+};
 
-  // return await client.collection(PocketBaseCollection.PAGES).update(id, data);
-
-  return await client.collection(PocketBaseCollection.PAGES).getOne(id);
+export const deletePage = async (id: string): Promise<boolean> => {
+  return await client.collection(PocketBaseCollection.PAGES).delete(id);
 };
 
 export const updatePageOrder = async (
@@ -233,8 +215,4 @@ export const updatePageOrder = async (
   data: Partial<NodeFormSchemaData>,
 ): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).update(id, data);
-};
-
-export const deletePage = async (id: string): Promise<boolean> => {
-  return await client.collection(PocketBaseCollection.PAGES).delete(id);
 };

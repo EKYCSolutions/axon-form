@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router';
 
 export default function FormPageList() {
   const navigate = useNavigate();
-  const { pages, updatePageOrder, exportForm } = useFormBuilder();
+  const { pages, updatePageOrder, deletePage, exportForm } = useFormBuilder();
 
   const [reOrderedPage, setReOrderedPage] = useState<Page[]>([]);
   const [isReordering, setIsReordering] = useState<boolean>(false);
@@ -32,6 +32,10 @@ export default function FormPageList() {
     updatePageOrder(reOrderedPage);
     handleSuccess('Reordered page successfully');
     setIsReordering(false);
+  };
+
+  const handleDelete = (id: string) => {
+    deletePage(id);
   };
 
   return (
@@ -66,9 +70,9 @@ export default function FormPageList() {
       <Separator />
       {pages.length > 0 ? (
         <PageDataTable
-          reOrderedPages={reOrderedPage}
           shouldResetOrder={shouldResetOrder}
           handleReordering={handleReordering}
+          onDelete={handleDelete}
         />
       ) : (
         <div className='flex items-center justify-center p-8'>
