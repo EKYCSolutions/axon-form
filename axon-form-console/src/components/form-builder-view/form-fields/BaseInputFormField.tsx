@@ -12,7 +12,6 @@ import { Plus } from 'lucide-react';
 
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-
 import ConditionFormField from './ConditionFormField';
 import OptionFormField from './OptionFormField';
 import ValidationRuleFormField from './ValidationRuleFormField';

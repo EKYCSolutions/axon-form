@@ -116,6 +116,7 @@ function DraggableRow({
             <DropdownMenuItem disabled className='cursor-not-allowed'>
               Duplicate
             </DropdownMenuItem>
+            <DropdownMenuItem>Add Condition</DropdownMenuItem>
             <DropdownMenuSeparator />
             <CustomAlertDialog
               title='Are you absolutely sure?'

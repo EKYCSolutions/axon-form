@@ -1,4 +1,4 @@
-import { NodeFieldType, NodeType } from '@/configs/graph';
+import { ConditionExpression, NodeFieldType, NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
 import type { Node } from '@/types/Node';
 import type { NodeResponse } from '@/types/PocketBaseResponse';
@@ -37,12 +37,19 @@ export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
     field_type: node.field_type as NodeFieldType,
     field_name: node.field_name,
     select_options: node.options?.map((option) => ({
+      id: option.id,
       label: option.label,
       value: option.value,
     })),
     validation_rules: node.validation_rules?.map((rule) =>
       convertValidationRuleResponseToValidationRule(rule),
     ),
+    conditions: node.conditions?.map((cond) => ({
+      id: cond.id,
+      node_id: cond.check_node,
+      expr: cond.expression as ConditionExpression,
+      value: cond.expected_value.toString(),
+    })),
   };
 }
 

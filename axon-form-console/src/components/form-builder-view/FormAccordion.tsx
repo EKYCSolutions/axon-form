@@ -12,8 +12,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
 import { Badge } from '../ui/badge';
-import BaseInputFormField from './BaseInputFormField';
+
 import FormAccordionDropdown from './FormAccordionDropdown';
+import BaseInputFormField from './form-fields/BaseInputFormField';
 
 function renderFormField(fieldType: NodeFieldType, fieldIndex: number) {
   const formFieldWithOptions = [

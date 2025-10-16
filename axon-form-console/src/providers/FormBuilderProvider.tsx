@@ -15,6 +15,7 @@ import {
   createPage as createPageService,
   deletePage as deletePageService,
   getAllConditionGroups,
+  getAllConditionsFromNode,
   getAllNodes,
   getAllPages,
   getPageById,
@@ -40,6 +41,7 @@ import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { validate } from 'uuid';
 
 interface FormBuilderProviderProps {
   children: ReactNode;
@@ -48,30 +50,37 @@ interface FormBuilderProviderProps {
 export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const [selectedPageId, setSelectedPageId] = useState<string>();
 
-  // Fetch all pages
+  // Query: Fetch all pages
   const { data: pagesData, refetch: refreshPages } = useQuery({
     queryKey: ['pages'],
     queryFn: getAllPages,
   });
 
-  // Fetch single page details
+  // Query: Fetch single page details
   const { data: singlePageData } = useQuery({
     queryKey: ['page', selectedPageId],
     queryFn: () => getPageById(selectedPageId!),
     enabled: !!selectedPageId,
   });
 
-  //
+  // Query: Fetch field conditions
+  const { data: fieldConditionsData } = useQuery({
+    queryKey: ['field_conditions', selectedPageId],
+    queryFn: () => getAllConditionsFromNode(selectedPageId!),
+    enabled: !!selectedPageId,
+  });
+
+  // Query: Fetch all nodes (lazy)
   const { refetch: fetchNodes } = useQuery({
     queryKey: ['nodes'],
     queryFn: () => getAllNodes(),
     enabled: false,
   });
 
-  //
+  // Query: Fetch all condition groups (lazy)
   const { refetch: fetchConditionGroups } = useQuery({
     queryKey: ['conditionGroups'],
-    queryFn: () => getAllConditionGroups(),
+    queryFn: getAllConditionGroups,
     enabled: false,
   });
 
@@ -125,43 +134,55 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   const isAllOptionsLoading = optionsQueries.some((query) => query.isLoading);
 
-  // Combine selected page with options
+  // Combine selected page with options and conditions
   const selectedPage: Page | undefined = useMemo(() => {
     if (!selectedPageData || isAllOptionsLoading) return undefined;
 
     return {
       ...selectedPageData,
       fields: selectedPageData.fields.map((field) => {
+        // Update conditions
+        const conditions = fieldConditionsData
+          ?.filter((cond) => cond.target_node_id === field.id)
+          .map((cond) => ({
+            id: cond.id,
+            check_node: cond.check_node,
+            expected_value: cond.expected_value,
+            expression: cond.expression,
+            target_node_id: cond.target_node_id,
+          }));
+
+        // Find field with options
         const fieldIndex = fieldIdsWithOptions.indexOf(field.id);
-
-        if (fieldIndex === -1) return field;
-
-        const optionsData = optionsQueries[fieldIndex]?.data;
-
-        return {
-          ...field,
-          options: optionsData
-            ? optionsData.map((option) => ({
+        const optionsData =
+          fieldIndex !== -1
+            ? optionsQueries[fieldIndex]?.data?.map((option) => ({
+                id: option.id,
                 label: option.label,
                 value: option.value,
               }))
-            : [],
+            : undefined;
+
+        return {
+          ...field,
+          conditions,
+          options: optionsData,
         };
       }),
     };
   }, [
     selectedPageData,
+    fieldConditionsData,
     isAllOptionsLoading,
     fieldIdsWithOptions,
     optionsQueries,
   ]);
 
-  // Add edge
+  // Helper: Create edge
   const addEdge = useCallback(
     async (data: EdgeFormSchemaData): Promise<EdgeResponse | undefined> => {
       try {
-        const edgeRes = await createEdgeService(data);
-        return edgeRes;
+        return await createEdgeService(data);
       } catch (error) {
         handleError(error);
         return undefined;
@@ -170,16 +191,16 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [],
   );
 
-  // Add value node with edge
+  // Helper: Add value node with edge
   const addValueNode = useCallback(
     async (
-      page_id: string,
-      parent_node_id: string,
+      pageId: string,
+      parentNodeId: string,
       option: SelectOptionFormSchemaData,
     ) => {
       try {
         const valueNodeData: NodeBody = {
-          page: page_id,
+          page: pageId,
           type: NodeType.Value,
           label: option.label,
           value: option.value,
@@ -192,7 +213,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         const hasOptionEdgeData: EdgeFormSchemaData = {
           label: '',
-          source_node: parent_node_id,
+          source_node: parentNodeId,
           target_node: addValueNodeRes.id,
           type: EdgeType.HasOption,
         };
@@ -205,21 +226,23 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [addEdge],
   );
 
+  // Helper: Add condition
   const addCondition = useCallback(
-    async (target_node_id: string, condition: ConditionFormSchemaData) => {
+    async (targetNodeId: string, condition: ConditionFormSchemaData) => {
       try {
         const showEdgeData: EdgeFormSchemaData = {
           label: '',
           source_node: condition.node_id!,
-          target_node: target_node_id,
+          target_node: targetNodeId,
           type: EdgeType.Shows,
         };
 
         const edgeRes = await addEdge(showEdgeData);
 
-        const conditionData = condition;
-        condition.edge = edgeRes?.id;
-        await createCondition(conditionData);
+        await createCondition({
+          ...condition,
+          edge: edgeRes?.id,
+        });
       } catch (error) {
         handleError(error);
       }
@@ -227,16 +250,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [addEdge],
   );
 
-  // Add node
+  // Helper: Add node
   const addNode = useCallback(
     async (
       data: NodeFormSchemaData,
-      page_id: string,
+      pageId: string,
     ): Promise<NodeResponse | undefined> => {
       try {
         const addNodeBody: NodeBody = {
-          page: page_id,
-          //
+          page: pageId,
           field_name: data.field_name,
           field_type: data.field_type,
           label: data.label,
@@ -251,10 +273,11 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         if (data.select_options?.length) {
           await Promise.all(
             data.select_options.map((option) =>
-              addValueNode(page_id, addNodeRes.id, option),
+              addValueNode(pageId, addNodeRes.id, option),
             ),
           );
         }
+
         return addNodeRes;
       } catch (error) {
         handleError(error);
@@ -264,11 +287,56 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [addValueNode],
   );
 
-  // Add page
+  // Helper: Create node ID mapping
+  const createNodeIdMap = (
+    fields: NodeFormSchemaData[],
+    nodeIds: string[],
+  ): Record<string, string> => {
+    return fields.reduce(
+      (acc, field, idx) => {
+        acc[field.id as string] = nodeIds[idx];
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+  };
+
+  // Helper: Process field conditions
+  const processFieldConditions = useCallback(
+    async (fields: NodeFormSchemaData[], nodeIdMap: Record<string, string>) => {
+      for (const field of fields) {
+        if (!field.conditions) continue;
+
+        const fieldId = nodeIdMap[field.id as string];
+
+        await Promise.all(
+          field.conditions.map((cond) => {
+            const conditionData = {
+              ...cond,
+              node_id: nodeIdMap[cond.node_id as string],
+            };
+            return addCondition(fieldId, conditionData);
+          }),
+        );
+      }
+    },
+    [addCondition],
+  );
+
+  // API: Add page
   const addPage = useCallback(
     async (data: PageFormSchemaData) => {
       try {
         const pageRes = await createPageService(data);
+        await createNodeService({
+          type: NodeType.Page,
+          page: pageRes.id,
+          field_name: undefined,
+          field_type: undefined,
+          label: undefined,
+          value: undefined,
+          validation_rules: [],
+        });
 
         const nodeIds = await Promise.all(
           data.fields.map(async (field) => {
@@ -277,26 +345,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           }),
         );
 
-        const nodeIdMap = data.fields.reduce(
-          (acc, field, idx) => {
-            acc[field.id as string] = nodeIds[idx];
-            return acc;
-          },
-          {} as Record<string, string>,
-        );
-
-        for (const field of data.fields) {
-          if (field.conditions) {
-            const fieldId = nodeIdMap[field.id as string];
-
-            field.conditions.map((cond) => {
-              const conditionData = cond;
-              cond.node_id = nodeIdMap[cond.node_id as string];
-
-              addCondition(fieldId, conditionData);
-            });
-          }
-        }
+        const nodeIdMap = createNodeIdMap(data.fields, nodeIds);
+        await processFieldConditions(data.fields, nodeIdMap);
 
         const updatePageBody: PageBody = {
           order: undefined,
@@ -306,61 +356,55 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         };
 
         await updatePageService(pageRes.id, updatePageBody);
-
         handleSuccess('Add Page Success');
         await refreshPages();
       } catch (error) {
         handleError(error);
       }
     },
-    [addNode, addCondition, refreshPages],
+    [addNode, processFieldConditions, refreshPages],
   );
 
-  // Get page by ID
+  // API: Get page by ID
   const getPage = useCallback((id: string) => {
     setSelectedPageId(id);
   }, []);
 
-  //
+  // API: Update page
   const updatePage = useCallback(
     async (id: string, data: Partial<PageFormSchemaData>) => {
       try {
-        if (!data.fields) {
-          return;
-        }
+        if (!data.fields) return;
 
-        const fieldIds = [];
+        const fieldIds: string[] = [];
 
-        // Get all existing field ids
-        const existingFields = data.fields.filter((field) => field.id);
-        //
-        if (existingFields) {
+        // Update existing fields
+        const existingFields = data.fields.filter(
+          (field) => !validate(field.id!),
+        );
+
+        if (existingFields.length > 0) {
           await Promise.all(
-            existingFields.map(async (field) => {
-              await updateNode(field.id!, field);
-            }),
+            existingFields.map((field) => updateNode(field.id!, field)),
           );
-          //
           fieldIds.push(...existingFields.map((field) => field.id!));
         }
 
-        // Get new fields
-        const newFields = data.fields?.filter((field) => !field.id);
+        // Create new fields
+        const newFields = data.fields.filter((field) => validate(field.id!));
 
-        // Create node for each of the new fields
-        if (newFields) {
+        if (newFields.length > 0) {
           const newFieldIdsRes = await Promise.all(
             newFields.map(async (field) => {
               const res = await addNode(field, id);
-              return res?.id;
+              return res!.id;
             }),
           );
 
-          const newFieldIds = newFieldIdsRes.filter(
-            (id): id is string => typeof id === 'string',
-          );
+          const nodeIdMap = createNodeIdMap(newFields, newFieldIdsRes);
+          await processFieldConditions(newFields, nodeIdMap);
 
-          fieldIds?.push(...newFieldIds);
+          fieldIds.push(...newFieldIdsRes);
         }
 
         const updatePageBody: PageBody = {
@@ -376,9 +420,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(err);
       }
     },
-    [addNode],
+    [addNode, processFieldConditions],
   );
 
+  // API: Delete page
   const deletePage = useCallback(
     async (id: string) => {
       try {
@@ -392,15 +437,12 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [refreshPages],
   );
 
-  //
+  // API: Update page order
   const updatePageOrder = useCallback(async (pages: Page[]) => {
     try {
       await Promise.all(
-        pages.map(
-          async (page) =>
-            await updatePageOrderService(page.id, {
-              order: page.order,
-            }),
+        pages.map((page) =>
+          updatePageOrderService(page.id, { order: page.order }),
         ),
       );
     } catch (err) {
@@ -408,21 +450,36 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     }
   }, []);
 
-  //
+  // Helper: Parse edges from nodes
+  const parseEdges = useCallback((nodes: GraphNode[]): GraphEdge[] => {
+    const nodeIds = new Set(nodes.map((node) => node.id));
+    const edgeMap = new Map<string, GraphEdge>();
+
+    nodes.forEach((node) => {
+      node.edges.forEach((edge) => {
+        if (
+          !edgeMap.has(edge.id) &&
+          nodeIds.has(edge.from) &&
+          nodeIds.has(edge.to)
+        ) {
+          edgeMap.set(edge.id, edge);
+        }
+      });
+    });
+
+    return Array.from(edgeMap.values());
+  }, []);
+
+  // API: Export form
   const exportForm = useCallback(
     async (fileName: string) => {
       try {
         const { data: nodesData } = await fetchNodes();
         const { data: conditionGroupsData } = await fetchConditionGroups();
 
-        const nodes = nodesData?.map((node) =>
-          convertNodeResponseToGraphNode(node),
-        );
+        if (!nodesData) return;
 
-        if (!nodes) {
-          return;
-        }
-
+        const nodes = nodesData.map(convertNodeResponseToGraphNode);
         const edges = parseEdges(nodes);
         const conditionGroups: EdgeConditionGroup[] = (
           conditionGroupsData ?? []
@@ -433,26 +490,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         }));
 
         const json = convertGraphToJSON(nodes, edges, conditionGroups, pages);
-
         exportJSON(json, fileName);
       } catch (err) {
         handleError(err);
       }
     },
-    [pages],
+    [pages, fetchNodes, fetchConditionGroups, parseEdges],
   );
-
-  const parseEdges = (nodes: GraphNode[]) => {
-    const nodeIds = nodes.map((node) => node.id);
-    const edgeRes: GraphEdge[] = nodes
-      .filter((node) => node.edges.length > 0)
-      .flatMap((node) => node.edges);
-    const ids = new Set();
-    const uniqueEdges = edgeRes.filter(({ id }) => !ids.has(id) && ids.add(id));
-    return uniqueEdges.filter(
-      (edge) => nodeIds.includes(edge.from) && nodeIds.includes(edge.to),
-    );
-  };
 
   const value: FormBuilderContextType = {
     pages,

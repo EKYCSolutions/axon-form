@@ -71,6 +71,7 @@ export default function PageDetail() {
 
   function onAddFormField(fieldType: NodeFieldType) {
     append({
+      id: crypto.randomUUID(),
       type: NodeType.Input,
       field_type: fieldType,
       label: '',

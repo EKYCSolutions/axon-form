@@ -3,6 +3,7 @@ import type { NodeBody } from '@/types/Node';
 import type { PageBody } from '@/types/Page';
 import type {
   ConditionGroupResponse,
+  ConditionResponse,
   EdgeResponse,
   NodeResponse,
   PageResponse,
@@ -82,6 +83,29 @@ export const getAllEdges = async (): Promise<EdgeResponse[]> => {
   });
 };
 
+export const getAllConditionsFromNode = async (
+  page_id: string,
+): Promise<ConditionResponse[]> => {
+  //
+  const edges = await client
+    .collection(PocketBaseCollection.EDGES)
+    .getFullList({
+      filter: `target_node.page = "${page_id}"`,
+      expand: 'conditions_via_edge',
+    });
+
+  //
+  const allConditions = edges.flatMap((edge) => {
+    const conditions = edge.expand?.conditions_via_edge || [];
+    return conditions.map((condition: ConditionResponse) => ({
+      ...condition,
+      target_node_id: edge.target_node,
+    }));
+  });
+
+  return allConditions;
+};
+
 export const getEdge = async (id: string): Promise<EdgeResponse> => {
   return await client.collection(PocketBaseCollection.EDGES).getOne(id);
 };
@@ -111,7 +135,7 @@ export const createCondition = async (
 export const getAllConditions = async (): Promise<unknown> => {
   return await client
     .collection(PocketBaseCollection.CONDITIONS)
-    .getList(1, 50, {});
+    .getFullList([]);
 };
 
 export const getCondition = async (id: string): Promise<unknown> => {

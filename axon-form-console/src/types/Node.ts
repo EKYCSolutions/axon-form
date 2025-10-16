@@ -4,8 +4,17 @@ import type { ValidationRule } from 'react-hook-form';
 import type { NodeResponse } from './PocketBaseResponse';
 
 export interface NodeOption {
+  id: string;
   label: string;
   value: string;
+}
+
+export interface NodeCondition {
+  id: string;
+  check_node: string;
+  expected_value: string;
+  expression: string;
+  target_node_id: string;
 }
 
 export interface Node {
@@ -17,6 +26,7 @@ export interface Node {
   field_name: string;
   validation_rules: ValidationRule[];
   options?: NodeOption[];
+  conditions?: NodeCondition[];
 }
 
 export function parseNodeResponse(node: NodeResponse): Node {
