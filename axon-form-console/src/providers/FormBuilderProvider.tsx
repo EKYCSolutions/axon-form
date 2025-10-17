@@ -14,6 +14,7 @@ import {
   createNode as createNodeService,
   createPage as createPageService,
   deleteCondition as deleteConditionService,
+  deleteNode as deleteNodeService,
   deletePage as deletePageService,
   getAllConditionGroups as getAllConditionGroupsService,
   getAllConditionsFromNode as getAllConditionsFromNodeService,
@@ -34,6 +35,7 @@ import { parseNodeResponse, type Node, type NodeBody } from '@/types/Node';
 import type { Page, PageBody } from '@/types/Page';
 import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
 import { exportJSON } from '@/utils/File';
+import { getFieldArrayChanges } from '@/utils/Form';
 import { convertGraphToJSON } from '@/utils/Graph';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
@@ -332,6 +334,80 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [addValueNode],
   );
 
+  // Helper: Update node
+  const updateNode = useCallback(
+    async (
+      pageId: string,
+      id: string,
+      initialData: NodeFormSchemaData,
+      data: Partial<NodeFormSchemaData>,
+    ) => {
+      try {
+        if (initialData.conditions && data.conditions) {
+          // Check conditions state
+          const {
+            added: addedConditions,
+            deleted: deletedConditions,
+            updated: updatedConditions,
+          } = getFieldArrayChanges(initialData.conditions, data.conditions);
+
+          if (addedConditions.length > 0) {
+            addedConditions.forEach((cond) => addCondition(id, cond));
+          }
+
+          if (deletedConditions.length > 0) {
+            deletedConditions.forEach((cond) => deleteCondition(cond.id));
+          }
+
+          if (updatedConditions.length > 0) {
+            updatedConditions.forEach((cond) => updateCondition(cond.id, cond));
+          }
+        }
+
+        if (initialData.select_options && data.select_options) {
+          // Check conditions state
+          const {
+            added: addedSelectOptions,
+            deleted: deletedSelectOptions,
+            updated: updatedSelectOptions,
+          } = getFieldArrayChanges(
+            initialData.select_options,
+            data.select_options,
+          );
+
+          if (addedSelectOptions.length > 0) {
+            addedSelectOptions.forEach((node) =>
+              addValueNode(pageId, id, node),
+            );
+          }
+
+          if (deletedSelectOptions.length > 0) {
+            deletedSelectOptions.forEach((node) => deleteNode(node.id));
+          }
+
+          if (updatedSelectOptions.length > 0) {
+            updatedSelectOptions.forEach((node) =>
+              updateNodeService(node.id, node),
+            );
+          }
+        }
+
+        await updateNodeService(id, data);
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [],
+  );
+
+  const deleteNode = useCallback(async (id: string) => {
+    try {
+      await deleteNodeService(id);
+    } catch (err) {
+      handleError(err);
+    }
+  }, []);
+
   // Helper: Create node ID mapping
   const createNodeIdMap = (
     fields: NodeFormSchemaData[],
@@ -421,7 +497,11 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // API: Update page
   const updatePage = useCallback(
-    async (id: string, data: Partial<PageFormSchemaData>) => {
+    async (
+      id: string,
+      initialData: PageFormSchemaData,
+      data: Partial<PageFormSchemaData>,
+    ) => {
       try {
         if (!data.fields) return;
 
@@ -434,7 +514,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         if (existingFields.length > 0) {
           await Promise.all(
-            existingFields.map((field) => updateNodeService(field.id!, field)),
+            existingFields.map((field) => {
+              const initialFieldData = initialData.fields.find(
+                (f) => f.id == field.id,
+              );
+
+              if (!initialFieldData) return;
+
+              updateNode(id, field.id!, initialFieldData, field);
+            }),
           );
           fieldIds.push(...existingFields.map((field) => field.id!));
         }
@@ -469,7 +557,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(err);
       }
     },
-    [addNode, processFieldConditions],
+    [addNode, updateNode, processFieldConditions],
   );
 
   // API: Delete page

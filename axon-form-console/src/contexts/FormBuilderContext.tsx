@@ -13,7 +13,11 @@ export interface FormBuilderContextType {
   refreshPages: () => void;
   addPage: (data: PageFormSchemaData) => void;
   getPage: (id: string, fetchInputNodes?: boolean) => void;
-  updatePage: (id: string, data: Partial<PageFormSchemaData>) => void;
+  updatePage: (
+    id: string,
+    initialData: PageFormSchemaData,
+    data: Partial<PageFormSchemaData>,
+  ) => void;
   deletePage: (id: string) => void;
   updatePageOrder: (pages: Page[]) => void;
   addPageConditions: (

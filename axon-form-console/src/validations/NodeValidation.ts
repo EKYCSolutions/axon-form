@@ -47,6 +47,7 @@ export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
     conditions: node.conditions?.map((cond) => ({
       id: cond.id,
       check_node_id: cond.check_node,
+      edge: cond.edge,
       expr: cond.expression as ConditionExpression,
       value: cond.expected_value.toString(),
     })),

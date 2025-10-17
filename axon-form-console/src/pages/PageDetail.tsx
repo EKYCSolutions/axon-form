@@ -40,6 +40,8 @@ export default function PageDetail() {
   const navigate = useNavigate();
   const { selectedPage, getPage, updatePage } = useFormBuilder();
   //
+  const [initialPageSchema, setInitialPageSchema] =
+    useState<PageFormSchemaData>();
   const [loading, setLoading] = useState<boolean>(true);
   //
   const form = useForm<PageFormSchemaData>({
@@ -64,6 +66,7 @@ export default function PageDetail() {
     }
 
     if (selectedPage) {
+      setInitialPageSchema(convertPageToPageFormSchema(selectedPage));
       form.reset(convertPageToPageFormSchema(selectedPage));
       setLoading(false);
     }
@@ -91,11 +94,11 @@ export default function PageDetail() {
   }
 
   function onSubmit(data: PageFormSchemaData) {
-    if (!id) {
+    if (!id || !initialPageSchema) {
       return;
     }
 
-    updatePage(id, data);
+    updatePage(id, initialPageSchema, data);
   }
 
   if (loading) {

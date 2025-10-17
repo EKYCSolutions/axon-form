@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { ValidationRuleType } from '@/configs/graph';
 import { Plus } from 'lucide-react';
 
+import { Label } from '@/components/ui/label';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import ConditionFormField from './ConditionFormField';
@@ -23,7 +24,7 @@ interface IProps {
 }
 
 export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
-  const { control, watch } = useFormContext();
+  const { control, watch, getValues } = useFormContext();
 
   const {
     fields: validationRuleFields,
@@ -195,6 +196,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
         </div>
 
         <Button
+          disabled={getValues('fields').length <= 1}
           type='button'
           className='w-full'
           variant='outline'
@@ -208,6 +210,12 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
           <Plus />
           Add Condition
         </Button>
+
+        {getValues('fields').length <= 0 && (
+          <Label className='text-primary/50 font-normal mt-2 italic'>
+            Please create more fields to add condition
+          </Label>
+        )}
       </div>
     </div>
   );
