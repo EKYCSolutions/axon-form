@@ -511,9 +511,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const updateCondition = useCallback(
     async (conditionId: string, data: Partial<ConditionFormSchemaData>) => {
       try {
-        console.log('condition data >>', conditionId);
-        console.log('condition data >>', data);
-
         if (!data.edge) {
           handleError('Update condition data missing field: edge');
           return;
@@ -535,7 +532,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   // API: Delete condition
   const deleteCondition = useCallback(async (conditionId: string) => {
     try {
-      console.log('deleting conditin >> ', conditionId);
       await deleteConditionService(conditionId);
       handleSuccess('Delete Page Conditions Success');
     } catch (err) {
