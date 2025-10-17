@@ -54,11 +54,13 @@ function DraggableRow({
   idx,
   row,
   onRowClick,
+  onViewConditionClick,
   onDelete,
 }: {
   idx: number;
   row: Page;
   onRowClick: MouseEventHandler<HTMLTableRowElement>;
+  onViewConditionClick: MouseEventHandler<HTMLDivElement>;
   onDelete: (id: string) => void;
 }) {
   const {
@@ -112,11 +114,13 @@ function DraggableRow({
               <span className='sr-only'>Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end' className='w-32'>
+          <DropdownMenuContent align='end' className='w-36'>
             <DropdownMenuItem disabled className='cursor-not-allowed'>
               Duplicate
             </DropdownMenuItem>
-            <DropdownMenuItem>Add Condition</DropdownMenuItem>
+            <DropdownMenuItem onClick={onViewConditionClick}>
+              View Conditions
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <CustomAlertDialog
               title='Are you absolutely sure?'
@@ -235,6 +239,9 @@ export function PageDataTable({
                   idx={idx}
                   row={data}
                   onRowClick={() => navigate(`/page/${data.id}`)}
+                  onViewConditionClick={() =>
+                    navigate(`/page/${data.id}/condition`)
+                  }
                   onDelete={onDelete}
                 />
               ))}

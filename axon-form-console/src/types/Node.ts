@@ -12,19 +12,20 @@ export interface NodeOption {
 export interface NodeCondition {
   id: string;
   check_node: string;
+  edge: string;
   expected_value: string;
   expression: string;
   target_node_id: string;
 }
 
 export interface Node {
-  id: string;
-  type: string;
-  label: string;
-  value: string;
-  field_type: string;
-  field_name: string;
-  validation_rules: ValidationRule[];
+  id?: string;
+  type?: string;
+  label?: string;
+  value?: string;
+  field_type?: string;
+  field_name?: string;
+  validation_rules?: ValidationRule[];
   options?: NodeOption[];
   conditions?: NodeCondition[];
 }

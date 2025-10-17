@@ -1,4 +1,5 @@
 import { PocketBaseCollection } from '@/configs/collections';
+import { NodeType } from '@/configs/graph';
 import type { NodeBody } from '@/types/Node';
 import type { PageBody } from '@/types/Page';
 import type {
@@ -36,12 +37,26 @@ export const getAllNodes = async (
   });
 };
 
+export const getAllInputFieldNodes = async (
+  pageId?: string,
+): Promise<NodeResponse[]> => {
+  return await client.collection(PocketBaseCollection.NODES).getFullList({
+    filter: `type="${NodeType.Input}"${pageId && `&& page!="${pageId}"`}`,
+  });
+};
+
 export const createNode = async (data: NodeBody): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).create(data);
 };
 
 export const getNode = async (id: string): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).getOne(id);
+};
+
+export const getPageNode = async (pageId: string): Promise<NodeResponse> => {
+  return await client
+    .collection(PocketBaseCollection.NODES)
+    .getFirstListItem(`type="${NodeType.Page}" && page="${pageId}"`);
 };
 
 export const getValueNodes = async (
@@ -125,7 +140,7 @@ export const createCondition = async (
   data: ConditionFormSchemaData,
 ): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).create({
-    check_node: data.node_id,
+    check_node: data.check_node_id,
     edge: data.edge,
     expression: data.expr,
     expected_value: data.value,
@@ -133,9 +148,7 @@ export const createCondition = async (
 };
 
 export const getAllConditions = async (): Promise<unknown> => {
-  return await client
-    .collection(PocketBaseCollection.CONDITIONS)
-    .getFullList([]);
+  return await client.collection(PocketBaseCollection.CONDITIONS).getFullList();
 };
 
 export const getCondition = async (id: string): Promise<unknown> => {
@@ -147,7 +160,7 @@ export const updateCondition = async (
   data: Partial<ConditionFormSchemaData>,
 ): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).update(id, {
-    check_node: data.node,
+    check_node: data.check_node_id,
     edge: data.edge,
     expression: data.expr,
     expected_value: data.value,

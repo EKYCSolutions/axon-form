@@ -59,7 +59,7 @@ export default function ConditionFormField({
         <div className='grid grid-cols-5 gap-2 w-full'>
           <FormField
             control={control}
-            name={`fields.${fieldIndex}.conditions.${conditionIndex}.node_id`}
+            name={`fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`}
             render={({ field }) => (
               <FormItem className='col-span-2'>
                 <FormControl>
@@ -67,7 +67,7 @@ export default function ConditionFormField({
                     onValueChange={(value) => {
                       console.log('value >>', value);
                       setValue(
-                        `fields.${fieldIndex}.conditions.${conditionIndex}.node_id`,
+                        `fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`,
                         value,
                       );
                     }}

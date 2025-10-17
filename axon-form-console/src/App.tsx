@@ -5,6 +5,7 @@ import { ThemeProvider } from './providers/ThemeProvider';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
 import CreatePageForm from './pages/CreatePageForm';
 import MainPage from './pages/MainPage';
+import PageConditionForm from './pages/PageConditionForm.js';
 import PageDetail from './pages/PageDetail';
 import { FormBuilderProvider } from './providers/FormBuilderProvider';
 import { GraphViewProvider } from './providers/GraphViewProvider';
@@ -24,6 +25,10 @@ export default function App() {
     {
       path: '/page/:id',
       element: <PageDetail />,
+    },
+    {
+      path: '/page/:id/condition',
+      element: <PageConditionForm />,
     },
     { path: '*', element: <Navigate to='/page' replace /> },
   ]);
