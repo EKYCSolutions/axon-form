@@ -15,17 +15,17 @@ import {
   createPage as createPageService,
   deleteCondition as deleteConditionService,
   deletePage as deletePageService,
-  getAllConditionGroups,
-  getAllConditionsFromNode,
-  getAllInputFieldNodes,
-  getAllNodes,
-  getAllPages,
-  getPageById,
-  getPageNode,
-  getValueNodes,
+  getAllConditionGroups as getAllConditionGroupsService,
+  getAllConditionsFromNode as getAllConditionsFromNodeService,
+  getAllInputFieldNodes as getAllInputFieldNodesService,
+  getAllNodes as getAllNodesService,
+  getAllPages as getAllPagesService,
+  getPageById as getPageByIdService,
+  getPageNode as getPageNodeService,
+  getValueNodes as getValueNodesService,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
-  updateNode,
+  updateNode as updateNodeService,
   updatePageOrder as updatePageOrderService,
   updatePage as updatePageService,
 } from '@/services/PocketBaseService';
@@ -61,48 +61,48 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   // Query: Fetch all pages
   const { data: pagesData, refetch: refreshPages } = useQuery({
     queryKey: ['pages'],
-    queryFn: getAllPages,
+    queryFn: getAllPagesService,
   });
 
   // Query: Fetch single page details
   const { data: singlePageData } = useQuery({
     queryKey: ['page', selectedPageId],
-    queryFn: () => getPageById(selectedPageId!),
+    queryFn: () => getPageByIdService(selectedPageId!),
     enabled: !!selectedPageId,
   });
 
   // Query: Fetch field conditions
   const { data: fieldConditionsData } = useQuery({
     queryKey: ['fieldConditions', selectedPageId],
-    queryFn: () => getAllConditionsFromNode(selectedPageId!),
+    queryFn: () => getAllConditionsFromNodeService(selectedPageId!),
     enabled: !!selectedPageId,
   });
 
   // Query: Fetch all nodes (lazy)
   const { refetch: fetchNodes } = useQuery({
     queryKey: ['nodes'],
-    queryFn: () => getAllNodes(),
+    queryFn: () => getAllNodesService(),
     enabled: false,
   });
 
   // Query: Fetch page node by page id
   const { data: pageNodeData } = useQuery({
     queryKey: ['pageNode', selectedPageId],
-    queryFn: () => getPageNode(selectedPageId!),
+    queryFn: () => getPageNodeService(selectedPageId!),
     enabled: !!selectedPageId,
   });
 
   // Query: Fetch all input nodes of other pages
   const { data: inputFieldNodesData } = useQuery({
     queryKey: ['inputFieldNodes', selectedPageId],
-    queryFn: () => getAllInputFieldNodes(selectedPageId!),
+    queryFn: () => getAllInputFieldNodesService(selectedPageId!),
     enabled: !!selectedPageId && fetchInputFieldNodes,
   });
 
   // Query: Fetch all condition groups (lazy)
   const { refetch: fetchConditionGroups } = useQuery({
     queryKey: ['conditionGroups'],
-    queryFn: getAllConditionGroups,
+    queryFn: getAllConditionGroupsService,
     enabled: false,
   });
 
@@ -150,7 +150,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const optionsQueries = useQueries({
     queries: fieldIdsWithOptions.map((fieldId) => ({
       queryKey: ['fieldOptions', fieldId],
-      queryFn: () => getValueNodes(fieldId!),
+      queryFn: () => getValueNodesService(fieldId!),
       enabled: !!fieldId,
     })),
   });
@@ -434,7 +434,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         if (existingFields.length > 0) {
           await Promise.all(
-            existingFields.map((field) => updateNode(field.id!, field)),
+            existingFields.map((field) => updateNodeService(field.id!, field)),
           );
           fieldIds.push(...existingFields.map((field) => field.id!));
         }
