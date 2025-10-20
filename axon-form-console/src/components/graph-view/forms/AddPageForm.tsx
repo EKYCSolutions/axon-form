@@ -6,7 +6,7 @@ import {
   PageFormSchema,
   type PageFormSchemaData,
 } from '@/validations/PageFormValidation';
-import PageForm from './PageForm';
+import GraphPageForm from './GraphPageForm.js';
 
 interface IProps {
   className?: string;
@@ -29,5 +29,7 @@ export default function AddPageForm({ className }: IProps) {
     // toast.success('Added group condition successfully');
   }
 
-  return <PageForm form={form} onSubmit={onSubmit} className={className} />;
+  return (
+    <GraphPageForm form={form} onSubmit={onSubmit} className={className} />
+  );
 }

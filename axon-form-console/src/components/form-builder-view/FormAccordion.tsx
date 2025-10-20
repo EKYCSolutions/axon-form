@@ -36,7 +36,6 @@ function renderFormField(fieldType: NodeFieldType, fieldIndex: number) {
 interface IProps {
   fieldId: string;
   fieldIndex: number;
-  fieldType: NodeFieldType;
   fieldLabel: string;
   //
   onFieldDelete: MouseEventHandler<HTMLDivElement>;
@@ -45,10 +44,11 @@ interface IProps {
 export default function FormAccordion({
   fieldId,
   fieldIndex,
-  fieldType,
   fieldLabel,
   onFieldDelete,
 }: IProps) {
+  const { getValues } = useFormContext();
+
   const {
     attributes,
     listeners,
@@ -59,8 +59,6 @@ export default function FormAccordion({
   } = useSortable({
     id: fieldId,
   });
-
-  const { watch } = useFormContext();
 
   return (
     <Accordion ref={setNodeRef} type='single' collapsible>
@@ -91,16 +89,20 @@ export default function FormAccordion({
                 {formatIndex(fieldIndex + 1)}
               </p>
               <Badge variant='secondary'>
-                {convertSnakeCaseToTitleCase(fieldType)}
+                {convertSnakeCaseToTitleCase(
+                  getValues(`fields.${fieldIndex}.field_type`),
+                )}
               </Badge>
-              {/* <p>seelct option {watch(`fields.2.select_options`).length}</p> */}
               {fieldLabel}
             </div>
             <FormAccordionDropdown onDelete={onFieldDelete} />
           </div>
         </AccordionTrigger>
         <AccordionContent className='bg-secondary/20 border border-t-0 p-4 rounded-md rounded-tl-none rounded-tr-none'>
-          {renderFormField(fieldType, fieldIndex)}
+          {renderFormField(
+            getValues(`fields.${fieldIndex}.field_type`),
+            fieldIndex,
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>
