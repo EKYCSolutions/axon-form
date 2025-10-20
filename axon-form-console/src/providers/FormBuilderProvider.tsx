@@ -67,7 +67,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   });
 
   // Query: Fetch single page details
-  const { data: singlePageData } = useQuery({
+  const { data: singlePageData, refetch: refreshSinglePage } = useQuery({
     queryKey: ['page', selectedPageId],
     queryFn: () => getPageByIdService(selectedPageId!),
     enabled: !!selectedPageId,
@@ -162,7 +162,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   // Combine selected page with options and conditions
   const selectedPage: Page | undefined = useMemo(() => {
     if (!selectedPageData || isAllOptionsLoading) return undefined;
-
     return {
       ...selectedPageData,
       conditions: fieldConditionsData?.map((cond) => ({
@@ -477,8 +476,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         };
 
         await updatePageService(pageRes.id, updatePageBody);
-        handleSuccess('Add Page Success');
         await refreshPages();
+        handleSuccess('Add Page Success');
       } catch (error) {
         handleError(error);
       }
@@ -552,12 +551,20 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         };
 
         await updatePageService(id, updatePageBody);
+        await refreshPages();
+        await refreshSinglePage();
         handleSuccess('Update Page Success');
       } catch (err) {
         handleError(err);
       }
     },
-    [addNode, updateNode, processFieldConditions],
+    [
+      addNode,
+      updateNode,
+      processFieldConditions,
+      refreshPages,
+      refreshSinglePage,
+    ],
   );
 
   // API: Delete page
@@ -628,17 +635,21 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   }, []);
 
   // API: Update page order
-  const updatePageOrder = useCallback(async (pages: Page[]) => {
-    try {
-      await Promise.all(
-        pages.map((page) =>
-          updatePageOrderService(page.id, { order: page.order }),
-        ),
-      );
-    } catch (err) {
-      handleError(err);
-    }
-  }, []);
+  const updatePageOrder = useCallback(
+    async (pages: Page[]) => {
+      try {
+        await Promise.all(
+          pages.map((page) =>
+            updatePageOrderService(page.id, { order: page.order }),
+          ),
+        );
+        await refreshPages();
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [pages],
+  );
 
   // Helper: Parse edges from nodes
   const parseEdges = useCallback((nodes: GraphNode[]): GraphEdge[] => {

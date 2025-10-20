@@ -13,6 +13,7 @@ import { GripVertical } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
 import { Badge } from '../ui/badge';
 
+import { useFormContext } from 'react-hook-form';
 import FormAccordionDropdown from './FormAccordionDropdown';
 import BaseInputFormField from './form-fields/BaseInputFormField';
 
@@ -24,11 +25,12 @@ function renderFormField(fieldType: NodeFieldType, fieldIndex: number) {
     NodeFieldType.Checkbox,
   ];
 
-  if (formFieldWithOptions.includes(fieldType)) {
-    return <BaseInputFormField fieldIndex={fieldIndex} hasOptions />;
-  }
-
-  return <BaseInputFormField fieldIndex={fieldIndex} />;
+  return (
+    <BaseInputFormField
+      fieldIndex={fieldIndex}
+      hasOptions={formFieldWithOptions.includes(fieldType)}
+    />
+  );
 }
 
 interface IProps {
@@ -57,6 +59,8 @@ export default function FormAccordion({
   } = useSortable({
     id: fieldId,
   });
+
+  const { watch } = useFormContext();
 
   return (
     <Accordion ref={setNodeRef} type='single' collapsible>
@@ -89,6 +93,7 @@ export default function FormAccordion({
               <Badge variant='secondary'>
                 {convertSnakeCaseToTitleCase(fieldType)}
               </Badge>
+              {/* <p>seelct option {watch(`fields.2.select_options`).length}</p> */}
               {fieldLabel}
             </div>
             <FormAccordionDropdown onDelete={onFieldDelete} />

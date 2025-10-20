@@ -41,7 +41,7 @@ export default function FormPageList() {
   return (
     <FormBuilderViewLayout>
       <div className='flex justify-between items-center my-8 gap-4'>
-        <PageHeader title='Pages' />
+        <PageHeader title='Sections' />
         <div className='flex gap-2'>
           {isReordering ? (
             <>

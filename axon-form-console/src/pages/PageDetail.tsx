@@ -31,15 +31,17 @@ import {
 } from '@dnd-kit/sortable';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function PageDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { selectedPage, getPage, updatePage } = useFormBuilder();
   //
+  const hasInitialized = useRef(false);
   const [initialPageSchema, setInitialPageSchema] =
     useState<PageFormSchemaData>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -64,17 +66,20 @@ export default function PageDetail() {
     if (id) {
       getPage(id);
     }
+  }, []);
 
-    if (selectedPage) {
+  useEffect(() => {
+    if (selectedPage && !hasInitialized.current) {
       setInitialPageSchema(convertPageToPageFormSchema(selectedPage));
       form.reset(convertPageToPageFormSchema(selectedPage));
       setLoading(false);
+      hasInitialized.current = true;
     }
-  }, [id, getPage, selectedPage, form]);
+  }, [selectedPage]);
 
   function onAddFormField(fieldType: NodeFieldType) {
     append({
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       type: NodeType.Input,
       field_type: fieldType,
       label: '',
@@ -97,8 +102,8 @@ export default function PageDetail() {
     if (!id || !initialPageSchema) {
       return;
     }
-
     updatePage(id, initialPageSchema, data);
+    form.reset(data);
   }
 
   if (loading) {
@@ -213,10 +218,9 @@ export default function PageDetail() {
               );
             }}
           />
-
           <DragAndDropWrapper handleDragEnd={handleDragEnd}>
             {/* Render Fields */}
-            <div className='flex flex-col gap-3'>
+            <div className='flex flex-col gap-3 pb-8'>
               <SortableContext
                 items={formFields.map((field) => field.id)}
                 strategy={verticalListSortingStrategy}

@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
-import { NodeFieldType, NodeType, ValidationRuleType } from '@/configs/graph';
+import { NodeFieldType, NodeType } from '@/configs/graph';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import { cn } from '@/lib/utils';
@@ -32,6 +32,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function CreatePageForm() {
   const navigate = useNavigate();
@@ -41,64 +42,6 @@ export default function CreatePageForm() {
     resolver: zodResolver(PageFormSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: {
-      title: 'page title',
-      description: 'description',
-      fields: [
-        {
-          id: crypto.randomUUID(),
-          type: NodeType.Input,
-          field_type: NodeFieldType.Text,
-          field_name: 'field-with-condition',
-          label: 'Field Label with Condition',
-          placeholder: 'field with condition placeholder',
-          validation_rules: [],
-        },
-        {
-          id: crypto.randomUUID(),
-          type: NodeType.Input,
-          field_type: NodeFieldType.Text,
-          field_name: 'field-name',
-          label: 'Field Label',
-          placeholder: 'placeholder',
-          validation_rules: [
-            {
-              type: ValidationRuleType.MaxLength,
-              value: 10,
-              message: 'Max length is 10',
-            },
-          ],
-        },
-        {
-          id: crypto.randomUUID(),
-          type: NodeType.Input,
-          field_type: NodeFieldType.Radio,
-          field_name: 'field-name-select',
-          label: 'Field Label Select',
-          placeholder: 'placeholder select',
-          select_options: [
-            {
-              label: 'Option 1',
-              value: 'option-1',
-            },
-            {
-              label: 'Option 2',
-              value: 'option-2',
-            },
-            {
-              label: 'Option 3',
-              value: 'option-3',
-            },
-          ],
-          validation_rules: [
-            {
-              type: ValidationRuleType.Required,
-              message: 'This field is required',
-            },
-          ],
-        },
-      ],
-    },
   });
 
   const {
@@ -120,7 +63,7 @@ export default function CreatePageForm() {
 
   function onAddFormField(fieldType: NodeFieldType) {
     append({
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       type: NodeType.Input,
       field_type: fieldType,
       label: '',
@@ -179,7 +122,7 @@ export default function CreatePageForm() {
               title={
                 form.watch('title') && form.watch('title').length > 0
                   ? form.watch('title')
-                  : 'Enter a page title'
+                  : 'Enter a section title'
               }
             />
             <Button variant='secondary' disabled={!form.formState.isValid}>
@@ -242,7 +185,7 @@ export default function CreatePageForm() {
 
           <DragAndDropWrapper handleDragEnd={handleDragEnd}>
             {/* Render Fields */}
-            <div className='flex flex-col gap-3'>
+            <div className='flex flex-col gap-3 pb-8'>
               <SortableContext
                 items={formFields.map((field) => field.id)}
                 strategy={verticalListSortingStrategy}
