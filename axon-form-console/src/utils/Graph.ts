@@ -127,7 +127,16 @@ export const convertGraphToJSON = (
           .map((field) => field.id),
       })),
     },
-    nodes: nodes,
+    nodes: nodes.map((node) => ({
+      id: node.id,
+      order: node.order,
+      type: node.type,
+      label: node.label,
+      value: node.value,
+      field_type: node.field_type,
+      field_name: node.field_name,
+      validation_rules: node.validation_rules,
+    })),
     edges: edges,
     condition_groups: conditionGroups,
   };
