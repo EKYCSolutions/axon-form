@@ -33,9 +33,12 @@ export default function PageDetail() {
   }, []);
 
   useEffect(() => {
-    if (selectedPage && !hasInitialized.current) {
-      setInitialPageSchema(convertPageToPageFormSchema(selectedPage));
-      form.reset(convertPageToPageFormSchema(selectedPage));
+    if (selectedPage && selectedPage.id == id && !hasInitialized.current) {
+      const pageFormSchema = convertPageToPageFormSchema(selectedPage);
+      //
+      setInitialPageSchema(pageFormSchema);
+      form.reset(pageFormSchema);
+      //
       setLoading(false);
       hasInitialized.current = true;
     }

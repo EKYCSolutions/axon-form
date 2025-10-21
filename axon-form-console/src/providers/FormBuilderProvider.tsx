@@ -30,7 +30,8 @@ import {
   updatePageOrder as updatePageOrderService,
   updatePage as updatePageService,
 } from '@/services/PocketBaseService';
-import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
+import type { Edge } from '@/types/Edge';
+import type { EdgeConditionGroup } from '@/types/Graph';
 import { parseNodeResponse, type Node, type NodeBody } from '@/types/Node';
 import type { Page, PageBody } from '@/types/Page';
 import type { EdgeResponse, NodeResponse } from '@/types/PocketBaseResponse';
@@ -40,10 +41,7 @@ import { convertGraphToJSON } from '@/utils/Graph';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
-import {
-  convertNodeResponseToGraphNode,
-  type NodeFormSchemaData,
-} from '@/validations/NodeValidation';
+import { type NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageConditionFormSchemaData } from '@/validations/PageConditionValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
@@ -247,6 +245,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       try {
         const valueNodeData: NodeBody = {
           page: pageId,
+          order: undefined,
           type: NodeType.Value,
           label: option.label,
           value: option.value,
@@ -305,6 +304,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       try {
         const addNodeBody: NodeBody = {
           page: pageId,
+          order: data.order,
           field_name: data.field_name,
           field_type: data.field_type,
           label: data.label,
@@ -450,6 +450,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         const pageRes = await createPageService(data);
         await createNodeService({
           type: NodeType.Page,
+          order: undefined,
           page: pageRes.id,
           field_name: undefined,
           field_type: undefined,
@@ -651,17 +652,17 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [pages],
   );
 
-  // Helper: Parse edges from nodes
-  const parseEdges = useCallback((nodes: GraphNode[]): GraphEdge[] => {
+  // Helper: Parse edges from nodesf
+  const parseEdges = useCallback((nodes: Node[]): Edge[] => {
     const nodeIds = new Set(nodes.map((node) => node.id));
-    const edgeMap = new Map<string, GraphEdge>();
+    const edgeMap = new Map<string, Edge>();
 
     nodes.forEach((node) => {
-      node.edges.forEach((edge) => {
+      node.edges?.forEach((edge) => {
         if (
           !edgeMap.has(edge.id) &&
-          nodeIds.has(edge.from) &&
-          nodeIds.has(edge.to)
+          nodeIds.has(edge.sourceNode) &&
+          nodeIds.has(edge.targetNode)
         ) {
           edgeMap.set(edge.id, edge);
         }
@@ -680,7 +681,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         if (!nodesData) return;
 
-        const nodes = nodesData.map(convertNodeResponseToGraphNode);
+        const nodes = nodesData.map(parseNodeResponse);
         const edges = parseEdges(nodes);
         const conditionGroups: EdgeConditionGroup[] = (
           conditionGroupsData ?? []

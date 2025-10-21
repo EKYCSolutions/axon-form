@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { type PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
+  arrayMove,
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
@@ -53,6 +54,7 @@ export default function PageForm({ form, onSubmit }: IProps) {
     append({
       id: uuidv4(),
       type: NodeType.Input,
+      order: formFields.length,
       field_type: fieldType,
       label: '',
       field_name: '',
@@ -66,6 +68,22 @@ export default function PageForm({ form, onSubmit }: IProps) {
 
     const oldIndex = formFields.findIndex((f) => f.id === active.id);
     const newIndex = formFields.findIndex((f) => f.id === over.id);
+
+    const fields = form.getValues('fields');
+    const newFields = arrayMove(fields, oldIndex, newIndex);
+
+    const updatedFields = newFields.map((item, idx) => ({
+      ...item,
+      order: idx,
+    }));
+
+    updatedFields.forEach((item) => {
+      const fieldIdx = fields.findIndex((f) => f.id == item.id);
+
+      form.setValue(`fields.${fieldIdx}.order`, item.order, {
+        shouldDirty: true,
+      });
+    });
 
     move(oldIndex, newIndex);
   }

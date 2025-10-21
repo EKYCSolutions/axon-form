@@ -3,12 +3,11 @@ import {
   EdgeType,
   NodeFieldType,
 } from '@/configs/graph';
-import type { EdgeConditionGroup, GraphEdge, GraphNode } from '@/types/Graph';
+import type { Edge } from '@/types/Edge';
+import type { EdgeConditionGroup, GraphEdge } from '@/types/Graph';
+import type { Node } from '@/types/Node';
 import type { Page } from '@/types/Page';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
-import { convertGraphEdgeToEdgeForm } from '@/validations/EdgeValidation';
-import { convertGraphNodeToNodeForm } from '@/validations/NodeValidation';
-import { convertPageToPageForm } from '@/validations/PageFormValidation';
 
 export const convertConditionGroupToConditionString = (
   data: ConditionGroupFormSchemaData,
@@ -110,22 +109,26 @@ export const convertConditionStringToConditionGroupObject = (
 };
 
 export const convertGraphToJSON = (
-  nodes: GraphNode[],
-  edges: GraphEdge[],
+  nodes: Node[],
+  edges: Edge[],
   conditionGroups: EdgeConditionGroup[],
   pages: Page[],
 ): Record<string, unknown> => {
   //
-  const nodeJson = nodes.map((node) => convertGraphNodeToNodeForm(node));
-  const edgeJson = edges.map((edge) => convertGraphEdgeToEdgeForm(edge));
-  const pageJson = pages.map((page) => convertPageToPageForm(page));
-
   return {
     layout: {
-      pages: pageJson,
+      pages: pages.map((page) => ({
+        id: page.id,
+        order: page.order,
+        title: page.title,
+        description: page.description,
+        field_ids: page.fields
+          .sort((a, b) => a.order! - b.order!)
+          .map((field) => field.id),
+      })),
     },
-    nodes: nodeJson,
-    edges: edgeJson,
+    nodes: nodes,
+    edges: edges,
     condition_groups: conditionGroups,
   };
 };

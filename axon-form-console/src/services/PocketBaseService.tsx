@@ -16,15 +16,12 @@ import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import PocketBase from 'pocketbase';
 
-const token = import.meta.env.VITE_POCKETBASE_TOKEN || '';
-
 export const client = new PocketBase(
   `${import.meta.env.VITE_POCKETBASE_URL}:${
     import.meta.env.VITE_POCKETBASE_PORT
   }`,
 );
 
-client.authStore.save(token, null);
 client.autoCancellation(false);
 
 export const getAllNodes = async (

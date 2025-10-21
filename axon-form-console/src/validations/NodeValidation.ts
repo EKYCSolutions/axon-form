@@ -33,7 +33,8 @@ export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
   return {
     id: node.id,
     type: node.type as NodeType,
-    label: node.label,
+    label: node.label || '',
+    order: node.order,
     field_type: node.field_type as NodeFieldType,
     field_name: node.field_name,
     select_options: node.options?.map((option) => ({
@@ -70,6 +71,8 @@ export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
   // Fetch all edges connected to the nodes
   // Each node could be a source or a target node
   // All the connected edges are destructured into expandedEdges
+
+  console.log('edges >>', node.expand);
   const edges = [
     ...(node.expand?.edges_via_source_node
       ? node.expand.edges_via_source_node.map((edge) =>
