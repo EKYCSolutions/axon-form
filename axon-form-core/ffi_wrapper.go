@@ -38,8 +38,7 @@ func InitGraph(dataPtr unsafe.Pointer, dataLen C.int) C.int {
 	}
 
 	jsonData := C.GoBytes(dataPtr, dataLen)
-	tempGraph := graph.InitGraph(jsonData)
-	g = &tempGraph
+	g.InitGraph(jsonData)
 
 	return 1
 }
