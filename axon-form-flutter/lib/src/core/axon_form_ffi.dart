@@ -33,6 +33,11 @@ typedef GetResultDart = Pointer<Utf8> Function();
 typedef GetFormValueC = Int32 Function();
 typedef GetFormValueDart = int Function();
 
+typedef GetPageFormValueC =
+    Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
+typedef GetPageFormValueDart =
+    int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
+
 class AxonFormFFI {
   late final DynamicLibrary _dylib;
   late final InitGraphDart _initGraphDart;
@@ -40,6 +45,7 @@ class AxonFormFFI {
   late final ValidateNodeDart _validateNodeDart;
   late final GetResultDart _getResult;
   late final GetFormValueDart _getFormValueDart;
+  late final GetPageFormValueDart _getPageFormValueDart;
 
   AxonFormFFI() {
     _loadLibrary();
@@ -76,6 +82,10 @@ class AxonFormFFI {
 
       _getFormValueDart = _dylib
           .lookup<NativeFunction<GetFormValueC>>('GetFormValue')
+          .asFunction();
+
+      _getPageFormValueDart = _dylib
+          .lookup<NativeFunction<GetPageFormValueC>>('GetPageFormValue')
           .asFunction();
     } catch (e) {
       throw Exception('Failed to bind functions: $e');
@@ -140,6 +150,21 @@ class AxonFormFFI {
   //
   Map<String, dynamic> getFormValue() {
     _getFormValueDart();
+
+    final ptr = _getResult();
+    final jsonString = ptr.toDartString();
+
+    final result = jsonDecode(jsonString);
+
+    return result;
+  }
+
+  //
+  Map<String, dynamic> getPageFormValue(String pageId) {
+    final pageIdBytes = pageId.toNativeUtf8();
+
+    // Call native function
+    _getPageFormValueDart(pageIdBytes.cast<Void>(), pageId.length);
 
     final ptr = _getResult();
     final jsonString = ptr.toDartString();

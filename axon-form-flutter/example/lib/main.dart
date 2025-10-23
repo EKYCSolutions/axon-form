@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: formGraph == null
           ? const Center(child: CircularProgressIndicator())
-          : FormBuilder(formGraph: formGraph!),
+          : FormBuilder(formGraph: formGraph!, core: core),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/base_inputs/base_input.dart';
 import 'package:axon_form_flutter/src/extensions/extension.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,8 @@ import '../models/model.dart';
 
 class FormBuilder extends StatefulWidget {
   final FormGraph formGraph;
-  const FormBuilder({super.key, required this.formGraph});
+  final AxonFormCore core;
+  const FormBuilder({super.key, required this.formGraph, required this.core});
 
   @override
   State<FormBuilder> createState() => _FormBuilderState();
@@ -23,6 +25,8 @@ class _FormBuilderState extends State<FormBuilder> {
           label: node.label ?? "LABEL",
 
           onChanged: (value) {
+            if (value == null) return;
+            widget.core.validateField(node.id!, value);
             _formData[node.fieldName!] = value;
           },
           validator: (value) {
@@ -37,6 +41,7 @@ class _FormBuilderState extends State<FormBuilder> {
           sheetLabel: "Select",
           label: node.label ?? "LABEL",
           onSelected: (value) {
+            widget.core.validateField(node.id!, value!.id!);
             setState(() {
               _formData[node.fieldName!] = value;
             });
@@ -53,6 +58,7 @@ class _FormBuilderState extends State<FormBuilder> {
           labelText: node.label,
 
           onSelected: (value) {
+            widget.core.validateField(node.id!, value!.id!);
             setState(() {
               _formData[node.fieldName!] = value;
             });
@@ -78,7 +84,10 @@ class _FormBuilderState extends State<FormBuilder> {
             _formData[node.fieldName!] = value;
           },
           validator: (value) {
-            return Validators.validate(value.toString(), node.validationRules ?? []);
+            return Validators.validate(
+              value.toString(),
+              node.validationRules ?? [],
+            );
           },
           builder: (context, field) {
             return SizedBox(
@@ -163,6 +172,9 @@ class _FormBuilderState extends State<FormBuilder> {
               if (_formKey.currentState!.validate()) {
                 _formKey.currentState!.save();
                 print("Collected Data: $_formData");
+                var result = widget.core.getPageFormValue("l31b5tuusxexxej");
+                print("form result >> $result");
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text("Form submitted: $_formData")),
                 );
