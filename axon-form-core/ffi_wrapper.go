@@ -118,6 +118,33 @@ func GetFormValue() C.int {
 	return 1
 }
 
+//export GetPageFormValue
+func GetPageFormValue(pageIDPtr unsafe.Pointer, pageIDLen C.int) C.int {
+	if g == nil {
+		setResult([]byte(`null`))
+		return 0
+	}
+
+	pageID := string(C.GoBytes(pageIDPtr, pageIDLen))
+
+	val := g.GetPageFormValue(pageID)
+	switch v := any(val).(type) {
+	case []byte:
+		setResult(v)
+	case string:
+		setResult([]byte(v))
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			setResult([]byte(fmt.Sprintf(`"marshal error: %s"`, err.Error())))
+			return 0
+		}
+		setResult(b)
+	}
+
+	return 1
+}
+
 //export ResultPtr
 func ResultPtr() *C.char {
 	if len(lastResult) == 0 {

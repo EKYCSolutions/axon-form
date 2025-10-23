@@ -25,8 +25,16 @@ func NewNode(
 	}
 }
 
+var FieldTypesWithOptions = []NodeFieldType{
+	NodeFieldTypeCheckbox,
+	NodeFieldTypeDropdown,
+	NodeFieldTypeMultiSelect,
+	NodeFieldTypeRadio,
+}
+
 func GetNodeByID(id string, nodes map[string]*Node) *Node {
 	node, ok := nodes[id]
+
 	if !ok {
 		return nil
 	}
@@ -46,4 +54,13 @@ func NewNodeFromJSON(nodeJson map[string]any) Node {
 	}
 
 	return node
+}
+
+func IsFieldTypeWithOptions(nodeType NodeFieldType) bool {
+	for _, item := range FieldTypesWithOptions {
+		if item == nodeType {
+			return true
+		}
+	}
+	return false
 }

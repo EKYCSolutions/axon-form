@@ -55,6 +55,7 @@ const (
 	NodeFieldTypeCheckbox
 	NodeFieldTypeFile
 	NodeFieldTypePassword
+	NodeFieldTypeNone
 )
 
 var nodeFieldType = map[NodeFieldType]string{
@@ -67,6 +68,7 @@ var nodeFieldType = map[NodeFieldType]string{
 	NodeFieldTypeCheckbox:    "checkbox",
 	NodeFieldTypeFile:        "file",
 	NodeFieldTypePassword:    "password",
+	NodeFieldTypeNone:        "",
 }
 
 func (nft NodeFieldType) String() string {
@@ -100,7 +102,7 @@ func (nft *NodeFieldType) UnmarshalJSON(data []byte) error {
 		*nft = NodeFieldTypePassword
 
 	default:
-		return fmt.Errorf("unknown NodeFieldType: %s", s)
+		*nft = NodeFieldTypeNone
 	}
 	return nil
 }

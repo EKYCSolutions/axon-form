@@ -3,6 +3,7 @@ package graph
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"regexp"
 	"strconv"
@@ -10,30 +11,42 @@ import (
 
 	"axon-form/core/internal/edge"
 	"axon-form/core/internal/node"
+	"axon-form/core/internal/page"
 	"axon-form/core/internal/util"
 )
 
 func (g *Graph) InitGraph(
 	jsonBytes []byte,
 ) bool {
-	var graphJson map[string][]any
+	var graphJson map[string]interface{}
 	err := json.Unmarshal(jsonBytes, &graphJson)
 	if err != nil {
 		panic(err)
 	}
 
-	nodesJson := graphJson["nodes"]
-	edgesJson := graphJson["edges"]
-	conditionGroupsJson := graphJson["condition_groups"]
+	layoutsJson := graphJson["layout"].(map[string]interface{})
+	pagesJson := layoutsJson["pages"].([]interface{})
+	nodesJson := graphJson["nodes"].([]interface{})
+	edgesJson := graphJson["edges"].([]interface{})
+	conditionGroupsJson := graphJson["condition_groups"].([]interface{})
 
 	// initialize nodes, edges and condition groups
 	g.Nodes = make(map[string]map[string]*node.Node)
 	g.Edges = make(map[string][]*edge.Edge)
 	g.ConditionGroups = make(map[string]*edge.EdgeConditionGroup)
+	g.Pages = make(map[string]*page.Page)
+
 	//
 	g.InitNodeGroup("inputs")
 	g.InitNodeGroup("values")
 	g.InitNodeGroup("pages")
+
+	for _, p := range pagesJson {
+		pageJson := p.(map[string]any)
+		newPage := page.NewPageFromJSON(pageJson)
+		//
+		g.Pages[newPage.ID] = &newPage
+	}
 
 	for _, n := range nodesJson {
 		nodeJson := n.(map[string]any)
@@ -73,6 +86,24 @@ func (g Graph) InitNodeGroup(group string) {
 	}
 }
 
+func (g Graph) GetPageFormValue(pageID string) string {
+	result := make(map[string]any)
+	//
+	foundPage := page.GetPageByID(pageID, g.Pages)
+
+	for _, nid := range foundPage.FieldIDs {
+		foundNode := node.GetNodeByID(nid, g.Nodes["inputs"])
+		result[foundNode.FieldName] = foundNode.Value
+	}
+
+	jsonBytes, err := json.Marshal(result)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return string(jsonBytes)
+}
+
 func (g Graph) GetFormValue() string {
 	result := make(map[string]any)
 	//
@@ -100,6 +131,19 @@ func (g Graph) IsNodeVisible(nodeID string) bool {
 	return foundNode.IsVisible
 }
 
+func (g Graph) updateFoundNodeValue(input VerifyNodeInput, foundNode *node.Node) {
+	isFieldTypeWithOptions := node.IsFieldTypeWithOptions(foundNode.FieldType)
+
+	if isFieldTypeWithOptions {
+		optionNodeId := fmt.Sprintf("%v", input.Value)
+		foundOptionNode := node.GetNodeByID(optionNodeId, g.Nodes["values"])
+		// Update node value
+		foundNode.Value = foundOptionNode.Value
+	} else {
+		foundNode.Value = input.Value
+	}
+}
+
 func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	var foundEdges []*edge.Edge
 
@@ -121,7 +165,7 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 
 	if len(foundEdges) == 0 {
 		// Update node value
-		foundNode.Value = input.Value
+		g.updateFoundNodeValue(input, foundNode)
 		return true, nil
 	}
 
@@ -155,7 +199,7 @@ func (g Graph) ValidateNode(input VerifyNodeInput) (bool, []error) {
 	}
 
 	// Update node value
-	foundNode.Value = input.Value
+	g.updateFoundNodeValue(input, foundNode)
 
 	return true, nil
 }
