@@ -37,6 +37,10 @@ func InitGraph(dataPtr unsafe.Pointer, dataLen C.int) C.int {
 		return 0
 	}
 
+	if g == nil {
+		g = &graph.Graph{}
+	}
+
 	jsonData := C.GoBytes(dataPtr, dataLen)
 	g.InitGraph(jsonData)
 
