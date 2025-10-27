@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:example/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,27 +28,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // Use 'late final' for variables initialized once in initState.
-  FormGraph? formGraph;
-  AxonFormCore core = AxonFormCore();
   Map<String, dynamic> formData = {};
 
   @override
   void initState() {
-    populateFormGraph(jsonPath: 'assets/example.json');
-    // 'assets/example-graph.json',
-
     super.initState();
-  }
-
-  populateFormGraph({required String jsonPath}) async {
-    // core.initialize(jsonPath);
-    final String jsonString = await rootBundle.loadString(jsonPath);
-    final Map<String, dynamic> jsonMap = json.decode(jsonString);
-
-    setState(() {
-      formGraph = FormGraph.fromJson(jsonMap);
-    });
   }
 
   void _handleFormChange(Map<String, dynamic> data) {
@@ -69,25 +50,22 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Axon Form Demo"),
       ),
-      body: formGraph == null
-          ? const Center(child: CircularProgressIndicator())
-          : FormBuilder(
-              formGraph: formGraph!,
+      body: FormBuilder(
+              jsonPath: 'assets/example.json',
               onChanged: _handleFormChange,
-
               customFieldBuilders: {
-              //   FieldType.text: (context, node, onSaved) {
-              //     return TextFormField(
-              //       decoration: InputDecoration(
-              //         labelText: node.label,
-              //         hintText: node.subLabel,
-              //       ),
-              //       initialValue: formData[node.fieldName]?.toString() ?? '',
-              //       onChanged: (value) {
-              //         // Handle value change
-              //       },
-              //     );
-              //   },
+                //   FieldType.text: (context, node, onSaved) {
+                //     return TextFormField(
+                //       decoration: InputDecoration(
+                //         labelText: node.label,
+                //         hintText: node.subLabel,
+                //       ),
+                //       initialValue: formData[node.fieldName]?.toString() ?? '',
+                //       onChanged: (value) {
+                //         // Handle value change
+                //       },
+                //     );
+                //   },
               },
             ),
     );

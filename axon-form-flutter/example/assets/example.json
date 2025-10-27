@@ -2,119 +2,29 @@
   "layout": {
     "pages": [
       {
-        "id": "352u7qq0ludrxtt",
-        "title": "Page ~ Service Type",
-        "description": "Service Type",
+        "id": "eeln1e7wkr1q204",
+        "title": "Service Type & Location",
+        "description": "Service type and service location",
         "field_ids": [
-          "2ap0gk0ybtc42tb"
+          "lzx0sorpox3fcqv",
+          "rmop0oc8vhlxg66"
         ]
       },
       {
-        "id": "a5n5crh38edwpsf",
-        "title": "Page ~ Service Location",
-        "description": "Service Location",
+        "id": "op012lft8tnb3i7",
+        "title": "Personal Information",
+        "description": "Personal information",
         "field_ids": [
-          "ul08072cyugtfhx"
-        ]
-      },
-      {
-        "id": "bgoj5mdtt4xkkrs",
-        "title": "Page ~ Information",
-        "description": "Personal Information",
-        "field_ids": [
-          "4klkn8xz70p7pks",
-          "zl4k0hk7cb77tvc",
-          "i1bt9wctdm6jvch",
-          "1hng29vhgic462p",
-          "3xh4vkuu7ac7o41"
+          "hdokt2fa4z32tjn",
+          "x8kdi5owsdz2s3l",
+          "0gn0zmop0bhrz93"
         ]
       }
     ]
   },
   "nodes": [
     {
-      "id": "31alyv7vqtmz5az",
-      "type": "input",
-      "field_type": "text",
-      "field_name": "first-name",
-      "label": "First Name",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "First Name is required"
-        }
-      ]
-    },
-    {
-      "id": "y6ynyv961s1ms9g",
-      "type": "input",
-      "field_type": "text",
-      "field_name": "last-name",
-      "label": "Last Name",
-      "validation_rules": [
-        {
-          "type": "required",
-          "value": 10,
-          "message": "Last Name is required"
-        }
-      ]
-    },
-    {
-      "id": "zl4k0hk7cb77tvc",
-      "type": "input",
-      "field_type": "text",
-      "field_name": "last-name",
-      "label": "Last Name",
-      "validation_rules": [
-        {
-          "type": "required",
-          "value": 10,
-          "message": "Last Name is required"
-        }
-      ]
-    },
-    {
-      "id": "4klkn8xz70p7pks",
-      "type": "input",
-      "field_type": "text",
-      "field_name": "first-name",
-      "label": "First Name",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "First Name is required"
-        }
-      ]
-    },
-    {
-      "id": "2ap0gk0ybtc42tb",
-      "type": "input",
-      "field_type": "radio",
-      "field_name": "service-type",
-      "label": "Service Type",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "Service Type is required"
-        }
-      ]
-    },
-    {
-      "id": "t0e9sx83bl2s5l4",
-      "type": "value",
-      "field_name": "",
-      "label": "New",
-      "validation_rules": []
-    },
-    {
-      "id": "ihm4c0kjk5j6lw5",
-      "type": "value",
-      "field_name": "",
-      "label": "Re-new",
-      "validation_rules": []
-    },
-    {
-      "id": "ul08072cyugtfhx",
+      "id": "rmop0oc8vhlxg66",
       "type": "input",
       "field_type": "dropdown",
       "field_name": "service-location",
@@ -122,69 +32,62 @@
       "validation_rules": [
         {
           "type": "required",
-          "message": "This field is required"
+          "message": "Location is required"
         }
       ]
     },
     {
-      "id": "wuidmz31gsvv87z",
-      "type": "value",
-      "field_name": "",
-      "label": "General Department of Identification",
-      "validation_rules": []
+      "id": "lzx0sorpox3fcqv",
+      "type": "input",
+      "field_type": "radio",
+      "field_name": "service-type",
+      "label": "Service Type",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "SErvice type is required"
+        }
+      ]
     },
     {
-      "id": "7vt8pxw71m34j09",
-      "type": "value",
-      "field_name": "",
-      "label": "Aeon 3",
-      "validation_rules": []
-    },
-    {
-      "id": "dwzq6evvr7zpb8m",
+      "id": "remifeffpeo7a6u",
       "type": "value",
       "field_name": "",
       "label": "Aeon 2",
       "validation_rules": []
     },
     {
-      "id": "3xh4vkuu7ac7o41",
-      "type": "input",
-      "field_type": "file",
-      "field_name": "passport",
-      "label": "Passport",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "Passport is required"
-        }
-      ]
-    },
-    {
-      "id": "q3u9lk1pnigzbk2",
-      "type": "input",
-      "field_type": "checkbox",
+      "id": "35flotkqtm1kb4f",
+      "type": "value",
       "field_name": "",
-      "label": "set",
+      "label": "GDI",
       "validation_rules": []
     },
     {
-      "id": "i1bt9wctdm6jvch",
-      "type": "input",
-      "field_type": "datetime",
-      "field_name": "dob",
-      "label": "Date of Birth",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "Date of Birth is required"
-        }
-      ]
+      "id": "0wyaccdc86y9jj8",
+      "type": "value",
+      "field_name": "",
+      "label": "Renewal",
+      "validation_rules": []
     },
     {
-      "id": "1hng29vhgic462p",
+      "id": "w7l5ldu1e98xk42",
+      "type": "value",
+      "field_name": "",
+      "label": "New",
+      "validation_rules": []
+    },
+    {
+      "id": "k1fdhxs2acvc6ua",
+      "type": "value",
+      "field_name": "",
+      "label": "Aeon 3",
+      "validation_rules": []
+    },
+    {
+      "id": "0gn0zmop0bhrz93",
       "type": "input",
-      "field_type": "dropdown",
+      "field_type": "radio",
       "field_name": "gender",
       "label": "Gender",
       "validation_rules": [
@@ -195,68 +98,94 @@
       ]
     },
     {
-      "id": "bh5e34ab0bvkwnr",
-      "type": "value",
-      "field_name": "",
-      "label": "Male",
-      "validation_rules": []
+      "id": "hdokt2fa4z32tjn",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "first-name",
+      "label": "First Name",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "First name is required"
+        }
+      ]
     },
     {
-      "id": "3p25aomrh4krpoa",
+      "id": "x8kdi5owsdz2s3l",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "last-name",
+      "label": "Last Name",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Last name is required"
+        }
+      ]
+    },
+    {
+      "id": "efpaqf8tn7t4i3k",
       "type": "value",
       "field_name": "",
       "label": "Female",
+      "validation_rules": []
+    },
+    {
+      "id": "o47p0pynk3x7467",
+      "type": "value",
+      "field_name": "",
+      "label": "Male",
       "validation_rules": []
     }
   ],
   "edges": [
     {
-      "id": "hh696ztr39fw87i",
+      "id": "lc4911wbp49ptfw",
       "label": "",
-      "source_node": "2ap0gk0ybtc42tb",
-      "target_node": "ihm4c0kjk5j6lw5",
+      "source_node": "rmop0oc8vhlxg66",
+      "target_node": "remifeffpeo7a6u",
       "type": "has_options"
     },
     {
-      "id": "umq46b97q3czfyn",
+      "id": "lu2cq5klyikztes",
       "label": "",
-      "source_node": "2ap0gk0ybtc42tb",
-      "target_node": "t0e9sx83bl2s5l4",
+      "source_node": "rmop0oc8vhlxg66",
+      "target_node": "35flotkqtm1kb4f",
       "type": "has_options"
     },
     {
-      "id": "4ndck954ea6ofsi",
+      "id": "cruw7saz6wse5ev",
       "label": "",
-      "source_node": "ul08072cyugtfhx",
-      "target_node": "7vt8pxw71m34j09",
+      "source_node": "rmop0oc8vhlxg66",
+      "target_node": "k1fdhxs2acvc6ua",
       "type": "has_options"
     },
     {
-      "id": "dcx39evq3ljnf3g",
+      "id": "q194o5r2wcymh2y",
       "label": "",
-      "source_node": "ul08072cyugtfhx",
-      "target_node": "wuidmz31gsvv87z",
+      "source_node": "lzx0sorpox3fcqv",
+      "target_node": "w7l5ldu1e98xk42",
       "type": "has_options"
     },
     {
-      "id": "x0tf4706fqisg0y",
+      "id": "ilfn3eb6d53qw88",
       "label": "",
-      "source_node": "ul08072cyugtfhx",
-      "target_node": "dwzq6evvr7zpb8m",
+      "source_node": "lzx0sorpox3fcqv",
+      "target_node": "0wyaccdc86y9jj8",
       "type": "has_options"
     },
     {
-      "id": "xji079m1hx3zmvo",
+      "id": "rfttptyk17q8nzw",
       "label": "",
-      "source_node": "1hng29vhgic462p",
-      "target_node": "bh5e34ab0bvkwnr",
+      "source_node": "0gn0zmop0bhrz93",
+      "target_node": "o47p0pynk3x7467",
       "type": "has_options"
     },
     {
-      "id": "smtxjvdd9wel048",
+      "id": "i7i0x6y7h9o6el1",
       "label": "",
-      "source_node": "1hng29vhgic462p",
-      "target_node": "3p25aomrh4krpoa",
+      "source_node": "0gn0zmop0bhrz93",
+      "target_node": "efpaqf8tn7t4i3k",
       "type": "has_options"
     }
   ],
