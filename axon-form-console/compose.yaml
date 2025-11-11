@@ -17,7 +17,6 @@ services:
     environment:
       VITE_POCKETBASE_URL: http://localhost
       VITE_POCKETBASE_PORT: 8080
-      VITE_POCKETBASE_TOKEN:
     depends_on:
       - db
     ports:

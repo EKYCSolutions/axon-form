@@ -1,4 +1,4 @@
-import type { MouseEventHandler } from 'react';
+import { type MouseEventHandler } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,8 +38,13 @@ export default function CustomAlertDialog({
   return (
     <>
       <AlertDialog>
-        <AlertDialogTrigger>{children}</AlertDialogTrigger>
-        <AlertDialogContent>
+        <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+        <AlertDialogContent
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            document.body.style.pointerEvents = '';
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>{title}</AlertDialogTitle>
             <AlertDialogDescription>{description}</AlertDialogDescription>

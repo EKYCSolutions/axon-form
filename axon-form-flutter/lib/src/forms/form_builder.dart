@@ -41,7 +41,9 @@ class _FormBuilderState extends State<FormBuilder> {
     _formProvider = FormProviderState();
     _formProvider!.populateFormGraph(jsonPath: widget.jsonPath).catchError((e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load form: $e')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to load form: $e')));
       }
     });
     _fieldBuilders = _initializeBuilders();
@@ -59,8 +61,15 @@ class _FormBuilderState extends State<FormBuilder> {
         final state = Provider.of<FormProviderState>(context, listen: false);
         return BaseTextInput(
           label: node.label ?? "LABEL",
-          onChanged: (value) => state.updateField(node.fieldName!, value),
-          validator: (value) => Validators.validate(value, node.validationRules ?? []),
+
+          onChanged: (value) {
+            if (value == null) return;
+            // widget.core.validateField(node.id!, value);
+            state.updateField(node.fieldName!, value);
+          },
+          validator: (value) {
+            return Validators.validate(value, node.validationRules ?? []);
+          },
         );
       },
       FieldType.dropdown: (context, node, onSaved) {
@@ -70,17 +79,23 @@ class _FormBuilderState extends State<FormBuilder> {
           options: options,
           sheetLabel: "Select",
           label: node.label ?? "LABEL",
-          onSelected: (value) => state.updateField(node.fieldName!, value),
+          onSelected: (value) {
+            // widget.core.validateField(node.id!, value!.id!);
+            state.updateField(node.fieldName!, value);
+          },
           initialValue: state.formData[node.fieldName!],
-          validator: (value) => Validators.validate(value?.id, node.validationRules ?? []),
+          validator: (value) =>
+              Validators.validate(value?.id, node.validationRules ?? []),
         );
       },
       FieldType.datetime: (context, node, onSaved) {
         final state = Provider.of<FormProviderState>(context, listen: false);
         return BaseDatePickerInput(
-          onChanged: (value) => state.updateField(node.fieldName ?? node.label ?? "", value),
+          onChanged: (value) =>
+              state.updateField(node.fieldName ?? node.label ?? "", value),
           label: node.label ?? "LABEL",
-          validator: (value) => Validators.validate(value, node.validationRules ?? []),
+          validator: (value) =>
+              Validators.validate(value, node.validationRules ?? []),
         );
       },
       FieldType.radio: (context, node, onSaved) {
@@ -89,16 +104,21 @@ class _FormBuilderState extends State<FormBuilder> {
         return BaseFormRadioGroupInput(
           options: options,
           labelText: node.label,
-          onSelected: (value) => state.updateField(node.fieldName!, value),
+          onSelected: (value) {
+            // widget.core.validateField(node.id!, value!.id!);
+            state.updateField(node.fieldName!, value);
+          },
           initialValue: state.formData[node.fieldName!],
-          validator: (value) => Validators.validate(value?.id, node.validationRules ?? []),
+          validator: (value) =>
+              Validators.validate(value?.id, node.validationRules ?? []),
         );
       },
       FieldType.file: (context, node, onSaved) {
         final state = Provider.of<FormProviderState>(context, listen: false);
         return BaseFileInput(
           onChanged: (value) => state.updateField(node.fieldName!, value),
-          validator: (value) => Validators.validate(value.toString(), node.validationRules ?? []),
+          validator: (value) =>
+              Validators.validate(value.toString(), node.validationRules ?? []),
           builder: (context, field) {
             final val = state.formData[node.fieldName!];
             return SizedBox(
@@ -113,12 +133,16 @@ class _FormBuilderState extends State<FormBuilder> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(50),
                         ),
-                        child: const Center(child: Icon(Icons.file_present_rounded)),
+                        child: const Center(
+                          child: Icon(Icons.file_present_rounded),
+                        ),
                       ),
                       Positioned(
                         bottom: 4,
                         right: 4,
-                        child: val != null ? const Icon(Icons.check_circle) : const Icon(Icons.add_circle_rounded),
+                        child: val != null
+                            ? const Icon(Icons.check_circle)
+                            : const Icon(Icons.add_circle_rounded),
                       ),
                     ],
                   ),
@@ -192,24 +216,33 @@ class _FormBuilderState extends State<FormBuilder> {
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             Padding(
-                              padding: const EdgeInsets.only(top: 4.0, bottom: 12.0),
+                              padding: const EdgeInsets.only(
+                                top: 4.0,
+                                bottom: 12.0,
+                              ),
                               child: Text(page.desc),
                             ),
                             ...page.fields.map((fieldId) {
-                              final node = state.formGraph!.getNodeById(fieldId);
+                              final node = state.formGraph!.getNodeById(
+                                fieldId,
+                              );
                               if (node == null) {
                                 return Text('Field with ID $fieldId not found');
                               }
                               final builder = _fieldBuilders[node.fieldType];
                               if (builder != null) {
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
                                   child: builder(context, node, (value) {
                                     state.updateField(node.fieldName!, value);
                                   }),
                                 );
                               }
-                              return Text('No builder found for field type ${node.fieldType}');
+                              return Text(
+                                'No builder found for field type ${node.fieldType}',
+                              );
                             }).toList(),
                           ],
                         ),
@@ -225,24 +258,50 @@ class _FormBuilderState extends State<FormBuilder> {
                   children: [
                     if (state.currentPage > 0)
                       widget.customBack != null
-                          ? InkWell(onTap: () => state.previousPage(), child: widget.customBack)
-                          : ElevatedButton(onPressed: () => state.previousPage(), child: const Text('Back')),
+                          ? InkWell(
+                              onTap: () => state.previousPage(),
+                              child: widget.customBack,
+                            )
+                          : ElevatedButton(
+                              onPressed: () => state.previousPage(),
+                              child: const Text('Back'),
+                            ),
                     const Spacer(),
                     widget.customNext != null
                         ? InkWell(
                             onTap: () async {
-                              final submitted = await state.advanceOrSubmit(onSubmitted: widget.onChanged);
+                              final submitted = await state.advanceOrSubmit(
+                                onSubmitted: widget.onChanged,
+                              );
                               if (submitted) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Form submitted: ${state.formData}')));
+                                // var result = widget.core.getPageFormValue("l31b5tuusxexxej");
+                                // print("form result >> $result");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Form submitted: ${state.formData}',
+                                    ),
+                                  ),
+                                );
                               }
                             },
                             child: widget.customNext,
                           )
                         : ElevatedButton(
                             onPressed: () async {
-                              final submitted = await state.advanceOrSubmit(onSubmitted: widget.onChanged);
+                              final submitted = await state.advanceOrSubmit(
+                                onSubmitted: widget.onChanged,
+                              );
                               if (submitted) {
-                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Form submitted: ${state.formData}')));
+                                // var result = widget.core.getPageFormValue("l31b5tuusxexxej");
+                                // print("form result >> $result");
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Form submitted: ${state.formData}',
+                                    ),
+                                  ),
+                                );
                               }
                             },
                             child: Text(state.isLastPage ? 'Submit' : 'Next'),

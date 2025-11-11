@@ -2,23 +2,23 @@
   "layout": {
     "pages": [
       {
-        "id": "1",
-        "title": "Page 1",
-        "desc": "Page 1 Info",
-        "fields": [
-          "t494fub1vww8jv2",
-          "b8mvlvxveal87lw",
-          "7fzhb9en55ntbeh",
-          "b6m1w00464sn4ed"
+        "id": "jlsey36msvujn50",
+        "order": 0,
+        "title": "Select product page",
+        "description": "Select product page description",
+        "field_ids": [
+          "t494fub1vww8jv2"
         ]
       },
       {
-        "id": "2",
-        "title": "Page 2",
-        "desc": "Page 2 Info",
-        "fields": [
-          "byfr5rsuiidyvsq",
-          "m0yy2ffq10njrbf"
+        "id": "l31b5tuusxexxej",
+        "order": 1,
+        "title": "Customer detail page",
+        "description": "Customer detail page",
+        "field_ids": [
+          "b8mvlvxveal87lw",
+          "7fzhb9en55ntbeh",
+          "byfr5rsuiidyvsq"
         ]
       }
     ]
@@ -26,32 +26,42 @@
   "nodes": [
     {
       "id": "t494fub1vww8jv2",
+      "order": 0,
       "type": "input",
       "field_type": "dropdown",
       "field_name": "product_type",
       "label": "Select Product Type",
+      "value": "",
       "validation_rules": []
     },
     {
       "id": "kq1sfch5ivka5wd",
+      "order": 0,
       "type": "value",
       "field_name": null,
+      "field_type": "",
       "label": "Laptop",
+      "value": "laptop",
       "validation_rules": []
     },
     {
       "id": "31vvgplwq4ycwmo",
+      "order": 0,
       "type": "value",
       "field_name": null,
+      "field_type": "",
       "label": "Phone",
+      "value": "phone",
       "validation_rules": []
     },
     {
       "id": "b8mvlvxveal87lw",
+      "order": 0,
       "type": "input",
       "field_type": "text",
       "field_name": "customer_name",
       "label": "Customer Name",
+      "value": "",
       "validation_rules": [
         {
           "type": "required",
@@ -61,10 +71,12 @@
     },
     {
       "id": "7fzhb9en55ntbeh",
+      "order": 1,
       "type": "input",
       "field_type": "text",
       "field_name": "email",
       "label": "Email",
+      "value": "",
       "validation_rules": [
         {
           "type": "required",
@@ -72,46 +84,44 @@
         }
       ]
     },
-      {
-      "id": "b6m1w00464sn4ed",
-      "type": "input",
-      "field_type": "datetime",
-      "label": "input-person-dob",
-      "validation_rules": []
-    },
     {
       "id": "byfr5rsuiidyvsq",
+      "order": 2,
       "type": "input",
       "field_type": "radio",
       "field_name": "delivery_option",
       "label": "Delivery Option",
-      "validation_rules": [
-         {
-          "type": "required",
-          "message": "Delivery Option is required"
-        }
-      ]
+      "value": "",
+      "validation_rules": []
     },
     {
       "id": "50f49bcqb4ej4bz",
+      "order": 0,
       "type": "value",
       "field_name": null,
+      "field_type": "",
       "label": "Home Delivery",
+      "value": "home-delivery",
       "validation_rules": []
     },
     {
       "id": "5nb3tdl76esj1et",
+      "order": 0,
       "type": "value",
       "field_name": null,
+      "field_type": "",
       "label": "Pickup",
+      "value": "pickup",
       "validation_rules": []
     },
     {
       "id": "m0yy2ffq10njrbf",
+      "order": 3,
       "type": "input",
       "field_type": "file",
       "field_name": "receipt_upload",
       "label": "Upload Receipt",
+      "value": "",
       "validation_rules": []
     }
   ],
@@ -143,6 +153,22 @@
       "source_node": "byfr5rsuiidyvsq",
       "target_node": "5nb3tdl76esj1et",
       "type": "has_options"
+    },
+    {
+      "id": "cmfp0wqfd0001284258nbn3hw",
+      "label": "show-delivery-option",
+      "source_node": "b8mvlvxveal87lw",
+      "target_node": "byfr5rsuiidyvsq",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cmfp0xphz000128427qd2xk8o",
+          "node": "b8mvlvxveal87lw",
+          "edge": "cmfp0wqfd0001284258nbn3hw",
+          "expr": "equal",
+          "value": "NJohn"
+        }
+      ]
     }
   ],
   "condition_groups": []

@@ -5,6 +5,7 @@ export interface BaseResponse {
 }
 
 export interface NodeResponse extends BaseResponse {
+  order: number;
   label: string;
   value: string;
   type: string;
@@ -35,6 +36,7 @@ export interface ConditionResponse extends BaseResponse {
   edge: string;
   expression: string;
   expected_value: string;
+  target_node_id: string;
 }
 
 export interface ConditionGroupResponse extends BaseResponse {

@@ -40,4 +40,13 @@ class AxonFormCore {
       rethrow;
     }
   }
+
+  //
+  Map<String, dynamic> getPageFormValue(String pageId) {
+    try {
+      return coreFFI.getPageFormValue(pageId);
+    } catch (error) {
+      rethrow;
+    }
+  }
 }

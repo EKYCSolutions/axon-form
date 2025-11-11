@@ -32,16 +32,19 @@ func GetResult() *C.char {
 
 //export InitGraph
 func InitGraph(dataPtr unsafe.Pointer, dataLen C.int) C.int {
- if dataLen == 0 || dataPtr == nil {
-  setResult([]byte(`["invalid input", null]`))
-  return 0
- }
- jsonData := C.GoBytes(dataPtr, dataLen)
- if g == nil {
-  g = &graph.Graph{}
- }
- g.InitGraph(jsonData)
- return 1
+	if dataLen == 0 || dataPtr == nil {
+		setResult([]byte(`["invalid input", null]`))
+		return 0
+	}
+
+	if g == nil {
+		g = &graph.Graph{}
+	}
+
+	jsonData := C.GoBytes(dataPtr, dataLen)
+	g.InitGraph(jsonData)
+
+	return 1
 }
 
 //export IsNodeVisible
@@ -101,6 +104,33 @@ func GetFormValue() C.int {
 	}
 
 	val := g.GetFormValue()
+	switch v := any(val).(type) {
+	case []byte:
+		setResult(v)
+	case string:
+		setResult([]byte(v))
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			setResult([]byte(fmt.Sprintf(`"marshal error: %s"`, err.Error())))
+			return 0
+		}
+		setResult(b)
+	}
+
+	return 1
+}
+
+//export GetPageFormValue
+func GetPageFormValue(pageIDPtr unsafe.Pointer, pageIDLen C.int) C.int {
+	if g == nil {
+		setResult([]byte(`null`))
+		return 0
+	}
+
+	pageID := string(C.GoBytes(pageIDPtr, pageIDLen))
+
+	val := g.GetPageFormValue(pageID)
 	switch v := any(val).(type) {
 	case []byte:
 		setResult(v)

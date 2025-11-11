@@ -1,6 +1,10 @@
 import { PocketBaseCollection } from '@/configs/collections';
+import { NodeType } from '@/configs/graph';
+import type { NodeBody } from '@/types/Node';
+import type { PageBody } from '@/types/Page';
 import type {
   ConditionGroupResponse,
+  ConditionResponse,
   EdgeResponse,
   NodeResponse,
   PageResponse,
@@ -12,15 +16,12 @@ import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import PocketBase from 'pocketbase';
 
-const token = import.meta.env.VITE_POCKETBASE_TOKEN || '';
-
 export const client = new PocketBase(
   `${import.meta.env.VITE_POCKETBASE_URL}:${
     import.meta.env.VITE_POCKETBASE_PORT
   }`,
 );
 
-client.authStore.save(token, null);
 client.autoCancellation(false);
 
 export const getAllNodes = async (
@@ -33,23 +34,26 @@ export const getAllNodes = async (
   });
 };
 
-export const createNode = async (
-  data: NodeFormSchemaData,
-): Promise<NodeResponse> => {
-  return await client.collection(PocketBaseCollection.NODES).create({
-    label: data.label,
-    type: data.type,
-    value: data.default_value,
-    field_name: data.field_name,
-    field_type: data.field_type,
-    fieldType: data.field_type,
-    nodeType: data.type,
-    validation_rules: data.validation_rules,
+export const getAllInputFieldNodes = async (
+  pageId?: string,
+): Promise<NodeResponse[]> => {
+  return await client.collection(PocketBaseCollection.NODES).getFullList({
+    filter: `type="${NodeType.Input}"${pageId && `&& page!="${pageId}"`}`,
   });
+};
+
+export const createNode = async (data: NodeBody): Promise<NodeResponse> => {
+  return await client.collection(PocketBaseCollection.NODES).create(data);
 };
 
 export const getNode = async (id: string): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.NODES).getOne(id);
+};
+
+export const getPageNode = async (pageId: string): Promise<NodeResponse> => {
+  return await client
+    .collection(PocketBaseCollection.NODES)
+    .getFirstListItem(`type="${NodeType.Page}" && page="${pageId}"`);
 };
 
 export const getValueNodes = async (
@@ -91,6 +95,29 @@ export const getAllEdges = async (): Promise<EdgeResponse[]> => {
   });
 };
 
+export const getAllConditionsFromNode = async (
+  page_id: string,
+): Promise<ConditionResponse[]> => {
+  //
+  const edges = await client
+    .collection(PocketBaseCollection.EDGES)
+    .getFullList({
+      filter: `target_node.page = "${page_id}"`,
+      expand: 'conditions_via_edge',
+    });
+
+  //
+  const allConditions = edges.flatMap((edge) => {
+    const conditions = edge.expand?.conditions_via_edge || [];
+    return conditions.map((condition: ConditionResponse) => ({
+      ...condition,
+      target_node_id: edge.target_node,
+    }));
+  });
+
+  return allConditions;
+};
+
 export const getEdge = async (id: string): Promise<EdgeResponse> => {
   return await client.collection(PocketBaseCollection.EDGES).getOne(id);
 };
@@ -110,7 +137,7 @@ export const createCondition = async (
   data: ConditionFormSchemaData,
 ): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).create({
-    check_node: data.node,
+    check_node: data.check_node_id,
     edge: data.edge,
     expression: data.expr,
     expected_value: data.value,
@@ -118,9 +145,7 @@ export const createCondition = async (
 };
 
 export const getAllConditions = async (): Promise<unknown> => {
-  return await client
-    .collection(PocketBaseCollection.CONDITIONS)
-    .getList(1, 50, {});
+  return await client.collection(PocketBaseCollection.CONDITIONS).getFullList();
 };
 
 export const getCondition = async (id: string): Promise<unknown> => {
@@ -132,7 +157,7 @@ export const updateCondition = async (
   data: Partial<ConditionFormSchemaData>,
 ): Promise<unknown> => {
   return await client.collection(PocketBaseCollection.CONDITIONS).update(id, {
-    check_node: data.node,
+    check_node: data.check_node_id,
     edge: data.edge,
     expression: data.expr,
     expected_value: data.value,
@@ -196,12 +221,10 @@ export const getPageById = async (id: string): Promise<PageResponse> => {
 
 export const createPage = async (
   data: PageFormSchemaData,
-  field_ids: string[],
 ): Promise<PageResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).create({
     title: data.title,
     description: data.description,
-    fields: field_ids,
   });
 };
 
@@ -211,21 +234,14 @@ export const getPage = async (id: string): Promise<NodeResponse> => {
 
 export const updatePage = async (
   id: string,
-  data: Partial<PageFormSchemaData>,
-  field_ids: string[],
+  data: Partial<PageBody>,
 ): Promise<PageResponse> => {
   //
-  if (field_ids.length > 0) {
-    return await client.collection(PocketBaseCollection.PAGES).update(id, {
-      title: data.title,
-      description: data.description,
-      fields: field_ids,
-    });
-  }
+  return await client.collection(PocketBaseCollection.PAGES).update(id, data);
+};
 
-  // return await client.collection(PocketBaseCollection.PAGES).update(id, data);
-
-  return await client.collection(PocketBaseCollection.PAGES).getOne(id);
+export const deletePage = async (id: string): Promise<boolean> => {
+  return await client.collection(PocketBaseCollection.PAGES).delete(id);
 };
 
 export const updatePageOrder = async (
@@ -233,8 +249,4 @@ export const updatePageOrder = async (
   data: Partial<NodeFormSchemaData>,
 ): Promise<NodeResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).update(id, data);
-};
-
-export const deletePage = async (id: string): Promise<boolean> => {
-  return await client.collection(PocketBaseCollection.PAGES).delete(id);
 };

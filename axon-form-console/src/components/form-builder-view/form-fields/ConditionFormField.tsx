@@ -59,7 +59,7 @@ export default function ConditionFormField({
         <div className='grid grid-cols-5 gap-2 w-full'>
           <FormField
             control={control}
-            name={`fields.${fieldIndex}.conditions.${conditionIndex}.node_id`}
+            name={`fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`}
             render={({ field }) => (
               <FormItem className='col-span-2'>
                 <FormControl>
@@ -67,7 +67,7 @@ export default function ConditionFormField({
                     onValueChange={(value) => {
                       console.log('value >>', value);
                       setValue(
-                        `fields.${fieldIndex}.conditions.${conditionIndex}.node_id`,
+                        `fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`,
                         value,
                       );
                     }}
@@ -79,14 +79,18 @@ export default function ConditionFormField({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {getValues('fields').map((field: NodeFormSchemaData) => {
-                        console.log('field >>', field);
-                        return (
-                          <SelectItem key={field.id} value={field.id!}>
-                            {field.label}
-                          </SelectItem>
-                        );
-                      })}
+                      {getValues('fields')
+                        .filter(
+                          (f: NodeFormSchemaData) =>
+                            f.id != getValues(`fields.${fieldIndex}.id`),
+                        )
+                        .map((field: NodeFormSchemaData) => {
+                          return (
+                            <SelectItem key={field.id} value={field.id!}>
+                              {field.label}
+                            </SelectItem>
+                          );
+                        })}
                     </SelectContent>
                   </Select>
                 </FormControl>

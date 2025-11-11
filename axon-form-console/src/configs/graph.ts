@@ -8,7 +8,7 @@ export enum NodeFieldType {
   Text = 'text',
   TextArea = 'textarea',
   Number = 'number',
-  Date = 'date',
+  Date = 'datetime',
   MultiSelect = 'multi_select',
   Select = 'select',
   Radio = 'radio',

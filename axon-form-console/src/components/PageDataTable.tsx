@@ -31,7 +31,7 @@ import {
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import type { Page } from '@/types/Page';
 import { formatIndex } from '@/utils/String';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, MoreVertical } from 'lucide-react';
 import {
   useEffect,
   useId,
@@ -40,15 +40,28 @@ import {
   type MouseEventHandler,
 } from 'react';
 import { useNavigate } from 'react-router';
+import CustomAlertDialog from './CustomAlertDialog';
+import { Button } from './ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 function DraggableRow({
   idx,
   row,
   onRowClick,
+  onViewConditionClick,
+  onDelete,
 }: {
   idx: number;
   row: Page;
   onRowClick: MouseEventHandler<HTMLTableRowElement>;
+  onViewConditionClick: MouseEventHandler<HTMLDivElement>;
+  onDelete: (id: string) => void;
 }) {
   const {
     transform,
@@ -84,21 +97,62 @@ function DraggableRow({
       <TableCell>{formatIndex(idx + 1)}</TableCell>
       <TableCell>{row.title}</TableCell>
       <TableCell>{row.description}</TableCell>
-      <TableCell>{row.fields.length}</TableCell>
+      <TableCell
+        className='flex items-center justify-between'
+        onClick={(e) => e.stopPropagation()}
+      >
+        {row.fields.length}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant='ghost'
+              className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
+              size='icon'
+              onClick={(e) => e.preventDefault()}
+            >
+              <MoreVertical />
+              <span className='sr-only'>Open menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align='end' className='w-36'>
+            <DropdownMenuItem disabled className='cursor-not-allowed'>
+              Duplicate
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onViewConditionClick}>
+              View Conditions
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <CustomAlertDialog
+              title='Are you absolutely sure?'
+              description='This action cannot be undone. This will permanently delete this item and remove all associated data.'
+              continueText='Delete'
+              onContinueClick={() => onDelete(row.id)}
+            >
+              <DropdownMenuItem
+                variant='destructive'
+                onSelect={(e) => e.preventDefault()}
+              >
+                Delete
+              </DropdownMenuItem>
+            </CustomAlertDialog>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </TableCell>
     </TableRow>
   );
 }
 
 interface IProps {
-  reOrderedPages: Page[];
   shouldResetOrder: boolean;
+  //
   handleReordering: (status: boolean, pages: Page[]) => void;
+  onDelete: (id: string) => void;
 }
 
 export function PageDataTable({
-  reOrderedPages,
   shouldResetOrder,
   handleReordering,
+  onDelete,
 }: IProps) {
   const navigate = useNavigate();
   const { pages } = useFormBuilder();
@@ -110,7 +164,7 @@ export function PageDataTable({
     if (shouldResetOrder) {
       setData(initialData);
     }
-  }, [shouldResetOrder]);
+  }, [shouldResetOrder, initialData]);
 
   useEffect(() => {
     setData(pages);
@@ -147,7 +201,7 @@ export function PageDataTable({
 
         handleReordering(
           JSON.stringify(initialData) !== JSON.stringify(updatedData),
-          data,
+          updatedData,
         );
 
         return updatedData;
@@ -185,6 +239,10 @@ export function PageDataTable({
                   idx={idx}
                   row={data}
                   onRowClick={() => navigate(`/page/${data.id}`)}
+                  onViewConditionClick={() =>
+                    navigate(`/page/${data.id}/condition`)
+                  }
+                  onDelete={onDelete}
                 />
               ))}
             </SortableContext>

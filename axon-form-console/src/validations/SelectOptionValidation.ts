@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const SelectOptionFormSchema = z.object({
+  id: z.string().optional(),
   label: z.string().min(1, {
     message: 'Label must be at least 1 character',
   }),

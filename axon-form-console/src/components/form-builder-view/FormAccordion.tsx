@@ -12,8 +12,10 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import type { MouseEventHandler } from 'react';
 import { Badge } from '../ui/badge';
-import BaseInputFormField from './BaseInputFormField';
+
+import { useFormContext } from 'react-hook-form';
 import FormAccordionDropdown from './FormAccordionDropdown';
+import BaseInputFormField from './form-fields/BaseInputFormField';
 
 function renderFormField(fieldType: NodeFieldType, fieldIndex: number) {
   const formFieldWithOptions = [
@@ -23,17 +25,17 @@ function renderFormField(fieldType: NodeFieldType, fieldIndex: number) {
     NodeFieldType.Checkbox,
   ];
 
-  if (formFieldWithOptions.includes(fieldType)) {
-    return <BaseInputFormField fieldIndex={fieldIndex} hasOptions />;
-  }
-
-  return <BaseInputFormField fieldIndex={fieldIndex} />;
+  return (
+    <BaseInputFormField
+      fieldIndex={fieldIndex}
+      hasOptions={formFieldWithOptions.includes(fieldType)}
+    />
+  );
 }
 
 interface IProps {
   fieldId: string;
   fieldIndex: number;
-  fieldType: NodeFieldType;
   fieldLabel: string;
   //
   onFieldDelete: MouseEventHandler<HTMLDivElement>;
@@ -42,10 +44,11 @@ interface IProps {
 export default function FormAccordion({
   fieldId,
   fieldIndex,
-  fieldType,
   fieldLabel,
   onFieldDelete,
 }: IProps) {
+  const { getValues } = useFormContext();
+
   const {
     attributes,
     listeners,
@@ -86,7 +89,9 @@ export default function FormAccordion({
                 {formatIndex(fieldIndex + 1)}
               </p>
               <Badge variant='secondary'>
-                {convertSnakeCaseToTitleCase(fieldType)}
+                {convertSnakeCaseToTitleCase(
+                  getValues(`fields.${fieldIndex}.field_type`),
+                )}
               </Badge>
               {fieldLabel}
             </div>
@@ -94,7 +99,10 @@ export default function FormAccordion({
           </div>
         </AccordionTrigger>
         <AccordionContent className='bg-secondary/20 border border-t-0 p-4 rounded-md rounded-tl-none rounded-tr-none'>
-          {renderFormField(fieldType, fieldIndex)}
+          {renderFormField(
+            getValues(`fields.${fieldIndex}.field_type`),
+            fieldIndex,
+          )}
         </AccordionContent>
       </AccordionItem>
     </Accordion>

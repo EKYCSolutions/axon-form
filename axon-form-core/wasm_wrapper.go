@@ -47,11 +47,16 @@ func getFormValue(this js.Value, args []js.Value) interface{} {
 	return g.GetFormValue()
 }
 
+func getPageFormValue(this js.Value, args []js.Value) interface{} {
+	return g.GetPageFormValue(args[0].String())
+}
+
 func main() {
 	js.Global().Set("initGraph", js.FuncOf(initGraph))
 	js.Global().Set("isNodeVisible", js.FuncOf(isNodeVisible))
 	js.Global().Set("validateNode", js.FuncOf(validateNode))
 	js.Global().Set("getFormValue", js.FuncOf(getFormValue))
+	js.Global().Set("getPageFormValue", js.FuncOf(getPageFormValue))
 	c := make(chan struct{})
 	<-c
 }

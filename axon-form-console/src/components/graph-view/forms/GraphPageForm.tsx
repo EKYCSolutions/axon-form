@@ -19,7 +19,7 @@ import { NodeType } from '@/configs/graph';
 import type { GraphNode } from '@/types/Graph';
 import { useState } from 'react';
 import { useGraph } from '../../hooks/useGraph.js';
-import { SelectNodeCombobox } from '../SelectNodeCombobox';
+import { SelectNodeCombobox } from '../SelectNodeCombobox.js';
 import {
   KanbanBoard,
   KanbanCard,
@@ -35,7 +35,7 @@ interface IProps {
   onSubmit: (data: PageFormSchemaData) => void;
 }
 
-export default function PageForm({ className, form, onSubmit }: IProps) {
+export default function GraphPageForm({ className, form, onSubmit }: IProps) {
   const { isDirty, isValid } = form.formState;
   const { nodes: nodeList, selectedNode, selectedNodes } = useGraph();
 

@@ -20,7 +20,7 @@ func main() {
 
 	product_type_input := graph.VerifyNodeInput{
 		NodeID: "t494fub1vww8jv2",
-		Value:  "Laptop",
+		Value:  "kq1sfch5ivka5wd",
 	}
 
 	customer_name_input := graph.VerifyNodeInput{
@@ -35,7 +35,7 @@ func main() {
 
 	delivery_option_input := graph.VerifyNodeInput{
 		NodeID: "byfr5rsuiidyvsq",
-		Value:  "Pickup",
+		Value:  "5nb3tdl76esj1et",
 	}
 
 	succ, errs := g.ValidateNode(product_type_input)
@@ -44,7 +44,7 @@ func main() {
 	} else {
 		fmt.Println("product type validation errors:", errs)
 	}
-	//
+
 	succ, errs = g.ValidateNode(customer_name_input)
 	if len(errs) == 0 {
 		fmt.Println("customer name input validation success:", succ)
@@ -70,4 +70,7 @@ func main() {
 
 	result := g.GetFormValue()
 	fmt.Println("form value result >>", result)
+
+	pageResult := g.GetPageFormValue("jlsey36msvujn50")
+	fmt.Println("page form value >>", pageResult)
 }
