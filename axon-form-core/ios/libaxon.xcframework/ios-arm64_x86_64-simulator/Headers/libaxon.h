@@ -87,6 +87,7 @@ extern int InitGraph(void* dataPtr, int dataLen);
 extern int IsNodeVisible(void* nodeIDPtr, int nodeIDLen);
 extern int ValidateNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);
 extern int GetFormValue(void);
+extern int GetPageFormValue(void* pageIDPtr, int pageIDLen);
 extern char* ResultPtr(void);
 extern int ResultLen(void);
 extern void enforce_binding(void);
