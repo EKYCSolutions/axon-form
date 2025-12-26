@@ -17,7 +17,20 @@
         "field_ids": [
           "hdokt2fa4z32tjn",
           "x8kdi5owsdz2s3l",
-          "0gn0zmop0bhrz93"
+          "0gn0zmop0bhrz93",
+          "date_of_birth",
+          "password_field",
+          "accept_terms"
+        ]
+      },
+      {
+        "id": "additional_info",
+        "title": "Additional Information",
+        "description": "Additional details",
+        "field_ids": [
+          "interests",
+          "profile_photo",
+          "age_field"
         ]
       }
     ]
@@ -136,6 +149,122 @@
       "field_name": "",
       "label": "Male",
       "validation_rules": []
+    },
+    {
+      "id": "date_of_birth",
+      "type": "input",
+      "field_type": "date",
+      "field_name": "date-of-birth",
+      "label": "Date of Birth",
+      "placeholder": "Select your date of birth",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Date of birth is required"
+        }
+      ]
+    },
+    {
+      "id": "password_field",
+      "type": "input",
+      "field_type": "password",
+      "field_name": "password",
+      "label": "Password",
+      "placeholder": "Enter your password",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Password is required"
+        },
+        {
+          "type": "min_length",
+          "value": 8,
+          "message": "Password must be at least 8 characters"
+        }
+      ]
+    },
+    {
+      "id": "accept_terms",
+      "type": "input",
+      "field_type": "checkbox",
+      "field_name": "accept-terms",
+      "label": "I accept the terms and conditions",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "You must accept the terms"
+        }
+      ]
+    },
+    {
+      "id": "interests",
+      "type": "input",
+      "field_type": "multi_select",
+      "field_name": "interests",
+      "label": "Interests",
+      "placeholder": "Select your interests",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select at least one interest"
+        }
+      ]
+    },
+    {
+      "id": "profile_photo",
+      "type": "input",
+      "field_type": "file",
+      "field_name": "profile-photo",
+      "label": "Profile Photo",
+      "placeholder": "Choose a file",
+      "validation_rules": []
+    },
+    {
+      "id": "age_field",
+      "type": "input",
+      "field_type": "number",
+      "field_name": "age",
+      "label": "Age",
+      "placeholder": "Enter your age",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Age is required"
+        },
+        {
+          "type": "min",
+          "value": 18,
+          "message": "You must be at least 18 years old"
+        }
+      ]
+    },
+    {
+      "id": "interest_sports",
+      "type": "value",
+      "field_name": "",
+      "label": "Sports",
+      "validation_rules": []
+    },
+    {
+      "id": "interest_music",
+      "type": "value",
+      "field_name": "",
+      "label": "Music",
+      "validation_rules": []
+    },
+    {
+      "id": "interest_reading",
+      "type": "value",
+      "field_name": "",
+      "label": "Reading",
+      "validation_rules": []
+    },
+    {
+      "id": "interest_travel",
+      "type": "value",
+      "field_name": "",
+      "label": "Travel",
+      "validation_rules": []
     }
   ],
   "edges": [
@@ -186,6 +315,34 @@
       "label": "",
       "source_node": "0gn0zmop0bhrz93",
       "target_node": "efpaqf8tn7t4i3k",
+      "type": "has_options"
+    },
+    {
+      "id": "interests_sports",
+      "label": "",
+      "source_node": "interests",
+      "target_node": "interest_sports",
+      "type": "has_options"
+    },
+    {
+      "id": "interests_music",
+      "label": "",
+      "source_node": "interests",
+      "target_node": "interest_music",
+      "type": "has_options"
+    },
+    {
+      "id": "interests_reading",
+      "label": "",
+      "source_node": "interests",
+      "target_node": "interest_reading",
+      "type": "has_options"
+    },
+    {
+      "id": "interests_travel",
+      "label": "",
+      "source_node": "interests",
+      "target_node": "interest_travel",
       "type": "has_options"
     }
   ],

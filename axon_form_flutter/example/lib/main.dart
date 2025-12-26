@@ -1,6 +1,7 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter_example/app_theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,12 +36,19 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  void _handleFormChange(Map<String, dynamic> data) {
-    // Handle form data changes here
-    formData = data;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text("Form submitted: $formData")));
+  void _handleFormSubmit(Map<String, dynamic> data) {
+    setState(() {
+      formData = data;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Form submitted successfully!"),
+        backgroundColor: Colors.green,
+      ),
+    );
+    
+    // Print the data for debugging
+    print("Form Data: $formData");
   }
 
   @override
@@ -50,24 +58,794 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Axon Form Demo"),
       ),
-      body: FormBuilder(
-              jsonPath: 'assets/example.json',
-              onChanged: _handleFormChange,
-              customFieldBuilders: {
-                //   FieldType.text: (context, node, onSaved) {
-                //     return TextFormField(
-                //       decoration: InputDecoration(
-                //         labelText: node.label,
-                //         hintText: node.subLabel,
-                //       ),
-                //       initialValue: formData[node.fieldName]?.toString() ?? '',
-                //       onChanged: (value) {
-                //         // Handle value change
-                //       },
-                //     );
-                //   },
+      body: DynamicForm(
+        config: FormConfig.fromJson({
+          "layout": {
+            "pages": [
+              {
+                "id": "eeln1e7wkr1q204",
+                "title": "Service Type & Location",
+                "description": "Service type and service location",
+                "field_ids": ["lzx0sorpox3fcqv", "rmop0oc8vhlxg66"],
               },
+              {
+                "id": "op012lft8tnb3i7",
+                "title": "Personal Information",
+                "description": "Personal information",
+                "field_ids": [
+                  "hdokt2fa4z32tjn",
+                  "x8kdi5owsdz2s3l",
+                  "0gn0zmop0bhrz93",
+                  "date_of_birth",
+                  "password_field",
+                  "accept_terms",
+                ],
+              },
+              {
+                "id": "additional_info",
+                "title": "Additional Information",
+                "description": "Additional details",
+                "field_ids": ["interests", "profile_photo", "age_field"],
+              },
+            ],
+          },
+          "nodes": [
+            {
+              "id": "rmop0oc8vhlxg66",
+              "type": "input",
+              "field_type": "dropdown",
+              "field_name": "service-location",
+              "label": "Service Location",
+              "validation_rules": [
+                {"type": "required", "message": "Location is required"},
+              ],
+            },
+            {
+              "id": "lzx0sorpox3fcqv",
+              "type": "input",
+              "field_type": "radio",
+              "field_name": "service-type",
+              "label": "Service Type",
+              "validation_rules": [
+                {"type": "required", "message": "SErvice type is required"},
+              ],
+            },
+            {
+              "id": "remifeffpeo7a6u",
+              "type": "value",
+              "field_name": "",
+              "label": "Aeon 2",
+              "validation_rules": [],
+            },
+            {
+              "id": "35flotkqtm1kb4f",
+              "type": "value",
+              "field_name": "",
+              "label": "GDI",
+              "validation_rules": [],
+            },
+            {
+              "id": "0wyaccdc86y9jj8",
+              "type": "value",
+              "field_name": "",
+              "label": "Renewal",
+              "validation_rules": [],
+            },
+            {
+              "id": "w7l5ldu1e98xk42",
+              "type": "value",
+              "field_name": "",
+              "label": "New",
+              "validation_rules": [],
+            },
+            {
+              "id": "k1fdhxs2acvc6ua",
+              "type": "value",
+              "field_name": "",
+              "label": "Aeon 3",
+              "validation_rules": [],
+            },
+            {
+              "id": "0gn0zmop0bhrz93",
+              "type": "input",
+              "field_type": "radio",
+              "field_name": "gender",
+              "label": "Gender",
+              "validation_rules": [
+                {"type": "required", "message": "Gender is required"},
+              ],
+            },
+            {
+              "id": "hdokt2fa4z32tjn",
+              "type": "input",
+              "field_type": "text",
+              "field_name": "first-name",
+              "label": "First Name",
+              "validation_rules": [
+                {"type": "required", "message": "First name is required"},
+              ],
+            },
+            {
+              "id": "x8kdi5owsdz2s3l",
+              "type": "input",
+              "field_type": "text",
+              "field_name": "last-name",
+              "label": "Last Name",
+              "validation_rules": [
+                {"type": "required", "message": "Last name is required"},
+              ],
+            },
+            {
+              "id": "efpaqf8tn7t4i3k",
+              "type": "value",
+              "field_name": "",
+              "label": "Female",
+              "validation_rules": [],
+            },
+            {
+              "id": "o47p0pynk3x7467",
+              "type": "value",
+              "field_name": "",
+              "label": "Male",
+              "validation_rules": [],
+            },
+            {
+              "id": "date_of_birth",
+              "type": "input",
+              "field_type": "date",
+              "field_name": "date-of-birth",
+              "label": "Date of Birth",
+              "placeholder": "Select your date of birth",
+              "validation_rules": [
+                {
+                  "type": "required",
+                  "message": "Date of birth is required",
+                },
+              ],
+            },
+            {
+              "id": "password_field",
+              "type": "input",
+              "field_type": "password",
+              "field_name": "password",
+              "label": "Password",
+              "placeholder": "Enter your password",
+              "validation_rules": [
+                {"type": "required", "message": "Password is required"},
+                {
+                  "type": "min_length",
+                  "value": 8,
+                  "message": "Password must be at least 8 characters",
+                },
+              ],
+            },
+            {
+              "id": "accept_terms",
+              "type": "input",
+              "field_type": "checkbox",
+              "field_name": "accept-terms",
+              "label": "I accept the terms and conditions",
+              "validation_rules": [
+                {
+                  "type": "required",
+                  "message": "You must accept the terms",
+                },
+              ],
+            },
+            {
+              "id": "interests",
+              "type": "input",
+              "field_type": "multi_select",
+              "field_name": "interests",
+              "label": "Interests",
+              "placeholder": "Select your interests",
+              "validation_rules": [
+                {
+                  "type": "required",
+                  "message": "Please select at least one interest",
+                },
+              ],
+            },
+            {
+              "id": "profile_photo",
+              "type": "input",
+              "field_type": "file",
+              "field_name": "profile-photo",
+              "label": "Profile Photo",
+              "placeholder": "Choose a file",
+              "validation_rules": [],
+            },
+            {
+              "id": "age_field",
+              "type": "input",
+              "field_type": "number",
+              "field_name": "age",
+              "label": "Age",
+              "placeholder": "Enter your age",
+              "validation_rules": [
+                {"type": "required", "message": "Age is required"},
+                {
+                  "type": "min",
+                  "value": 18,
+                  "message": "You must be at least 18 years old",
+                },
+              ],
+            },
+            {
+              "id": "interest_sports",
+              "type": "value",
+              "field_name": "",
+              "label": "Sports",
+              "validation_rules": [],
+            },
+            {
+              "id": "interest_music",
+              "type": "value",
+              "field_name": "",
+              "label": "Music",
+              "validation_rules": [],
+            },
+            {
+              "id": "interest_reading",
+              "type": "value",
+              "field_name": "",
+              "label": "Reading",
+              "validation_rules": [],
+            },
+            {
+              "id": "interest_travel",
+              "type": "value",
+              "field_name": "",
+              "label": "Travel",
+              "validation_rules": [],
+            },
+          ],
+          "edges": [
+            {
+              "id": "lc4911wbp49ptfw",
+              "label": "",
+              "source_node": "rmop0oc8vhlxg66",
+              "target_node": "remifeffpeo7a6u",
+              "type": "has_options",
+            },
+            {
+              "id": "lu2cq5klyikztes",
+              "label": "",
+              "source_node": "rmop0oc8vhlxg66",
+              "target_node": "35flotkqtm1kb4f",
+              "type": "has_options",
+            },
+            {
+              "id": "cruw7saz6wse5ev",
+              "label": "",
+              "source_node": "rmop0oc8vhlxg66",
+              "target_node": "k1fdhxs2acvc6ua",
+              "type": "has_options",
+            },
+            {
+              "id": "q194o5r2wcymh2y",
+              "label": "",
+              "source_node": "lzx0sorpox3fcqv",
+              "target_node": "w7l5ldu1e98xk42",
+              "type": "has_options",
+            },
+            {
+              "id": "ilfn3eb6d53qw88",
+              "label": "",
+              "source_node": "lzx0sorpox3fcqv",
+              "target_node": "0wyaccdc86y9jj8",
+              "type": "has_options",
+            },
+            {
+              "id": "rfttptyk17q8nzw",
+              "label": "",
+              "source_node": "0gn0zmop0bhrz93",
+              "target_node": "o47p0pynk3x7467",
+              "type": "has_options",
+            },
+            {
+              "id": "i7i0x6y7h9o6el1",
+              "label": "",
+              "source_node": "0gn0zmop0bhrz93",
+              "target_node": "efpaqf8tn7t4i3k",
+              "type": "has_options",
+            },
+            {
+              "id": "interests_sports",
+              "label": "",
+              "source_node": "interests",
+              "target_node": "interest_sports",
+              "type": "has_options",
+            },
+            {
+              "id": "interests_music",
+              "label": "",
+              "source_node": "interests",
+              "target_node": "interest_music",
+              "type": "has_options",
+            },
+            {
+              "id": "interests_reading",
+              "label": "",
+              "source_node": "interests",
+              "target_node": "interest_reading",
+              "type": "has_options",
+            },
+            {
+              "id": "interests_travel",
+              "label": "",
+              "source_node": "interests",
+              "target_node": "interest_travel",
+              "type": "has_options",
+            },
+          ],
+          "condition_groups": [],
+        }),
+        theme: FormTheme(
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
+            fillColor: Colors.grey[50],
+            filled: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          ),
+          labelStyle: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.indigo[900],
+          ),
+          primaryButtonStyle: ElevatedButton.styleFrom(
+            backgroundColor: Colors.indigo,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          checkboxActiveColor: Colors.indigo,
+          radioActiveColor: Colors.indigo,
+        ),
+        builders: FormBuilders(
+          // Custom field wrapper - adds card around each field
+          fieldWrapperBuilder: (context, field) => Card(
+            elevation: 2,
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: field,
+            ),
+          ),
+          
+          // Custom field builders
+          fieldBuilders: {
+            // Custom text field with icon and character counter
+            FieldType.text: (context, node, formState, theme) {
+              final currentValue = formState.getValue(node.fieldName)?.toString() ?? '';
+              
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    initialValue: currentValue,
+                    decoration: InputDecoration(
+                      labelText: node.label,
+                      hintText: node.placeholder ?? 'Enter ${node.label.toLowerCase()}',
+                      prefixIcon: Icon(Icons.person_outline, color: Colors.indigo),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey[300]!),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.indigo, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      counterText: '${currentValue.length} characters',
+                    ),
+                    onChanged: (value) {
+                      formState.setValue(node.fieldName, value);
+                    },
+                    validator: (value) {
+                      // Add validation logic based on node.validationRules if needed
+                      return null; // Placeholder; implement as per requirements
+                    },
+                  ),
+                  if (formState.getError(node.fieldName) != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                      child: Text(
+                        formState.getError(node.fieldName)!,
+                        style: TextStyle(color: Colors.red[700], fontSize: 12),
+                      ),
+                    ),
+                ],
+              );
+            },
+            
+            // Custom number field with increment/decrement buttons
+            FieldType.number: (context, node, formState, theme) {
+              final currentValue = formState.getValue(node.fieldName) ?? 0;
+              
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    node.label,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.indigo[900],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[300]!),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove_circle_outline, color: Colors.indigo),
+                          onPressed: () {
+                            final newValue = (currentValue as int? ?? 0) - 1;
+                            if (newValue >= 0) {
+                              formState.setValue(node.fieldName, newValue);
+                            }
+                          },
+                        ),
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: currentValue.toString(),
+                            decoration: InputDecoration(
+                              border: InputBorder.none,
+                              hintText: node.placeholder ?? '0',
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                            onChanged: (value) {
+                              final numValue = int.tryParse(value);
+                              formState.setValue(node.fieldName, numValue);
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add_circle_outline, color: Colors.indigo),
+                          onPressed: () {
+                            final newValue = (currentValue as int? ?? 0) + 1;
+                            formState.setValue(node.fieldName, newValue);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (formState.getError(node.fieldName) != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+                      child: Text(
+                        formState.getError(node.fieldName)!,
+                        style: TextStyle(color: Colors.red[700], fontSize: 12),
+                      ),
+                    ),
+                ],
+              );
+            },
+            
+            // Custom password field with strength indicator
+            FieldType.password: (context, node, formState, theme) {
+              return _CustomPasswordField(
+                node: node,
+                formState: formState,
+              );
+            },
+            
+            // Custom checkbox with styled tile
+            FieldType.checkbox: (context, node, formState, theme) {
+              final value = formState.getValue(node.fieldName) ?? false;
+              
+              return Container(
+                decoration: BoxDecoration(
+                  color: value ? Colors.indigo[50] : Colors.white,
+                  border: Border.all(
+                    color: value ? Colors.indigo : Colors.grey[300]!,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: CheckboxListTile(
+                  title: Text(
+                    node.label,
+                    style: TextStyle(
+                      fontWeight: value ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  value: value,
+                  activeColor: Colors.indigo,
+                  onChanged: (newValue) {
+                    formState.setValue(node.fieldName, newValue ?? false);
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+              );
+            },
+          },
+          
+          // Custom navigation with icons and step counter
+          navigationBuilder: (context, currentPage, totalPages, onNext, onPrevious, onSubmit) {
+            return Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 10,
+                    offset: Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Step indicator
+                  Text(
+                    'Step ${currentPage + 1} of $totalPages',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (currentPage > 0)
+                        OutlinedButton.icon(
+                          onPressed: onPrevious,
+                          icon: Icon(Icons.arrow_back),
+                          label: Text('Previous'),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            side: BorderSide(color: Colors.indigo),
+                            foregroundColor: Colors.indigo,
+                          ),
+                        )
+                      else
+                        SizedBox(width: 100),
+                      
+                      if (currentPage < totalPages - 1)
+                        ElevatedButton.icon(
+                          onPressed: onNext,
+                          icon: Text('Next'),
+                          label: Icon(Icons.arrow_forward),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.indigo,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                        )
+                      else
+                        ElevatedButton.icon(
+                          onPressed: onSubmit,
+                          icon: Text('Submit'),
+                          label: Icon(Icons.check_circle),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+          
+          // Custom progress indicator
+          progressBuilder: (context, currentPage, totalPages) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: List.generate(totalPages, (index) {
+                  final isActive = index <= currentPage;
+                  final isCurrent = index == currentPage;
+                  
+                  return Expanded(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: 2),
+                      height: 6,
+                      decoration: BoxDecoration(
+                        color: isActive ? Colors.indigo : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(3),
+                        boxShadow: isCurrent ? [
+                          BoxShadow(
+                            color: Colors.indigo.withOpacity(0.5),
+                            blurRadius: 4,
+                            spreadRadius: 1,
+                          ),
+                        ] : null,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            );
+          },
+          
+          // Custom page header
+          pageHeaderBuilder: (context, page) {
+            return Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.indigo, Colors.purple],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.indigo.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.edit_document, color: Colors.white, size: 28),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          page.title,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    page.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        onSubmit: _handleFormSubmit,
+      ),
+    );
+  }
+}
+
+// Custom password field widget with strength indicator
+class _CustomPasswordField extends StatefulWidget {
+  final FormNode node;
+  final FormStateNotifier formState;
+
+  const _CustomPasswordField({
+    required this.node,
+    required this.formState,
+  });
+
+  @override
+  State<_CustomPasswordField> createState() => _CustomPasswordFieldState();
+}
+
+class _CustomPasswordFieldState extends State<_CustomPasswordField> {
+  bool _obscureText = true;
+  String _password = '';
+
+  String _getPasswordStrength() {
+    if (_password.isEmpty) return '';
+    if (_password.length < 6) return 'Weak';
+    if (_password.length < 8) return 'Medium';
+    if (_password.length >= 8 && _password.contains(RegExp(r'[0-9]'))) {
+      return 'Strong';
+    }
+    return 'Medium';
+  }
+
+  Color _getStrengthColor() {
+    final strength = _getPasswordStrength();
+    switch (strength) {
+      case 'Weak':
+        return Colors.red;
+      case 'Medium':
+        return Colors.orange;
+      case 'Strong':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          initialValue: widget.formState.getValue(widget.node.fieldName) ?? '',
+          obscureText: _obscureText,
+          decoration: InputDecoration(
+            labelText: widget.node.label,
+            hintText: widget.node.placeholder,
+            prefixIcon: Icon(Icons.lock_outline, color: Colors.indigo),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureText ? Icons.visibility : Icons.visibility_off,
+                color: Colors.grey,
+              ),
+              onPressed: () => setState(() => _obscureText = !_obscureText),
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          onChanged: (value) {
+            setState(() => _password = value);
+            widget.formState.setValue(widget.node.fieldName, value);
+          },
+        ),
+        if (_password.isNotEmpty) ...[
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: LinearProgressIndicator(
+                  value: _password.length / 12,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation(_getStrengthColor()),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text(
+                _getPasswordStrength(),
+                style: TextStyle(
+                  color: _getStrengthColor(),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ],
+        if (widget.formState.getError(widget.node.fieldName) != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8.0, left: 12.0),
+            child: Text(
+              widget.formState.getError(widget.node.fieldName)!,
+              style: TextStyle(color: Colors.red[700], fontSize: 12),
+            ),
+          ),
+      ],
     );
   }
 }
