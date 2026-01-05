@@ -91,7 +91,7 @@ class FormNode {
       id: json['id'],
       type: json['type'],
       fieldType: FieldType.fromString(json['field_type']),
-      fieldName: json['field_name'],
+      fieldName: json['field_name'] ?? "",
       label: json['label'],
       placeholder: json['placeholder'],
       validationRules: (json['validation_rules'] as List)
@@ -103,7 +103,6 @@ class FormNode {
   /// Get field type value as string
   String? get fieldTypeValue => fieldType?.value;
 }
-
 
 class FormEdge {
   final String id;
@@ -131,17 +130,12 @@ class FormEdge {
   }
 }
 
-
 class ValidationRule {
   final String? type;
   final String? message;
   final int? value;
 
-  ValidationRule({
-    this.type,
-    this.message,
-    this.value,
-  });
+  ValidationRule({this.type, this.message, this.value});
 
   factory ValidationRule.fromJson(Map<String, dynamic> json) {
     return ValidationRule(

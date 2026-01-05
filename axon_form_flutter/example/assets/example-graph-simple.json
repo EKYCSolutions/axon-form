@@ -7,7 +7,11 @@
         "title": "Select product page",
         "description": "Select product page description",
         "field_ids": [
-          "t494fub1vww8jv2"
+          "t494fub1vww8jv2",
+          "kXhgdF5qwqEjdG5B1Alrd",
+          "133vVgWuRSpGlx8a5YQkh",
+          "4sXQ1b71mN2zj32CRJWae",
+          "rbBgG4U3nltmJpNmgadt4"
         ]
       },
       {
@@ -123,9 +127,82 @@
       "label": "Upload Receipt",
       "value": "",
       "validation_rules": []
+    },
+    {
+      "id": "kXhgdF5qwqEjdG5B1Alrd",
+      "order": 4,
+      "type": "input",
+      "field_type": "address_dropdown",
+      "field_name": "current_address_province",
+      "label": "Current Address Province",
+      "value": "",
+      "validation_rules": [],
+      "config": {
+        "level": "province"
+      }
+    },
+    {
+      "id": "133vVgWuRSpGlx8a5YQkh",
+      "order": 4,
+      "type": "input",
+      "field_type": "address_dropdown",
+      "field_name": "current_address_district",
+      "label": "Current Address District",
+      "value": "",
+      "validation_rules": [],
+      "config": {
+        "level": "district"
+      }
+    },
+    {
+      "id": "4sXQ1b71mN2zj32CRJWae",
+      "order": 4,
+      "type": "input",
+      "field_type": "address_dropdown",
+      "field_name": "current_address_commune",
+      "label": "Current Address Commune",
+      "value": "",
+      "validation_rules": [],
+      "config": {
+        "level": "commune"
+      }
+    },
+    {
+      "id": "rbBgG4U3nltmJpNmgadt4",
+      "order": 4,
+      "type": "input",
+      "field_type": "address_dropdown",
+      "field_name": "current_address_village",
+      "label": "Current Address Village",
+      "value": "",
+      "validation_rules": [],
+      "config": {
+        "level": "village"
+      }
     }
   ],
   "edges": [
+    {
+      "id": "ui4fj7fskvrzcvs",
+      "label": "current-address-commune-village",
+      "source_node": "rbBgG4U3nltmJpNmgadt4",
+      "target_node": "4sXQ1b71mN2zj32CRJWae",
+      "type": "filter_by"
+    },
+    {
+      "id": "ui4fj7fskvrzcvs",
+      "label": "current-address-district-commune",
+      "source_node": "4sXQ1b71mN2zj32CRJWae",
+      "target_node": "133vVgWuRSpGlx8a5YQkh",
+      "type": "filter_by"
+    },
+    {
+      "id": "ui4fj7fskvrzcvs",
+      "label": "current-address-province-district",
+      "source_node": "133vVgWuRSpGlx8a5YQkh",
+      "target_node": "kXhgdF5qwqEjdG5B1Alrd",
+      "type": "filter_by"
+    },
     {
       "id": "ui4fj7fskvrzcvs",
       "label": "product-type-phone",

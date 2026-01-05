@@ -6,6 +6,7 @@ enum FieldType {
   password,
   radio,
   dropdown,
+  addressDropdown,
   checkbox,
   multiSelect,
   file,
@@ -28,6 +29,8 @@ enum FieldType {
         return FieldType.radio;
       case 'dropdown':
         return FieldType.dropdown;
+      case 'address_dropdown':
+        return FieldType.addressDropdown;
       case 'checkbox':
         return FieldType.checkbox;
       case 'multi_select':
@@ -46,7 +49,7 @@ enum FieldType {
         return 'text';
       case FieldType.number:
         return 'number';
-      case FieldType.date:        
+      case FieldType.date:
         return 'date';
       case FieldType.password:
         return 'password';
@@ -54,7 +57,9 @@ enum FieldType {
         return 'radio';
       case FieldType.dropdown:
         return 'dropdown';
-      case FieldType.checkbox:      
+      case FieldType.addressDropdown:
+        return 'address_dropdown';
+      case FieldType.checkbox:
         return 'checkbox';
       case FieldType.multiSelect:
         return 'multi_select';

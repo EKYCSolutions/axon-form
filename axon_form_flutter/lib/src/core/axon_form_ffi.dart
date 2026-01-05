@@ -2,48 +2,20 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
+import 'package:axon_form_flutter/src/core/ffi_types.dart';
 import 'package:ffi/ffi.dart';
-
-typedef InitGraphC = Int32 Function(Pointer<Void> dataPtr, Int32 dataLen);
-typedef InitGraphDart = int Function(Pointer<Void> dataPtr, int dataLen);
-
-typedef IsNodeVisibleC =
-    Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
-typedef IsNodeVisibleDart =
-    int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
-
-typedef ValidateNodeC =
-    Int32 Function(
-      Pointer<Void> nodeIdPtr,
-      Int32 nodeIdLen,
-      Pointer<Void> valuePtr,
-      Int32 valueLen,
-    );
-typedef ValidateNodeDart =
-    int Function(
-      Pointer<Void> nodeIdPtr,
-      int nodeIdLen,
-      Pointer<Void> valuePtr,
-      int valueLen,
-    );
-
-typedef GetResultC = Pointer<Utf8> Function();
-typedef GetResultDart = Pointer<Utf8> Function();
-
-typedef GetFormValueC = Int32 Function();
-typedef GetFormValueDart = int Function();
-
-typedef GetPageFormValueC =
-    Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
-typedef GetPageFormValueDart =
-    int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
 
 class AxonFormFFI {
   late final DynamicLibrary _dylib;
   late final InitGraphDart _initGraphDart;
+  late final InitAddressDart _initAddressDart;
   late final IsNodeVisibleDart _isNodeVisibleDart;
   late final ValidateNodeDart _validateNodeDart;
-  late final GetResultDart _getResult;
+  late final ValidateAddressNodeDart _validateAddressNodeDart;
+  late final GetChildNodeDart _getChildNodeDart;
+  late final GetOptionNodesDart _getOptionNodesDart;
+  late final GetResultDart _getResultDart;
   late final GetFormValueDart _getFormValueDart;
   late final GetPageFormValueDart _getPageFormValueDart;
 
@@ -68,6 +40,10 @@ class AxonFormFFI {
           .lookup<NativeFunction<InitGraphC>>('InitGraph')
           .asFunction();
 
+      _initAddressDart = _dylib
+          .lookup<NativeFunction<InitAddressC>>('InitAddress')
+          .asFunction();
+
       _isNodeVisibleDart = _dylib
           .lookup<NativeFunction<IsNodeVisibleC>>('IsNodeVisible')
           .asFunction();
@@ -76,7 +52,19 @@ class AxonFormFFI {
           .lookup<NativeFunction<ValidateNodeC>>('ValidateNode')
           .asFunction();
 
-      _getResult = _dylib
+      _validateAddressNodeDart = _dylib
+          .lookup<NativeFunction<ValidateNodeC>>('ValidateAddressNode')
+          .asFunction();
+
+      _getChildNodeDart = _dylib
+          .lookup<NativeFunction<GetChildNodeC>>('GetChildNode')
+          .asFunction();
+
+      _getOptionNodesDart = _dylib
+          .lookup<NativeFunction<GetOptionNodesC>>('GetOptionNodes')
+          .asFunction();
+
+      _getResultDart = _dylib
           .lookup<NativeFunction<GetResultC>>('GetResult')
           .asFunction();
 
@@ -102,75 +90,161 @@ class AxonFormFFI {
   }
 
   //
-  bool isNodeVisible(String nodeId) {
-    final nodeIdBytes = nodeId.toNativeUtf8();
+  void initializeAddress(Uint8List fileBytes) {
+    final Pointer<Uint8> nativeData = malloc<Uint8>(fileBytes.length);
+    final nativeBytes = nativeData.asTypedList(fileBytes.length);
+    nativeBytes.setAll(0, fileBytes);
+    _initAddressDart(nativeData.cast<Void>(), fileBytes.length);
+    malloc.free(nativeData);
+  }
 
-    // Call native function
-    _isNodeVisibleDart(nodeIdBytes.cast<Void>(), nodeId.length);
+  CoreResponse isNodeVisible(String nodeId) {
+    final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
 
+    try {
+      _isNodeVisibleDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
+      return _getCoreResponse();
+    } catch (e) {
+      print("[isNodeVisible] Error : $e");
+    } finally {
+      malloc.free(nodeIdPtr);
+    }
+    return CoreResponse(false, null, null);
+  }
+
+  //
+  CoreResponse validateNode(String nodeId, String value) {
+    final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
+    final Pointer<Utf8> valuePtr = value.toNativeUtf8();
+
+    try {
+      _validateNodeDart(
+        nodeIdPtr.cast<Void>(),
+        nodeIdPtr.length,
+        valuePtr.cast<Void>(),
+        valuePtr.length,
+      );
+
+      return _getCoreResponse();
+    } catch (e) {
+      print("[validateNode] Error : $e");
+      return CoreResponse(false, "[validateNode] Error : $e", null);
+    } finally {
+      //
+      malloc.free(nodeIdPtr);
+      malloc.free(valuePtr);
+    }
+  }
+
+  //
+  CoreResponse validateAddressNode(String nodeId, String value) {
+    final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
+    final Pointer<Utf8> valuePtr = value.toNativeUtf8();
     //
-    malloc.free(nodeIdBytes);
+    try {
+      _validateAddressNodeDart(
+        nodeIdPtr.cast<Void>(),
+        nodeIdPtr.length,
+        valuePtr.cast<Void>(),
+        valuePtr.length,
+      );
 
-    final ptr = _getResult();
-    final jsonString = ptr.toDartString();
-
-    final decoded = jsonDecode(jsonString);
-    return decoded[0];
+      return _getCoreResponse();
+    } catch (e) {
+      print("[validateAddressNode] Error : $e");
+      return CoreResponse(false, "[validateAddressNode] Error : $e", null);
+    } finally {
+      //
+      malloc.free(nodeIdPtr);
+      malloc.free(valuePtr);
+    }
   }
 
   //
-  Map<String, dynamic> validateNode(String nodeId, String value) {
-    final nodeIdBytes = nodeId.toNativeUtf8();
-    final valueBytes = value.toNativeUtf8();
-
-    // Call native function
-    _validateNodeDart(
-      nodeIdBytes.cast<Void>(),
-      nodeId.length,
-      valueBytes.cast<Void>(),
-      value.length,
-    );
-
-    //
-    malloc.free(nodeIdBytes);
-    malloc.free(valueBytes);
-
-    final ptr = _getResult();
-    final jsonString = ptr.toDartString();
-
-    final decoded = jsonDecode(jsonString);
-    Map<String, dynamic> result = {
-      "status": decoded[0],
-      "errorMessages": decoded[1],
-    };
-
-    return result;
+  CoreResponse getFormValue() {
+    try {
+      _getFormValueDart();
+      return _getCoreResponse();
+    } catch (e) {
+      print("[getFormValue] Error : $e");
+      return CoreResponse(false, "[getFormValue] Error : $e", null);
+    }
   }
 
   //
-  Map<String, dynamic> getFormValue() {
-    _getFormValueDart();
-
-    final ptr = _getResult();
-    final jsonString = ptr.toDartString();
-
-    final result = jsonDecode(jsonString);
-
-    return result;
+  CoreResponse getOptionNodes(String nodeId) {
+    final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
+    try {
+      _getOptionNodesDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
+      return _getCoreResponse();
+    } catch (e) {
+      print("[getOptionNodes] Error : $e");
+      return CoreResponse(false, "[getOptionNodes] Error : $e", null);
+    } finally {
+      malloc.free(nodeIdPtr);
+    }
   }
 
   //
-  Map<String, dynamic> getPageFormValue(String pageId) {
-    final pageIdBytes = pageId.toNativeUtf8();
+  CoreResponse getChildNode(String nodeId) {
+    final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
+    try {
+      _getChildNodeDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
+      return _getCoreResponse();
+    } catch (e) {
+      print("[getChildNode] Error : $e");
+      return CoreResponse(false, "[getChildNode] Error : $e", null);
+    } finally {
+      malloc.free(nodeIdPtr);
+    }
+  }
 
-    // Call native function
-    _getPageFormValueDart(pageIdBytes.cast<Void>(), pageId.length);
+  //
+  CoreResponse getPageFormValue(String pageId) {
+    final pageIdPtr = pageId.toNativeUtf8();
+    try {
+      _getPageFormValueDart(pageIdPtr.cast<Void>(), pageIdPtr.length);
+      return _getCoreResponse();
+    } catch (e) {
+      print("[getPageFormValue] Error : $e");
+      return CoreResponse(false, "[getPageFormValue] Error : $e", null);
+    } finally {
+      malloc.free(pageIdPtr);
+    }
+  }
 
-    final ptr = _getResult();
-    final jsonString = ptr.toDartString();
+  CoreResponse _getCoreResponse() {
+    final Pointer<Utf8> resPtr = _getResultDart();
 
-    final result = jsonDecode(jsonString);
+    if (resPtr == nullptr) {
+      return CoreResponse(false, "Native bridge returned null", null);
+    }
 
-    return result;
+    try {
+      final String jsonString = resPtr.toDartString();
+
+      if (jsonString.isEmpty || jsonString == "null") {
+        return CoreResponse(false, "Empty response from Go", null);
+      }
+
+      final dynamic decoded = jsonDecode(jsonString);
+
+      if (decoded is List) {
+        return CoreResponse(
+          decoded.isNotEmpty ? decoded[0] : false, // Result (bool)
+          decoded.length > 1 ? decoded[1] : null, // Message (String)
+          decoded.length > 2 ? decoded[2] : null, // Data (Object)
+        );
+      } else {
+        print("[getCoreResponse] Unexpected JSON format: $jsonString");
+        return CoreResponse(false, "Invalid JSON format", null);
+      }
+    } catch (e) {
+      print("[getCoreResponse] Parsing Error: $e");
+      return CoreResponse(false, "Parse error: $e", null);
+    } finally {
+      // ALWAYS free the pointer to prevent memory leaks
+      malloc.free(resPtr);
+    }
   }
 }

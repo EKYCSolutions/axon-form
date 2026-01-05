@@ -60,6 +60,13 @@ class FormFieldFactory {
           theme: theme,
         );
         break;
+      case FieldType.addressDropdown:
+        field = DropdownFieldWidget(
+          node: node,
+          formState: formState,
+          theme: theme,
+        );
+        break;
       case FieldType.checkbox:
         field = CheckboxFieldWidget(
           node: node,
@@ -79,7 +86,7 @@ class FormFieldFactory {
         field = Text('Missing field type for: ${node.id}');
 
         break;
-      case FieldType.unknown :
+      case FieldType.unknown:
         field = Text('Missing field type for: ${node.id}');
         break;
       default:
