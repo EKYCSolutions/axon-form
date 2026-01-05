@@ -12,6 +12,7 @@ const (
 	EdgeTypeHasField
 	EdgeTypeValidates
 	EdgeTypeShows
+	EdgeTypeFilterBy
 )
 
 var edgeType = map[EdgeType]string{
@@ -19,6 +20,7 @@ var edgeType = map[EdgeType]string{
 	EdgeTypeHasField:  "has_field",
 	EdgeTypeValidates: "validates",
 	EdgeTypeShows:     "shows",
+	EdgeTypeFilterBy:  "filter_by",
 }
 
 func (et EdgeType) String() string {
@@ -40,6 +42,8 @@ func (et *EdgeType) UnmarshalJSON(data []byte) error {
 		*et = EdgeTypeValidates
 	case "shows":
 		*et = EdgeTypeShows
+	case "filter_by":
+		*et = EdgeTypeFilterBy
 
 	default:
 		return fmt.Errorf("unknown EdgeType: %s", s)

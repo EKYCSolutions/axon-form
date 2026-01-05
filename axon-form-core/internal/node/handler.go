@@ -28,6 +28,7 @@ func NewNode(
 var FieldTypesWithOptions = []NodeFieldType{
 	NodeFieldTypeCheckbox,
 	NodeFieldTypeDropdown,
+	NodeFieldTypeAddressDropdown,
 	NodeFieldTypeMultiSelect,
 	NodeFieldTypeRadio,
 }
@@ -41,19 +42,31 @@ func GetNodeByID(id string, nodes map[string]*Node) *Node {
 	return node
 }
 
-func NewNodeFromJSON(nodeJson map[string]any) Node {
+func GetAddressNode(nodes map[string]*Node, level string) *[]Node {
+	var addressNodes []Node
+
+	for _, node := range nodes {
+		if node.FieldType == NodeFieldTypeAddressDropdown {
+			addressNodes = append(addressNodes, *node)
+		}
+	}
+
+	return &addressNodes
+}
+
+func NewNodeFromJSON(nodeJson map[string]any) (*Node, error) {
 	var node Node
 
 	nodeJsonBytes, err := json.Marshal(nodeJson)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(nodeJsonBytes, &node); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return node
+	return &node, nil
 }
 
 func IsFieldTypeWithOptions(nodeType NodeFieldType) bool {
@@ -63,4 +76,18 @@ func IsFieldTypeWithOptions(nodeType NodeFieldType) bool {
 		}
 	}
 	return false
+}
+
+func IsAddressNode(node *Node) (bool, string) {
+	if node.FieldType != NodeFieldTypeAddressDropdown {
+		return false, ""
+	}
+
+	level, ok := node.Config["level"].(string)
+	if !ok {
+		return false, ""
+	}
+
+	//
+	return true, level
 }

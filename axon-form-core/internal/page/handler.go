@@ -4,19 +4,19 @@ import (
 	"encoding/json"
 )
 
-func NewPageFromJSON(pageJson map[string]any) Page {
+func NewPageFromJSON(pageJson map[string]any) (*Page, error) {
 	var page Page
 
 	pageJsonBytes, err := json.Marshal(pageJson)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(pageJsonBytes, &page); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return page
+	return &page, nil
 }
 
 func GetPageByID(id string, pages map[string]*Page) *Page {

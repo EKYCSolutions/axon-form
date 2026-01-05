@@ -8,9 +8,10 @@ MIN_VERSION=15
 
 # Output directories
 BUILD_DIR=build
-BUILD_DIR_iphonesimulator=build/iphonesimulator
-BUILD_DIR_iphoneos=build/iphoneos
-BUILD_DIR_HEADER=build/header
+# BUILD_DIR=../axon_form_flutter/ios/Frameworks
+BUILD_DIR_iphonesimulator=$BUILD_DIR/iphonesimulator
+BUILD_DIR_iphoneos=$BUILD_DIR/iphoneos
+BUILD_DIR_HEADER=$BUILD_DIR/header
 # IOS_DIR=build
 IOS_DIR=ios
 echo "🧹 Cleaning old build files..."
@@ -40,18 +41,33 @@ build_arch() {
 
   if [ "$SDK" = "iphoneos" ]; then
     TARGET="$CARCH-apple-ios$MIN_VERSION"
-  elif [ "$SDK" = "iphonesimulator" ]; then
+    MIN_FLAG="-mios-version-min=$MIN_VERSION"
+  else
     TARGET="$CARCH-apple-ios$MIN_VERSION-simulator"
+    MIN_FLAG="-mios-simulator-version-min=$MIN_VERSION"
   fi
 
-  CLANG=$(xcrun --sdk $SDK --find clang)
-  CC="$CLANG -target $TARGET -isysroot $SDK_PATH"
-  export CC
+  export CC="$(xcrun --sdk $SDK -f clang)"
 
-  go build -trimpath -buildmode=c-archive -o $BUILD_DIR/${LIB_NAME}_${GOARCH}_${SDK}.a
+  export CGO_CFLAGS="\
+    -target $TARGET \
+    -isysroot $SDK_PATH \
+    $MIN_FLAG
+  "
+
+  export CGO_LDFLAGS="$CGO_CFLAGS"
+
+  echo "▶ CC=$CC"
+  echo "▶ CGO_CFLAGS=$CGO_CFLAGS"
+
+  go build \
+    -trimpath \
+    -buildmode=c-archive \
+    -o "$BUILD_DIR/${LIB_NAME}_${GOARCH}_${SDK}.a"
 
   echo "✅ Built $BUILD_DIR/${LIB_NAME}_${GOARCH}_${SDK}.a"
 }
+
 
 # Build three variants
 build_arch amd64 iphonesimulator

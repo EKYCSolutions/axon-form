@@ -41,32 +41,32 @@ func GetEdgeByID(id string, edges []Edge) *Edge {
 	return edge
 }
 
-func NewEdgeFromJSON(edgeJson map[string]any) Edge {
+func NewEdgeFromJSON(edgeJson map[string]any) (*Edge, error) {
 	var edge Edge
 
 	edgeJsonBytes, err := json.Marshal(edgeJson)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(edgeJsonBytes, &edge); err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return edge
+	return &edge, nil
 }
 
-func NewEdgeConditionGroupFromJSON(conditionGroupJson map[string]any) EdgeConditionGroup {
+func NewEdgeConditionGroupFromJSON(conditionGroupJson map[string]any) (*EdgeConditionGroup, error) {
 	var conditionGroup EdgeConditionGroup
 	conditionGroup.ValidEdges = make(map[string]bool)
 
 	conditionGroupJsonBytes, err := json.Marshal(conditionGroupJson)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if err := json.Unmarshal(conditionGroupJsonBytes, &conditionGroup); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// Find all EdgeIDs in the string
@@ -85,5 +85,24 @@ func NewEdgeConditionGroupFromJSON(conditionGroupJson map[string]any) EdgeCondit
 		conditionGroup.ValidEdges[edgeID] = false
 	}
 
-	return conditionGroup
+	return &conditionGroup, nil
+}
+
+func GetEdgeByNode(nodeId string, nodeType string, edges map[string][]*Edge) *Edge {
+	var foundEdge *Edge
+
+	// Find the edge
+	for _, edgeList := range edges {
+		for _, e := range edgeList {
+			if nodeType == "target" && e.TargetNode == nodeId {
+				foundEdge = e
+				break
+			} else if nodeType == "source" && e.SourceNode == nodeId {
+				foundEdge = e
+				break
+			}
+		}
+	}
+
+	return foundEdge
 }
