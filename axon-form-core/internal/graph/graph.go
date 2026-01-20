@@ -7,12 +7,18 @@ import (
 	"axon-form/core/internal/page"
 )
 
+type EventHandler struct {
+	OnNodeVisibilityChange func(map[string]any)
+	OnNodeValidatedChanged func(map[string]any)
+}
+
 type Graph struct {
 	Nodes           map[string]map[string]*node.Node
 	Edges           map[string][]*edge.Edge
 	ConditionGroups map[string]*edge.EdgeConditionGroup
 	Pages           map[string]*page.Page
 	Address         *address.Address
+	EventHandler    *EventHandler
 }
 
 type ValidateNodeInput struct {

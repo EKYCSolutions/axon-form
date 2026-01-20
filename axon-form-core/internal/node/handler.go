@@ -26,7 +26,6 @@ func NewNode(
 }
 
 var FieldTypesWithOptions = []NodeFieldType{
-	NodeFieldTypeCheckbox,
 	NodeFieldTypeDropdown,
 	NodeFieldTypeAddressDropdown,
 	NodeFieldTypeMultiSelect,
@@ -47,6 +46,10 @@ func GetAddressNode(nodes map[string]*Node, level string) *[]Node {
 
 	for _, node := range nodes {
 		if node.FieldType == NodeFieldTypeAddressDropdown {
+			if level != "" && node.Config["level"].(string) != level {
+				continue
+			}
+
 			addressNodes = append(addressNodes, *node)
 		}
 	}

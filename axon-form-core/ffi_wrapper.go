@@ -5,9 +5,21 @@ package main
 /*
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+typedef void (*dart_json_callback)(char* json_data);
+
+static void invoke_callback(void* callback_ptr, char* json_data) {
+    if (callback_ptr == NULL) return;
+    dart_json_callback cb = (dart_json_callback)callback_ptr;
+    cb(json_data);
+}
+
+static void debug_print(char* str) {
+    printf("[Native] %s\n", str);
+}
 */
 import "C"
-
 import (
 	"axon-form/core/internal/graph"
 	"encoding/json"
@@ -81,19 +93,50 @@ func InitGraph(dataPtr unsafe.Pointer, dataLen C.int) C.int {
 	jsonData := C.GoBytes(dataPtr, dataLen)
 	g.InitGraph(jsonData)
 
-	return 1
-}
-
-//export InitAddress
-func InitAddress(dataPtr unsafe.Pointer, dataLen C.int) C.int {
-	if dataPtr == nil || dataLen == 0 {
-		setResult([]byte(`["invalid input",null]`))
-		return 0
+	data := map[string]any{
+		"pages": g.Pages,
+		"nodes": g.Nodes,
+		"edges": g.Edges,
 	}
 
-	jsonData := C.GoBytes(dataPtr, dataLen)
-	g.InitAddress(jsonData)
+	return setJSONResult([]any{true, nil, data})
+}
 
+//export AddEventListener
+func AddEventListener(
+	eventPtr unsafe.Pointer,
+	eventLen C.int,
+	callbackPtr unsafe.Pointer,
+) C.int {
+	if g == nil {
+		return setJSONResult([]string{"graph not initialized"})
+	}
+
+	event := goString(eventPtr, eventLen)
+
+	cEvent := C.CString(fmt.Sprintf("AddEventListener called for: %s", event))
+	C.debug_print(cEvent)
+	C.free(unsafe.Pointer(cEvent))
+
+	callback := func(data map[string]any) {
+		jsonData, _ := json.Marshal(data)
+		// Convert Go string -> C string
+		cData := C.CString(string(jsonData))
+		// We DO NOT free cData here because the Dart NativeCallable.listener is asynchronous.
+		// If we free it here, Dart receives a pointer to freed memory.
+		// We transfer ownership to Dart, which must free it after reading.
+
+		// Call the C helper, which calls the Dart function
+		C.invoke_callback(callbackPtr, cData)
+	}
+
+	g.AddEventListener(event, callback)
+
+	data := map[string]any{
+		"status": "added event listener",
+	}
+
+	setJSONResult([]any{true, nil, data})
 	return 1
 }
 
@@ -232,12 +275,18 @@ func GetFormValue() C.int {
 		return 0
 	}
 
-	result, err := g.GetFormValue()
+	var errOut any
+	success, err, result := g.GetFormValue()
 	if err != nil {
-		return setJSONResult(err)
+		errOut = err.Error()
 	}
 
-	return setJSONResult(result)
+	data := map[string]any{
+		"result": result,
+	}
+
+	return setJSONResult([]any{success, errOut, data})
+
 }
 
 //export GetPageFormValue

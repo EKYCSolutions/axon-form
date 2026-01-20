@@ -55,8 +55,8 @@ const (
 	NodeFieldTypeCheckbox
 	NodeFieldTypeFile
 	NodeFieldTypePassword
-	NodeFieldTypeNone
 	NodeFieldTypeAddressDropdown
+	NodeFieldTypeNone
 )
 
 var nodeFieldType = map[NodeFieldType]string{

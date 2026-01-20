@@ -2,7 +2,7 @@ package address
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"slices"
 	"strings"
 )
@@ -37,7 +37,7 @@ func (a *Address) GetProvinces() ([]AddressInfo, error) {
 func (a *Address) GetDistricts(provinceKey string) ([]AddressInfo, error) {
 	province, ok := a.Provinces[provinceKey]
 	if !ok {
-		return []AddressInfo{}, errors.New("Province key not found")
+		return []AddressInfo{}, fmt.Errorf("[GetDistricts] Province key not found. Key: %s", provinceKey)
 	}
 
 	districts := make([]AddressInfo, 0, len(province.Districts))
@@ -59,12 +59,12 @@ func (a *Address) GetDistricts(provinceKey string) ([]AddressInfo, error) {
 func (a *Address) GetCommunes(provinceKey string, districtKey string) ([]AddressInfo, error) {
 	province, ok := a.Provinces[provinceKey]
 	if !ok {
-		return []AddressInfo{}, errors.New("Province key not found")
+		return []AddressInfo{}, fmt.Errorf("[GetCommunes] Province key not found. Key: %s", provinceKey)
 	}
 
 	district, ok := province.Districts[districtKey]
 	if !ok {
-		return []AddressInfo{}, errors.New("District key not found")
+		return []AddressInfo{}, fmt.Errorf("[GetCommunes] District key not found. Key: %s", districtKey)
 	}
 
 	communes := make([]AddressInfo, 0, len(district.Communes))
@@ -86,17 +86,17 @@ func (a *Address) GetCommunes(provinceKey string, districtKey string) ([]Address
 func (a *Address) GetVillages(provinceKey string, districtKey string, communeKey string) ([]AddressInfo, error) {
 	province, ok := a.Provinces[provinceKey]
 	if !ok {
-		return []AddressInfo{}, errors.New("Province key not found")
+		return []AddressInfo{}, fmt.Errorf("[GetVillages] Province key not found. Key: %s", provinceKey)
 	}
 
 	district, ok := province.Districts[districtKey]
 	if !ok {
-		return []AddressInfo{}, errors.New("District key not found")
+		return []AddressInfo{}, fmt.Errorf("[GetVillages] District key not found. Key: %s", districtKey)
 	}
 
 	communes, ok := district.Communes[communeKey]
 	if !ok {
-		return []AddressInfo{}, errors.New("Commune key not found")
+		return []AddressInfo{}, fmt.Errorf("[GetVillages] Commune key not found. Key: %s", communeKey)
 	}
 
 	villages := make([]AddressInfo, 0, len(communes.Villages))
