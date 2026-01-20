@@ -45,12 +45,6 @@ class AxonFormProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  @override
-  void dispose() {
-    print("dispose");
-    super.dispose();
-  }
-
   void addEventListener(
     String event,
     void Function(Map<String, dynamic> data) onChange,
@@ -65,16 +59,13 @@ class AxonFormProvider extends ChangeNotifier {
 
   // A "Pure" check for the validator that DOES NOT notify listeners
   String? validateAddressNodeSilently(String nodeId, String? value) {
-    print("[silent: $nodeId] received: $nodeId | value $value");
     final res = _controller.validateAddressNode(nodeId, value);
-    print("res ${res.data} | ${res.error}");
     return res.error;
   }
 
   // The "Active" update for User Interaction
   void validateAddressNode(String nodeId, String value) {
     final res = _controller.validateAddressNode(nodeId, value);
-    print("res ${res.data} ${res.error}");
     if (res.success) {
       _addressNodeIdsToUpdate = res.data?["nodeIds"].cast<String>();
       pulse++;
@@ -98,9 +89,8 @@ class AxonFormProvider extends ChangeNotifier {
   Map<String, dynamic> submitForm() {
     CoreResponse res = _controller.getFormValue();
     if (!res.success || res.data == null) {
-      // throw Exception(res.error);
       print("Submit form error: ${res.error}");
-      return {};
+      throw Exception(res.error);
     }
     Map<String, dynamic> resultJson = jsonDecode(res.data?["result"]);
     return resultJson;

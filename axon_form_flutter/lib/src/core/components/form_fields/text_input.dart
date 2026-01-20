@@ -1,9 +1,11 @@
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
 import 'package:flutter/material.dart';
 
 class AxonTextInput extends AxonBaseInput {
-  const AxonTextInput({super.key, required super.node});
+  const AxonTextInput({super.key, required super.node, this.style});
+
+  final AxonFormTextInputStyle? style;
 
   @override
   State<AxonTextInput> createState() => _AxonTextInputState();
@@ -29,6 +31,11 @@ class _AxonTextInputState extends State<AxonTextInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
 
+    var style =
+        widget.style ??
+        Theme.of(context).extension<AxonFormTextInputStyle>() ??
+        AxonFormTextInputStyle.fallback(context);
+
     return FormField<String?>(
       initialValue: _textController.text,
       validator: (String? s) {
@@ -42,7 +49,10 @@ class _AxonTextInputState extends State<AxonTextInput> {
           children: [
             TextField(
               controller: _textController,
-              decoration: InputDecoration(hintText: widget.node.label),
+              decoration: style.decoration?.copyWith(
+                labelText: widget.node.label,
+                hintText: widget.node.placeholder,
+              ),
               onChanged: (String s) {
                 formFieldState.didChange(s);
               },

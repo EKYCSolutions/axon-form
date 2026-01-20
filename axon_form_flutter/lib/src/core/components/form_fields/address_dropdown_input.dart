@@ -1,11 +1,13 @@
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AxonAddressDropdownInput extends AxonBaseInput {
-  const AxonAddressDropdownInput({super.key, required super.node});
+  const AxonAddressDropdownInput({super.key, required super.node, this.style});
+
+  final AxonFormAddressDropdownInputStyle? style;
 
   @override
   State<AxonAddressDropdownInput> createState() =>
@@ -23,6 +25,11 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
+
+    var style =
+        widget.style ??
+        Theme.of(context).extension<AxonFormAddressDropdownInputStyle>() ??
+        AxonFormAddressDropdownInputStyle.fallback(context);
 
     return FormField<String?>(
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -69,6 +76,25 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                     "Please select a parent first",
                     style: TextStyle(color: Colors.grey[500]),
                   ),
+                  elevation: style.elevation,
+                  style: style.style,
+                  underline: style.underline,
+                  icon: style.icon,
+                  iconDisabledColor: style.iconDisabledColor,
+                  iconEnabledColor: style.iconEnabledColor,
+                  iconSize: style.iconSize,
+                  isDense: style.isDense,
+                  itemHeight: style.itemHeight,
+                  menuWidth: style.menuWidth,
+                  focusColor: style.focusColor,
+                  autofocus: style.autofocus,
+                  dropdownColor: style.dropdownColor,
+                  menuMaxHeight: style.menuMaxHeight,
+                  enableFeedback: style.enableFeedback,
+                  alignment: style.alignment,
+                  borderRadius: style.borderRadius,
+                  padding: style.padding,
+                  barrierDismissible: style.barrierDismissible,
                   onChanged: hasOptions
                       ? (val) {
                           if (val != null) {
@@ -78,34 +104,51 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                         }
                       : null,
                   items: options.map((option) {
-                    final (kh, en) = _parseLabel(option.label);
+                    final (labelKh, labelEn) = _parseLabel(option.label);
                     return DropdownMenuItem<String>(
                       value: option.id,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(kh),
-                          if (en.isNotEmpty)
-                            Text(
-                              en,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
+                      child: style.addressItemBuilder != null
+                          ? style.addressItemBuilder!(
+                              context,
+                              labelKh,
+                              labelEn,
+                              selectedValue == option.id,
+                            )
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(labelKh),
+                                if (labelEn.isNotEmpty)
+                                  Text(
+                                    labelEn,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                              ],
                             ),
-                        ],
-                      ),
                     );
                   }).toList(),
                   selectedItemBuilder: (context) => options.map((option) {
-                    return Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        _parseLabel(option.label).$1,
-                        style: const TextStyle(overflow: TextOverflow.ellipsis),
-                      ),
-                    );
+                    final (labelKh, labelEn) = _parseLabel(option.label);
+                    return style.addressSelectedItemBuilder != null
+                        ? style.addressItemBuilder!(
+                            context,
+                            labelKh,
+                            labelEn,
+                            selectedValue == option.id,
+                          )
+                        : Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              labelKh,
+                              style: const TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          );
                   }).toList(),
                 ),
 

@@ -1,5 +1,5 @@
 /// Form fields barrel file - exports all field widgets
-library axon_form_fields;
+library;
 
 export 'address_dropdown_input.dart';
 export 'base_input.dart';
@@ -12,3 +12,4 @@ export 'number_input.dart';
 export 'password_input.dart';
 export 'radio_input.dart';
 export 'text_input.dart';
+//

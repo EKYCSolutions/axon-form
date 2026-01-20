@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AxonForm extends StatefulWidget {
-  const AxonForm({required this.filePath, required this.onSubmit, super.key});
+  const AxonForm({super.key, required this.filePath, required this.onSubmit});
 
   // The asset path to the form configuration file.
   final String filePath;

@@ -1,10 +1,12 @@
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AxonNumberInput extends AxonBaseInput {
-  const AxonNumberInput({super.key, required super.node});
+  const AxonNumberInput({super.key, required super.node, this.style});
+
+  final AxonFormNumberInputStyle? style;
 
   @override
   State<AxonNumberInput> createState() => _AxonNumberInputState();
@@ -30,6 +32,11 @@ class _AxonNumberInputState extends State<AxonNumberInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
 
+    var style =
+        widget.style ??
+        Theme.of(context).extension<AxonFormNumberInputStyle>() ??
+        AxonFormNumberInputStyle.fallback(context);
+
     return FormField<String?>(
       initialValue: _textController.text,
       validator: (String? s) {
@@ -43,7 +50,10 @@ class _AxonNumberInputState extends State<AxonNumberInput> {
           children: [
             TextField(
               controller: _textController,
-              decoration: InputDecoration(hintText: widget.node.label),
+              decoration: style.decoration?.copyWith(
+                labelText: widget.node.label,
+                hintText: widget.node.placeholder,
+              ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (String s) {

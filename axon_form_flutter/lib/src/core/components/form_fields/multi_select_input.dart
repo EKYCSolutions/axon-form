@@ -1,9 +1,11 @@
+import 'package:axon_form_flutter/src/core/axon_form_core.dart';
 import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
 import 'package:flutter/material.dart';
 
 class AxonMultiSelectInput extends AxonBaseInput {
-  const AxonMultiSelectInput({super.key, required super.node});
+  const AxonMultiSelectInput({super.key, required super.node, this.style});
+
+  final AxonFormMultiSelectInputStyle? style;
 
   @override
   State<AxonMultiSelectInput> createState() => AxonMultiSelectInputState();
@@ -14,6 +16,11 @@ class AxonMultiSelectInputState extends State<AxonMultiSelectInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
     final options = controller.getOptions(widget.node.id);
+
+    var style =
+        widget.style ??
+        Theme.of(context).extension<AxonFormMultiSelectInputStyle>() ??
+        AxonFormMultiSelectInputStyle.fallback(context);
 
     return FormField<List<String>?>(
       initialValue: widget.node.value?.split(",") ?? [],
@@ -26,20 +33,15 @@ class AxonMultiSelectInputState extends State<AxonMultiSelectInput> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              widget.node.label,
-              // style:
-              //     theme.labelStyle ??
-              //     TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
+            Text(widget.node.label),
             SizedBox(height: 8),
             ...options.map((option) {
               final isSelected =
                   formFieldState.value?.contains(option.id) ?? false;
               return CheckboxListTile(
-                title: Text(option.label),
+                title: Text(option.label, style: style.titleStyle),
                 value: isSelected,
-                // activeColor: theme.checkboxActiveColor,
+                activeColor: style.activeColor,
                 onChanged: (checked) {
                   final currentList = List<String>.from(
                     formFieldState.value ?? [],

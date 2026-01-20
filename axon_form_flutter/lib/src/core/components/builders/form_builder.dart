@@ -27,9 +27,7 @@ class _FormBuilderState extends State<FormBuilder> {
       }
 
       var result = controller.submitForm();
-      print("result: $result");
       widget.onSubmit(result);
-      // print("form result ${result}");
     }
 
     return Form(

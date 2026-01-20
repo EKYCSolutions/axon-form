@@ -1,10 +1,13 @@
 import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
 import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
+import 'package:axon_form_flutter/src/core/components/styles/date_input_style.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AxonDateInput extends AxonBaseInput {
-  const AxonDateInput({super.key, required super.node});
+  const AxonDateInput({super.key, required super.node, this.style});
+
+  final AxonFormDateInputStyle? style;
 
   @override
   State<AxonDateInput> createState() => _AxonDateInputState();
@@ -15,6 +18,11 @@ class _AxonDateInputState extends State<AxonDateInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
     final dateFormat = DateFormat('yyyy-MM-dd');
+
+    var style =
+        widget.style ??
+        Theme.of(context).extension<AxonFormDateInputStyle>() ??
+        AxonFormDateInputStyle.fallback(context);
 
     return FormField<DateTime?>(
       initialValue: widget.node.value != null
@@ -37,22 +45,28 @@ class _AxonDateInputState extends State<AxonDateInput> {
                   initialDate: formFieldState.value ?? DateTime.now(),
                   firstDate: DateTime(1900),
                   lastDate: DateTime(2100),
+                  builder: (context, child) {
+                    return Theme(
+                      data: ThemeData(
+                        colorScheme: Theme.of(
+                          context,
+                        ).colorScheme.copyWith(primary: Colors.red),
+                      ),
+                      child: child!,
+                    );
+                  },
                 );
                 if (picked != null) {
-                  // onChanged(picked);
                   formFieldState.didChange(picked);
                 }
               },
               child: InputDecorator(
-                // decoration: getDecoration().copyWith(
-                //   suffixIcon: Icon(Icons.calendar_today),
-                // ),
-                decoration: InputDecoration(),
+                decoration: style.inputDecoration ?? InputDecoration(),
                 child: Text(
                   formFieldState.value != null
                       ? dateFormat.format(formFieldState.value!)
                       : widget.node.label,
-                  style: TextStyle(fontSize: 16),
+                  style: style.labelStyle,
                 ),
               ),
             ),

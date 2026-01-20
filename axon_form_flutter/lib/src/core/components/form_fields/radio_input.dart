@@ -1,9 +1,12 @@
 import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
 import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
+import 'package:axon_form_flutter/src/core/components/styles/radio_input_style.dart';
 import 'package:flutter/material.dart';
 
 class AxonRadioInput extends AxonBaseInput {
-  const AxonRadioInput({super.key, required super.node});
+  const AxonRadioInput({super.key, required super.node, this.style});
+
+  final AxonFormRadioInputStyle? style;
 
   @override
   State<AxonRadioInput> createState() => _AxonRadioInputState();
@@ -14,6 +17,11 @@ class _AxonRadioInputState extends State<AxonRadioInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
     final options = controller.getOptions(widget.node.id);
+
+    var style =
+        widget.style ??
+        Theme.of(context).extension<AxonFormRadioInputStyle>() ??
+        AxonFormRadioInputStyle.fallback(context);
 
     return FormField<String?>(
       initialValue: widget.node.value,
@@ -34,8 +42,11 @@ class _AxonRadioInputState extends State<AxonRadioInput> {
               child: Column(
                 children: options.map((option) {
                   return ListTile(
-                    title: Text(option.label),
-                    leading: Radio<String>(value: option.id),
+                    title: Text(option.label, style: style.titleStyle),
+                    leading: Radio<String>(
+                      value: option.id,
+                      activeColor: style.activeColor,
+                    ),
                   );
                 }).toList(),
               ),
