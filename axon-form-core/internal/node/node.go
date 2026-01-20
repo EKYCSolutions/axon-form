@@ -7,13 +7,14 @@ type ValidationRule struct {
 }
 
 type Node struct {
-	ID        string         `json:"id"`
-	Order     int            `json:"order"`
-	Label     string         `json:"label"`
-	NodeType  NodeType       `json:"type"`
-	FieldType NodeFieldType  `json:"field_type"`
-	FieldName string         `json:"field_name"`
-	Config    map[string]any `json:"config"`
+	ID          string         `json:"id"`
+	Order       int            `json:"order"`
+	Label       string         `json:"label"`
+	NodeType    NodeType       `json:"type"`
+	FieldType   NodeFieldType  `json:"field_type"`
+	FieldName   string         `json:"field_name"`
+	Placeholder string         `json:"placeholder"`
+	Config      map[string]any `json:"config"`
 	//
 	IsVisible       bool
 	ValidationRules []ValidationRule `json:"validation_rules"`

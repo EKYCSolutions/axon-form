@@ -429,9 +429,6 @@ func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []st
 		return false, valErr, []string{}
 	}
 
-	fmt.Println("input node: ", input.NodeID)
-	fmt.Println("input value: ", input.Value)
-
 	n, ok := g.Nodes["inputs"][input.NodeID]
 	if !ok {
 		return false, []error{errors.New("Input node not found")}, []string{}
