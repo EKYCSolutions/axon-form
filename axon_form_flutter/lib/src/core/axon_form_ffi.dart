@@ -1,15 +1,16 @@
 import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
-import 'dart:typed_data';
-import 'package:axon_form_flutter/axon_form_flutter.dart';
+
 import 'package:axon_form_flutter/src/core/ffi_types.dart';
+import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 
 class AxonFormFFI {
   late final DynamicLibrary _dylib;
   late final InitGraphDart _initGraphDart;
-  late final InitAddressDart _initAddressDart;
+  late final AddEventListenerDart _addEventListenerDart;
   late final IsNodeVisibleDart _isNodeVisibleDart;
   late final ValidateNodeDart _validateNodeDart;
   late final ValidateAddressNodeDart _validateAddressNodeDart;
@@ -40,8 +41,8 @@ class AxonFormFFI {
           .lookup<NativeFunction<InitGraphC>>('InitGraph')
           .asFunction();
 
-      _initAddressDart = _dylib
-          .lookup<NativeFunction<InitAddressC>>('InitAddress')
+      _addEventListenerDart = _dylib
+          .lookup<NativeFunction<AddEventListenerC>>('AddEventListener')
           .asFunction();
 
       _isNodeVisibleDart = _dylib
@@ -81,21 +82,55 @@ class AxonFormFFI {
   }
 
   //
-  void initialize(Uint8List fileBytes) {
+  CoreResponse initialize(Uint8List fileBytes) {
     final Pointer<Uint8> nativeData = malloc<Uint8>(fileBytes.length);
     final nativeBytes = nativeData.asTypedList(fileBytes.length);
     nativeBytes.setAll(0, fileBytes);
     _initGraphDart(nativeData.cast<Void>(), fileBytes.length);
     malloc.free(nativeData);
+    return _getCoreResponse("initialize");
   }
 
+  // Keep references to listeners to prevent them from being garbage collected
+  final List<NativeCallable> _activeListeners = [];
+
   //
-  void initializeAddress(Uint8List fileBytes) {
-    final Pointer<Uint8> nativeData = malloc<Uint8>(fileBytes.length);
-    final nativeBytes = nativeData.asTypedList(fileBytes.length);
-    nativeBytes.setAll(0, fileBytes);
-    _initAddressDart(nativeData.cast<Void>(), fileBytes.length);
-    malloc.free(nativeData);
+  void addEventListener(
+    String eventName,
+    Function(Map<String, dynamic>) callback,
+  ) {
+    final Pointer<Utf8> eventNamePtr = eventName.toNativeUtf8();
+
+    // Create a native-callable listener. This is thread-safe and can be called from Go/C.
+    final listener = NativeCallable<NativeStringCallback>.listener((
+      Pointer<Utf8> strPtr,
+    ) {
+      final str = strPtr.toDartString();
+      malloc.free(strPtr);
+
+      try {
+        final decoded = jsonDecode(str);
+        if (decoded is Map<String, dynamic>) {
+          callback(decoded);
+        } else {
+          debugPrint("Callback received non-map JSON: $decoded");
+        }
+      } catch (e) {
+        debugPrint("Failed to decode callback JSON: $e");
+      }
+    });
+
+    // Store the listener so it doesn't get garbage collected
+    _activeListeners.add(listener);
+
+    _addEventListenerDart(
+      eventNamePtr.cast<Void>(),
+      eventNamePtr.length,
+      listener.nativeFunction, // Pass the actual function pointer
+    );
+
+    malloc.free(eventNamePtr);
+    _getCoreResponse("addEventListener");
   }
 
   CoreResponse isNodeVisible(String nodeId) {
@@ -103,9 +138,9 @@ class AxonFormFFI {
 
     try {
       _isNodeVisibleDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
-      return _getCoreResponse();
+      return _getCoreResponse("isNodeVisible");
     } catch (e) {
-      print("[isNodeVisible] Error : $e");
+      debugPrint("[isNodeVisible] Error : $e");
     } finally {
       malloc.free(nodeIdPtr);
     }
@@ -113,45 +148,59 @@ class AxonFormFFI {
   }
 
   //
-  CoreResponse validateNode(String nodeId, String value) {
+  CoreResponse validateNode(String nodeId, String? value) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
-    final Pointer<Utf8> valuePtr = value.toNativeUtf8();
+    Pointer<Utf8> valuePtr = nullptr;
+    int valueLen = 0;
+
+    if (value != null) {
+      valuePtr = value.toNativeUtf8();
+      valueLen = valuePtr.length;
+    }
 
     try {
       _validateNodeDart(
         nodeIdPtr.cast<Void>(),
         nodeIdPtr.length,
         valuePtr.cast<Void>(),
-        valuePtr.length,
+        valueLen,
       );
 
-      return _getCoreResponse();
+      return _getCoreResponse("validateNode");
     } catch (e) {
-      print("[validateNode] Error : $e");
+      debugPrint("[validateNode] Error : $e");
       return CoreResponse(false, "[validateNode] Error : $e", null);
     } finally {
       //
       malloc.free(nodeIdPtr);
-      malloc.free(valuePtr);
+      if (valuePtr != nullptr) {
+        malloc.free(valuePtr);
+      }
     }
   }
 
   //
-  CoreResponse validateAddressNode(String nodeId, String value) {
+  CoreResponse validateAddressNode(String nodeId, String? value) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
-    final Pointer<Utf8> valuePtr = value.toNativeUtf8();
+    Pointer<Utf8> valuePtr = nullptr;
+    int valueLen = 0;
+
+    if (value != null) {
+      valuePtr = value.toNativeUtf8();
+      valueLen = valuePtr.length;
+    }
     //
     try {
       _validateAddressNodeDart(
         nodeIdPtr.cast<Void>(),
         nodeIdPtr.length,
         valuePtr.cast<Void>(),
-        valuePtr.length,
+        valueLen,
       );
 
-      return _getCoreResponse();
+      return _getCoreResponse("validateAddressNode");
     } catch (e) {
-      print("[validateAddressNode] Error : $e");
+      debugPrint("[validateAddressNode] Error : $e");
       return CoreResponse(false, "[validateAddressNode] Error : $e", null);
     } finally {
       //
@@ -164,9 +213,9 @@ class AxonFormFFI {
   CoreResponse getFormValue() {
     try {
       _getFormValueDart();
-      return _getCoreResponse();
+      return _getCoreResponse("getFormValue");
     } catch (e) {
-      print("[getFormValue] Error : $e");
+      debugPrint("[getFormValue] Error : $e");
       return CoreResponse(false, "[getFormValue] Error : $e", null);
     }
   }
@@ -176,9 +225,9 @@ class AxonFormFFI {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
     try {
       _getOptionNodesDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
-      return _getCoreResponse();
+      return _getCoreResponse("getOptionNodes");
     } catch (e) {
-      print("[getOptionNodes] Error : $e");
+      debugPrint("[getOptionNodes] Error : $e");
       return CoreResponse(false, "[getOptionNodes] Error : $e", null);
     } finally {
       malloc.free(nodeIdPtr);
@@ -190,9 +239,9 @@ class AxonFormFFI {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
     try {
       _getChildNodeDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
-      return _getCoreResponse();
+      return _getCoreResponse("getChildNode");
     } catch (e) {
-      print("[getChildNode] Error : $e");
+      debugPrint("[getChildNode] Error : $e");
       return CoreResponse(false, "[getChildNode] Error : $e", null);
     } finally {
       malloc.free(nodeIdPtr);
@@ -204,16 +253,16 @@ class AxonFormFFI {
     final pageIdPtr = pageId.toNativeUtf8();
     try {
       _getPageFormValueDart(pageIdPtr.cast<Void>(), pageIdPtr.length);
-      return _getCoreResponse();
+      return _getCoreResponse("getPageFormValue");
     } catch (e) {
-      print("[getPageFormValue] Error : $e");
+      debugPrint("[getPageFormValue] Error : $e");
       return CoreResponse(false, "[getPageFormValue] Error : $e", null);
     } finally {
       malloc.free(pageIdPtr);
     }
   }
 
-  CoreResponse _getCoreResponse() {
+  CoreResponse _getCoreResponse(String event) {
     final Pointer<Utf8> resPtr = _getResultDart();
 
     if (resPtr == nullptr) {
@@ -236,11 +285,13 @@ class AxonFormFFI {
           decoded.length > 2 ? decoded[2] : null, // Data (Object)
         );
       } else {
-        print("[getCoreResponse] Unexpected JSON format: $jsonString");
+        debugPrint(
+          "[getCoreResponse: $event] | Unexpected JSON format: $jsonString",
+        );
         return CoreResponse(false, "Invalid JSON format", null);
       }
     } catch (e) {
-      print("[getCoreResponse] Parsing Error: $e");
+      debugPrint("[getCoreResponse: $event] | Parsing Error: $e");
       return CoreResponse(false, "Parse error: $e", null);
     } finally {
       // ALWAYS free the pointer to prevent memory leaks

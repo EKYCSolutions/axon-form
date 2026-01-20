@@ -1,3 +1,4 @@
+import 'package:axon_form_flutter/src/models/validation_rule_type.dart';
 import 'package:flutter/material.dart';
 import '../models/form_config.dart';
 
@@ -33,7 +34,7 @@ class FormStateNotifier extends ChangeNotifier {
 
     for (final rule in node.validationRules) {
       switch (rule.type) {
-        case 'required':
+        case ValidationRuleType.required:
           if (value == null ||
               (value is String && value.isEmpty) ||
               (value is List && value.isEmpty) ||
@@ -41,20 +42,22 @@ class FormStateNotifier extends ChangeNotifier {
             return rule.message;
           }
           break;
-        case 'min_length':
+        case ValidationRuleType.minLength:
           if (value is String && value.length < (rule.value as int)) {
             return rule.message;
           }
           break;
-        case 'min':
+        case ValidationRuleType.min:
           if (value is num && value < (rule.value as num)) {
             return rule.message;
           }
           break;
-        case 'max':
+        case ValidationRuleType.max:
           if (value is num && value > (rule.value as num)) {
             return rule.message;
           }
+          break;
+        default:
           break;
       }
     }

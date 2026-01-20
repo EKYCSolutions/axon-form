@@ -1,5 +1,7 @@
-import 'models.dart';
+import 'package:axon_form_flutter/src/models/validation_rule_type.dart';
+
 import 'field_type.dart';
+import 'models.dart';
 
 class FormConfig {
   final FormLayout layout;
@@ -131,7 +133,7 @@ class FormEdge {
 }
 
 class ValidationRule {
-  final String? type;
+  final ValidationRuleType? type;
   final String? message;
   final int? value;
 
@@ -139,9 +141,13 @@ class ValidationRule {
 
   factory ValidationRule.fromJson(Map<String, dynamic> json) {
     return ValidationRule(
-      type: json['type'],
+      type: json['type'].runtimeType == int
+          ? ValidationRuleType.fromInt(json['type'])
+          : ValidationRuleType.fromString(json['type']),
       message: json['message'],
-      value: json['value'],
+      value: json['value'] != null && json['value'] is int
+          ? json['value']
+          : null,
     );
   }
 }

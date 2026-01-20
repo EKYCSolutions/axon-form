@@ -42,6 +42,36 @@ enum FieldType {
     }
   }
 
+  /// Convert golang FieldType iota to FieldType enum
+  static FieldType fromInt(int value) {
+    switch (value) {
+      case 0:
+        return FieldType.text;
+      case 1:
+        return FieldType.number;
+      case 2:
+        return FieldType.date;
+      case 3:
+        return FieldType.multiSelect;
+      case 4:
+        return FieldType.radio;
+      case 5:
+        return FieldType.dropdown;
+      case 6:
+        return FieldType.checkbox;
+      case 7:
+        return FieldType.file;
+      case 8:
+        return FieldType.password;
+      case 9:
+        return FieldType.addressDropdown;
+      case 10:
+        return FieldType.unknown;
+      default:
+        return FieldType.unknown;
+    }
+  }
+
   /// Get string value of the FieldType enum
   String get value {
     switch (this) {

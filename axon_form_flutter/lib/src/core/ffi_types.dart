@@ -1,11 +1,25 @@
 import 'dart:ffi';
+
 import 'package:ffi/ffi.dart';
+
+typedef NativeStringCallback = Void Function(Pointer<Utf8>);
+typedef DartStringCallback = void Function(Pointer<Utf8>);
 
 typedef InitGraphC = Int32 Function(Pointer<Void> dataPtr, Int32 dataLen);
 typedef InitGraphDart = int Function(Pointer<Void> dataPtr, int dataLen);
 
-typedef InitAddressC = Int32 Function(Pointer<Void> dataPtr, Int32 dataLen);
-typedef InitAddressDart = int Function(Pointer<Void> dataPtr, int dataLen);
+typedef AddEventListenerC =
+    Int32 Function(
+      Pointer<Void> eventPtr,
+      Int32 eventLen,
+      Pointer<NativeFunction<NativeStringCallback>> callbackPtr,
+    );
+typedef AddEventListenerDart =
+    int Function(
+      Pointer<Void> eventPtr,
+      int eventLen,
+      Pointer<NativeFunction<NativeStringCallback>> callbackPtr,
+    );
 
 typedef IsNodeVisibleC =
     Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
