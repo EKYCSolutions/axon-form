@@ -1,13 +1,25 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
-import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AxonAddressDropdownInput extends AxonBaseInput {
-  const AxonAddressDropdownInput({super.key, required super.node, this.style});
+  const AxonAddressDropdownInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormAddressDropdownInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    List<AxonFormNode> options,
+    String? selectedValue,
+    void Function(String? value) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonAddressDropdownInput> createState() =>
@@ -62,6 +74,22 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
             }
 
             final selectedValue = valueIsValid ? formFieldState.value : null;
+
+            if (widget.builder != null) {
+              return widget.builder!(
+                context,
+                widget.node,
+                options,
+                selectedValue,
+                (val) {
+                  if (val != null) {
+                    formFieldState.didChange(val);
+                    controller.validateAddressNode(widget.node.id, val);
+                  }
+                },
+                formFieldState.errorText,
+              );
+            }
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,11 +162,10 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                   selectedItemBuilder: (context) => options.map((option) {
                     final (labelKh, labelEn) = _parseLabel(option.label);
                     return style.addressSelectedItemBuilder != null
-                        ? style.addressItemBuilder!(
+                        ? style.addressSelectedItemBuilder!(
                             context,
                             labelKh,
                             labelEn,
-                            selectedValue == option.id,
                           )
                         : Align(
                             alignment: Alignment.centerLeft,

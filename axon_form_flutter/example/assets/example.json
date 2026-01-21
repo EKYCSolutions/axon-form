@@ -202,7 +202,7 @@
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_province",
-      "label": "POB Province",
+      "label": "រាជធានី ខេត្ត",
       "value": null,
       "config": {
         "level": "province"
@@ -219,7 +219,7 @@
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_district",
-      "label": "POB District",
+      "label": "ក្រុង​ ស្រុក ខណ្ឌ",
       "value": null,
       "config": {
         "level": "district"
@@ -236,7 +236,7 @@
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_commune",
-      "label": "POB Commune",
+      "label": "សង្កាត់ ឃុំ",
       "value": null,
       "config": {
         "level": "commune"
@@ -253,7 +253,7 @@
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_village",
-      "label": "POB Village",
+      "label": "ភូមិ",
       "value": null,
       "config": {
         "level": "village"

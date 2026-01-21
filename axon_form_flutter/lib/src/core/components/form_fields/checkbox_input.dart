@@ -1,12 +1,23 @@
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
-import 'package:axon_form_flutter/src/core/components/styles/checkbox_input_style.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 
 class AxonCheckboxInput extends AxonBaseInput {
-  const AxonCheckboxInput({super.key, required super.node, this.style});
+  const AxonCheckboxInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormCheckboxInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    bool? isSelected,
+    void Function(bool? value) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonCheckboxInput> createState() => _AxonCheckboxInputState();
@@ -30,6 +41,14 @@ class _AxonCheckboxInputState extends State<AxonCheckboxInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(context, widget.node, formFieldState.value, (
+            val,
+          ) {
+            formFieldState.didChange(val);
+          }, formFieldState.errorText);
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

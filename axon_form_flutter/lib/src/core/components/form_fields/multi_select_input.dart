@@ -1,11 +1,24 @@
-import 'package:axon_form_flutter/src/core/axon_form_core.dart';
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 
 class AxonMultiSelectInput extends AxonBaseInput {
-  const AxonMultiSelectInput({super.key, required super.node, this.style});
+  const AxonMultiSelectInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormMultiSelectInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    List<AxonFormNode> options,
+    List<String>? selectedValue,
+    void Function(AxonFormNode option, bool? checked) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonMultiSelectInput> createState() => AxonMultiSelectInputState();
@@ -30,6 +43,26 @@ class AxonMultiSelectInputState extends State<AxonMultiSelectInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(
+            context,
+            widget.node,
+            options,
+            formFieldState.value,
+            (option, checked) {
+              final currentList = List<String>.from(formFieldState.value ?? []);
+
+              if (checked == true) {
+                currentList.add(option.id);
+              } else {
+                currentList.remove(option.id);
+              }
+              formFieldState.didChange(currentList);
+            },
+            formFieldState.errorText,
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

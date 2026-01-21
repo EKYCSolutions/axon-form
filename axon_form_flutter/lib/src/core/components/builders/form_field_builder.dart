@@ -2,13 +2,27 @@ import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:flutter/material.dart';
 
-class AxonFormField extends StatelessWidget {
-  final AxonFormNode node;
+class AxonFormFieldBuilder extends StatelessWidget {
+  const AxonFormFieldBuilder({
+    super.key,
+    required this.node,
+    this.fieldBuilder,
+  });
 
-  const AxonFormField({super.key, required this.node});
+  final AxonFormNode node;
+  final Widget? Function(BuildContext context, AxonFormNode field)?
+  fieldBuilder;
 
   @override
   Widget build(BuildContext context) {
+    if (fieldBuilder != null) {
+      final customWidget = fieldBuilder!(context, node);
+
+      if (customWidget != null) {
+        return customWidget;
+      }
+    }
+
     switch (node.fieldType) {
       case FieldType.text:
         return AxonTextInput(node: node);

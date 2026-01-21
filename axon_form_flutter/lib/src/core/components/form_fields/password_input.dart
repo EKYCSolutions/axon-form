@@ -1,12 +1,22 @@
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
-import 'package:axon_form_flutter/src/core/components/styles/password_input_style.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 
 class AxonPasswordInput extends AxonBaseInput {
-  const AxonPasswordInput({super.key, required super.node, this.style});
+  const AxonPasswordInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormPasswordInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    void Function(String? val) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonPasswordInput> createState() => _AxonPasswordInputState();
@@ -32,6 +42,11 @@ class _AxonPasswordInputState extends State<AxonPasswordInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(context, widget.node, (val) {
+            formFieldState.didChange(val);
+          }, formFieldState.errorText);
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

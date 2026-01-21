@@ -1,11 +1,24 @@
-import 'package:axon_form_flutter/axon_form.dart';
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 
 class AxonDropdownInput extends AxonBaseInput {
-  const AxonDropdownInput({super.key, required super.node, this.style});
+  const AxonDropdownInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormDropdownInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    List<AxonFormNode> options,
+    String? selectedValue,
+    void Function(String? value) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonDropdownInput> createState() => _AxonDropdownInputState();
@@ -30,6 +43,20 @@ class _AxonDropdownInputState extends State<AxonDropdownInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(
+            context,
+            widget.node,
+            options,
+            formFieldState.value,
+            (val) {
+              if (val != null) {
+                formFieldState.didChange(val);
+              }
+            },
+            formFieldState.errorText,
+          );
+        }
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:axon_form_flutter/axon_form_flutter.dart';
+import 'package:axon_form_flutter_example/widgets/custom_address_dropdown.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -138,37 +139,36 @@ class _MyHomePageState extends State<MyHomePage> {
                 //   fileByte = selectedFileBytes;
                 // });
               },
-              // pageBuilder: (context, page) {
-              //   if (page.id == "dog") {
-              //     return Custompage(
-              //       page: page
-              //     )
-              //   }
+              pageBuilder: (context, page, nodes) {
+                if (page.id == "p1_account") {
+                  return Container(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("page title ${page.title}"),
+                        Text("page desc ${page.description}"),
+                        ...nodes.map((n) {
+                          return AxonFormFieldBuilder(node: n);
+                        }),
+                      ],
+                    ),
+                  );
+                }
 
-              //   children:
-              //     - title
-              //     - desc
+                return null;
+              },
+              fieldBuilder: (context, node) {
+                if ([
+                  "pob_prov",
+                  "pob_dist",
+                  "pob_comm",
+                  "pob_vill",
+                ].contains(node.id)) {
+                  return CustomAddressDropdown(node: node);
+                }
 
-              //   return null;
-              // },
-              // pageBuilder: {
-              //   "pageId": (context, page) {
-              //     return Page2(
-              //       page: page,
-              //     );
-              //   },
-              // },
-              // fieldBuilder: () {
-              //   "nodeID": Container,
-              // },
-              // builder: (context, progress, form) {
-              //   return Column(
-              //     children: [
-              //       form,
-              //       BottomBar(),
-              //     ],
-              //   );
-              // }
+                return null;
+              },
             ),
           ],
         ),
@@ -176,29 +176,3 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
-
-// class Page2 extends StatelessWidget {
-//   const Page2({super.key, this.content});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final axonFormProvider = context.watch<AxonFormProvider>();
-
-//     return Scaffold(
-//       body: Column(
-//         children: [
-//           fields[this.content.fieldId]
-//         ],
-//       ),
-//     );
-//   }
-// }
-
-// class AxonTextField extends StatelessWidget {
-//   const AxonTextField({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }

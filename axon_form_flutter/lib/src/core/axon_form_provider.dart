@@ -53,7 +53,7 @@ class AxonFormProvider extends ChangeNotifier {
   }
 
   CoreResponse validateNode(String nodeId, dynamic value) {
-    CoreResponse res = _controller.validateNode(nodeId, value);
+    CoreResponse res = _controller.validateNode(nodeId, value?.toString());
     return res;
   }
 

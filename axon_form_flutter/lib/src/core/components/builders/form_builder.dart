@@ -1,14 +1,31 @@
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/components/builders/page_builder.dart';
+import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:axon_form_flutter/src/core/models/page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class FormBuilder extends StatefulWidget {
-  const FormBuilder({required this.pages, required this.onSubmit, super.key});
+  const FormBuilder({
+    super.key,
+    required this.pages,
+    required this.onSubmit,
+    this.pageBuilder,
+    this.fieldBuilder,
+  });
 
   final List<AxonFormPage> pages;
   final void Function(Map<String, dynamic> result) onSubmit;
+
+  //
+  final Widget? Function(
+    BuildContext context,
+    AxonFormPage page,
+    List<AxonFormNode> nodes,
+  )?
+  pageBuilder;
+  final Widget? Function(BuildContext context, AxonFormNode field)?
+  fieldBuilder;
 
   @override
   State<FormBuilder> createState() => _FormBuilderState();
@@ -36,7 +53,11 @@ class _FormBuilderState extends State<FormBuilder> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ...widget.pages.map((page) {
-            return PageBuilder(page: page);
+            return PageBuilder(
+              page: page,
+              pageBuilder: widget.pageBuilder,
+              fieldBuilder: widget.fieldBuilder,
+            );
           }),
           TextButton(onPressed: onSubmit, child: Text("Submit")),
         ],

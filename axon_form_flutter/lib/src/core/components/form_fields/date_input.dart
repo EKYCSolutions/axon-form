@@ -1,13 +1,24 @@
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
-import 'package:axon_form_flutter/src/core/components/styles/date_input_style.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AxonDateInput extends AxonBaseInput {
-  const AxonDateInput({super.key, required super.node, this.style});
+  const AxonDateInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormDateInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    DateTime? selectedValue,
+    void Function(DateTime? value) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonDateInput> createState() => _AxonDateInputState();
@@ -35,6 +46,14 @@ class _AxonDateInputState extends State<AxonDateInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(context, widget.node, formFieldState.value, (
+            val,
+          ) {
+            formFieldState.didChange(val);
+          }, formFieldState.errorText);
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

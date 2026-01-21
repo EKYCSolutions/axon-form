@@ -1,11 +1,23 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
 import 'package:flutter/material.dart';
 
 class AxonTextInput extends AxonBaseInput {
-  const AxonTextInput({super.key, required super.node, this.style});
+  const AxonTextInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormTextInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    TextEditingController controller,
+    void Function(String? val) onChanged,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonTextInput> createState() => _AxonTextInputState();
@@ -44,6 +56,12 @@ class _AxonTextInputState extends State<AxonTextInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(context, widget.node, _textController, (val) {
+            formFieldState.didChange(val);
+          }, formFieldState.errorText);
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

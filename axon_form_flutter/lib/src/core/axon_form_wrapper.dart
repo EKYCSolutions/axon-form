@@ -1,15 +1,32 @@
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/components/builders/form_builder.dart';
+import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:axon_form_flutter/src/core/models/page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AxonForm extends StatefulWidget {
-  const AxonForm({super.key, required this.filePath, required this.onSubmit});
+  const AxonForm({
+    super.key,
+    required this.filePath,
+    required this.onSubmit,
+    this.pageBuilder,
+    this.fieldBuilder,
+  });
 
   // The asset path to the form configuration file.
   final String filePath;
   final void Function(Map<String, dynamic> result) onSubmit;
+
+  //
+  final Widget? Function(
+    BuildContext context,
+    AxonFormPage page,
+    List<AxonFormNode> nodes,
+  )?
+  pageBuilder;
+  final Widget? Function(BuildContext context, AxonFormNode field)?
+  fieldBuilder;
 
   @override
   State<AxonForm> createState() => _AxonFormState();
@@ -31,6 +48,8 @@ class _AxonFormState extends State<AxonForm> {
           return FormBuilder(
             pages: pages as List<AxonFormPage>,
             onSubmit: widget.onSubmit,
+            pageBuilder: widget.pageBuilder,
+            fieldBuilder: widget.fieldBuilder,
           );
         },
       ),

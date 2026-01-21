@@ -1,12 +1,24 @@
-import 'package:axon_form_flutter/src/core/components/builders/error_builder.dart';
-import 'package:axon_form_flutter/src/core/components/form_fields/base_input.dart';
-import 'package:axon_form_flutter/src/core/components/styles/radio_input_style.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 
 class AxonRadioInput extends AxonBaseInput {
-  const AxonRadioInput({super.key, required super.node, this.style});
+  const AxonRadioInput({
+    super.key,
+    required super.node,
+    this.style,
+    this.builder,
+  });
 
   final AxonFormRadioInputStyle? style;
+  final Widget Function(
+    BuildContext context,
+    AxonFormNode field,
+    List<AxonFormNode> options,
+    String? selectedValue,
+    void Function(String? value) onChange,
+    String? errorText,
+  )?
+  builder;
 
   @override
   State<AxonRadioInput> createState() => _AxonRadioInputState();
@@ -31,6 +43,21 @@ class _AxonRadioInputState extends State<AxonRadioInput> {
       },
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
+        if (widget.builder != null) {
+          return widget.builder!(
+            context,
+            widget.node,
+            options,
+            formFieldState.value,
+            (val) {
+              if (val != null) {
+                formFieldState.didChange(val);
+              }
+            },
+            formFieldState.errorText,
+          );
+        }
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

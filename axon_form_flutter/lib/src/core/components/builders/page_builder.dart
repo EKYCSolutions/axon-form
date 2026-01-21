@@ -1,13 +1,25 @@
+import 'package:axon_form_flutter/axon_form.dart';
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
-import 'package:axon_form_flutter/src/core/components/builders/form_field_builder.dart';
-import 'package:axon_form_flutter/src/core/models/page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class PageBuilder extends StatefulWidget {
-  final AxonFormPage page;
+  const PageBuilder({
+    super.key,
+    required this.page,
+    this.pageBuilder,
+    this.fieldBuilder,
+  });
 
-  const PageBuilder({super.key, required this.page});
+  final AxonFormPage page;
+  final Widget? Function(
+    BuildContext context,
+    AxonFormPage page,
+    List<AxonFormNode> nodes,
+  )?
+  pageBuilder;
+  final Widget? Function(BuildContext context, AxonFormNode field)?
+  fieldBuilder;
 
   @override
   State<PageBuilder> createState() => _PageBuilderState();
@@ -24,6 +36,13 @@ class _PageBuilderState extends State<PageBuilder> {
         .toList();
 
     nodes.sort((a, b) => a.order.compareTo(b.order));
+
+    if (widget.pageBuilder != null) {
+      final customWidget = widget.pageBuilder!(context, widget.page, nodes);
+      if (customWidget != null) {
+        return customWidget;
+      }
+    }
 
     //
     return Column(
@@ -48,7 +67,10 @@ class _PageBuilderState extends State<PageBuilder> {
           ),
         ),
         ...nodes.map((n) {
-          return AxonFormField(node: n);
+          return AxonFormFieldBuilder(
+            node: n,
+            fieldBuilder: widget.fieldBuilder,
+          );
         }),
         Divider(),
       ],
