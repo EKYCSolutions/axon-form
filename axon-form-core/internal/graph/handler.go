@@ -237,7 +237,10 @@ func (g Graph) GetFormValue() (bool, error, string) {
 		isAddressNode, level := node.IsAddressNode(n)
 		// //
 		if isAddressNode {
-			if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+			addrNode := node.GetNodeByID(n.Value.(string), g.Nodes["values"])
+
+			// only return the value if value is not a node id and custom option is allowed
+			if addrNode == nil && n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
 				result[n.FieldName] = n.Value
 				continue
 			}
