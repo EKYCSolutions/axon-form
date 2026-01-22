@@ -215,15 +215,12 @@ func (g Graph) GetFormValue() (bool, error, string) {
 	inputNodes := g.Nodes["inputs"]
 
 	for _, n := range inputNodes {
-		isRequired := false
-		for _, rule := range n.ValidationRules {
-			if rule.Type == node.ValidationRuleTypeRequired {
-				isRequired = true
-				break
-			}
-		}
-
+		isRequired := n.IsRequired()
 		hasValue := n.Value != nil
+		// If the value is a string, empty string "" should be considered as no value
+		if val, ok := n.Value.(string); ok {
+			hasValue = val != ""
+		}
 
 		//
 		if isRequired && !hasValue {
@@ -235,35 +232,16 @@ func (g Graph) GetFormValue() (bool, error, string) {
 			continue
 		}
 
-		// Handle option nodes
-		// Set the value to the option nodes' values
-		isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
-		//
-		if isFieldTypeWithOption {
-			nodeValueIdString := n.Value.(string)
-			nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
-
-			nodeValues := make([]string, 0)
-
-			for _, optionId := range nodeValueOptionIds {
-				if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
-					nodeValues = append(nodeValues, optionId)
-					continue
-				}
-
-				opt_node := g.Nodes["values"][optionId]
-				nodeValues = append(nodeValues, opt_node.Value.(string))
+		// // Handle adddress nodes
+		// // Set the value to the address nodes' details
+		isAddressNode, level := node.IsAddressNode(n)
+		// //
+		if isAddressNode {
+			if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+				result[n.FieldName] = n.Value
+				continue
 			}
 
-			result[n.FieldName] = strings.Join(nodeValues, ",")
-			continue
-		}
-
-		// Handle adddress nodes
-		// Set the value to the address nodes' details
-		isAddressNode, level := node.IsAddressNode(n)
-		//
-		if isAddressNode {
 			parentNode, err := g.GetParentNode(n.ID)
 			if level != "province" && err != nil {
 				return false, err, ""
@@ -275,12 +253,43 @@ func (g Graph) GetFormValue() (bool, error, string) {
 				return false, err, ""
 			}
 
+			optionValueNode := g.Nodes["values"][n.Value.(string)]
 			for _, addr := range addressList {
-				if addr.Key == n.Value {
+				if addr.Key == optionValueNode.Value {
 					result[n.FieldName] = addr
 				}
 			}
 
+			continue
+		}
+
+		// Handle option nodes
+		// Set the value to the option nodes' values
+		isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
+		//
+		if isFieldTypeWithOption {
+			nodeValueIdString := n.Value.(string)
+			nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
+
+			nodeValues := make([]string, 0, len(nodeValueOptionIds))
+
+			for _, optionId := range nodeValueOptionIds {
+				if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+					nodeValues = append(nodeValues, optionId)
+					continue
+				}
+
+				opt_node, exists := g.Nodes["values"][optionId]
+				if !exists {
+					return false, fmt.Errorf("Option Id %s not found for field name %s", optionId, n.FieldName), ""
+				}
+
+				if val, ok := opt_node.Value.(string); ok {
+					nodeValues = append(nodeValues, val)
+				}
+			}
+
+			result[n.FieldName] = strings.Join(nodeValues, ",")
 			continue
 		}
 
@@ -408,19 +417,16 @@ func (g Graph) ValidateNode(input ValidateNodeInput) (bool, []error) {
 	if len(fieldErrors) > 0 {
 		return false, fieldErrors
 	}
-	fmt.Println("passed [Validate Field Rules]")
 
 	// 2. Evaluate Dependent Logic (Edges & Groups)
 	if err := g.evaluateDependentLogic(input); err != nil {
 		return false, []error{err}
 	}
-	fmt.Println("passed [Evaluate Dependent Logic (Edges & Groups)]")
 
 	// 3. Update Node Value & Fire Event
 	if _, err := g.updateNodeValue(input, n); err != nil {
 		return false, []error{err}
 	}
-	fmt.Println("passed [Update Node Value & Fire Event]")
 
 	g.EventHandler.OnNodeValidatedChanged(map[string]any{"nodeID": input.NodeID})
 
@@ -467,6 +473,12 @@ func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []st
 
 	if !valid && len(valErr) > 0 {
 		return false, valErr, []string{}
+	}
+
+	// Skip option node validation when the node id is empty
+	optionNodeId := input.Value
+	if len(optionNodeId) == 0 {
+		return true, nil, []string{}
 	}
 
 	n, ok := g.Nodes["inputs"][input.NodeID]
@@ -686,7 +698,6 @@ func (g Graph) GetChildNode(nodeId string) (*node.Node, error) {
 // ==========================================
 
 func (g Graph) updateAddressNodeOptions(parentNode node.Node) (bool, error) {
-
 	e := edge.GetEdgeByNode(parentNode.ID, "target", g.Edges)
 
 	if e == nil {
@@ -861,10 +872,9 @@ func (g Graph) getAddressList(parentNode *node.Node, level string) ([]address.Ad
 		addressList = provinces
 	case "district":
 		provinceNode := parentNode
-		provinceKey, _ := provinceNode.Value.(string)
+		provinceKey := g.getSafeValue(provinceNode.Value)
 
 		districts, err := g.Address.GetDistricts(provinceKey)
-
 		if err != nil {
 			return []address.AddressInfo{}, err
 		}
@@ -872,15 +882,14 @@ func (g Graph) getAddressList(parentNode *node.Node, level string) ([]address.Ad
 		addressList = districts
 	case "commune":
 		districtNode := parentNode
-		districtKey, _ := parentNode.Value.(string)
+		districtKey := g.getSafeValue(districtNode.Value)
 
 		provinceNode, err := g.getAddressParentNode(*districtNode)
 		if err != nil {
 			return []address.AddressInfo{}, err
 		}
 
-		provinceKey := provinceNode.Value.(string)
-
+		provinceKey := g.getSafeValue(provinceNode.Value)
 		communes, err := g.Address.GetCommunes(provinceKey, districtKey)
 
 		if err != nil {
@@ -890,21 +899,21 @@ func (g Graph) getAddressList(parentNode *node.Node, level string) ([]address.Ad
 		addressList = communes
 	case "village":
 		communeNode := parentNode
-		communeKey, _ := parentNode.Value.(string)
+		communeKey := g.getSafeValue(communeNode.Value)
 
 		districtNode, err := g.getAddressParentNode(*communeNode)
 		if err != nil {
 			return []address.AddressInfo{}, err
 		}
 
-		districtKey := districtNode.Value.(string)
+		districtKey := g.getSafeValue(districtNode.Value)
 
 		provinceNode, err := g.getAddressParentNode(*districtNode)
 		if err != nil {
 			return []address.AddressInfo{}, err
 		}
 
-		provinceKey := provinceNode.Value.(string)
+		provinceKey := g.getSafeValue(provinceNode.Value)
 
 		villages, err := g.Address.GetVillages(provinceKey, districtKey, communeKey)
 
@@ -916,4 +925,20 @@ func (g Graph) getAddressList(parentNode *node.Node, level string) ([]address.Ad
 	}
 
 	return addressList, nil
+}
+
+// Safe helper to get a string value from a node ID
+func (g Graph) getSafeValue(nodeID interface{}) string {
+	idStr, ok := nodeID.(string)
+	if !ok {
+		return ""
+	}
+
+	valNode, exists := g.Nodes["values"][idStr]
+	if !exists || valNode == nil {
+		return ""
+	}
+
+	finalVal, _ := valNode.Value.(string)
+	return finalVal
 }

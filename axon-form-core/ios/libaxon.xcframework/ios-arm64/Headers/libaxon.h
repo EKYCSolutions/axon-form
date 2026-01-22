@@ -96,6 +96,7 @@ extern "C" {
 extern char* ResultPtr();
 extern int ResultLen();
 extern char* GetResult();
+extern void FreeString(char* ptr);
 extern int InitGraph(void* dataPtr, int dataLen);
 extern int AddEventListener(void* eventPtr, int eventLen, void* callbackPtr);
 extern int IsNodeVisible(void* nodeIDPtr, int nodeIDLen);

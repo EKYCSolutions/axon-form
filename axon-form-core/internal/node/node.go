@@ -23,6 +23,16 @@ type Node struct {
 	Value any `json:"value"`
 }
 
+func (n *Node) IsRequired() bool {
+	for _, rule := range n.ValidationRules {
+		if rule.Type == ValidationRuleTypeRequired {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (n *Node) GetBoolConfig(key string) bool {
 	if n.Config == nil {
 		return false

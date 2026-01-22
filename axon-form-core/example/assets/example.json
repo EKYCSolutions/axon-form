@@ -58,14 +58,7 @@
       "type": "input",
       "field_type": "dropdown",
       "field_name": "job_role",
-      "label": "Job Role",
-      "value": "opt_dev",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "Please select a role"
-        }
-      ]
+      "label": "Job Role"
     },
     {
       "id": "opt_dev",
@@ -103,7 +96,7 @@
       "field_type": "password",
       "field_name": "pwd",
       "label": "Password",
-      "value": "asdfasdfs",
+      "value": "asdfassfsdf",
       "validation_rules": [
         {
           "type": "required",
@@ -183,9 +176,7 @@
       "field_type": "multi_select",
       "field_name": "tags",
       "label": "Interests",
-      "config": {
-        "allow_custom_option": true
-      }
+      "value": "opt_tech,opt_art"
     },
     {
       "id": "opt_tech",
@@ -207,9 +198,15 @@
       "label": "រាជធានី ខេត្ត",
       "value": null,
       "config": {
-        "level": "province"
+        "level": "province",
+        "allow_custom_option": true
       },
-      "validation_rules": []
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select a province"
+        }
+      ]
     },
     {
       "id": "pob_dist",
@@ -217,11 +214,17 @@
       "field_type": "address_dropdown",
       "field_name": "pob_district",
       "label": "ក្រុង​ ស្រុក ខណ្ឌ",
-      "value": null,
+      "value": "random_district",
       "config": {
-        "level": "district"
+        "level": "district",
+        "allow_custom_option": true
       },
-      "validation_rules": []
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select a district"
+        }
+      ]
     },
     {
       "id": "pob_comm",
@@ -229,11 +232,17 @@
       "field_type": "address_dropdown",
       "field_name": "pob_commune",
       "label": "សង្កាត់ ឃុំ",
-      "value": null,
+      "value": "random_commune",
       "config": {
-        "level": "commune"
+        "level": "commune",
+        "allow_custom_option": true
       },
-      "validation_rules": []
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select a commune"
+        }
+      ]
     },
     {
       "id": "pob_vill",
@@ -241,11 +250,17 @@
       "field_type": "address_dropdown",
       "field_name": "pob_village",
       "label": "ភូមិ",
-      "value": null,
+      "value": "random_village",
       "config": {
-        "level": "village"
+        "level": "village",
+        "allow_custom_option": true
       },
-      "validation_rules": []
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select a village"
+        }
+      ]
     },
     {
       "id": "cur_prov",

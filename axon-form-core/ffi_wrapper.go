@@ -77,6 +77,14 @@ func GetResult() *C.char {
 	return C.CString(string(lastResult)) // caller must free
 }
 
+//export FreeString
+func FreeString(ptr *C.char) {
+	if ptr == nil {
+		return
+	}
+	C.free(unsafe.Pointer(ptr))
+}
+
 /* -------------------- graph lifecycle -------------------- */
 
 //export InitGraph
