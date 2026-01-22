@@ -1,4 +1,5 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
+import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ class AxonAddressDropdownInput extends AxonBaseInput {
     List<AxonFormNode> options,
     String? selectedValue,
     void Function(String? value) onChanged,
+    void Function(String value) onSearch,
     String? errorText,
   )?
   builder;
@@ -33,6 +35,17 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
     final en = parts.length > 1 ? parts[1].trim() : '';
     return (kh, en);
   }
+
+  List<AxonFormNode> onSearch(String query, List<AxonFormNode> options) {
+    return options.where((option) {
+      final titleLower = option.label.toLowerCase();
+      final searchLower = query.toLowerCase();
+
+      return titleLower.contains(searchLower);
+    }).toList();
+  }
+
+  String _searchQuery = '';
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +71,10 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
             return isMe ? pro.pulse : -1;
           },
           builder: (context, pulse, _) {
-            final options = controller.getOptions(widget.node.id);
+            var options = controller.getOptions(widget.node.id);
+            List<AxonFormNode> selectOptions = _searchQuery.isNotEmpty
+                ? onSearch(_searchQuery, options)
+                : options;
             final hasOptions = options.isNotEmpty;
 
             // Check if the current form value is still valid in the new options list
@@ -79,13 +95,18 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
               return widget.builder!(
                 context,
                 widget.node,
-                options,
+                selectOptions,
                 selectedValue,
                 (val) {
                   if (val != null) {
                     formFieldState.didChange(val);
                     controller.validateAddressNode(widget.node.id, val);
                   }
+                },
+                (query) {
+                  setState(() {
+                    _searchQuery = query;
+                  });
                 },
                 formFieldState.errorText,
               );
