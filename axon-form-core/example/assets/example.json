@@ -59,7 +59,7 @@
       "field_type": "dropdown",
       "field_name": "job_role",
       "label": "Job Role",
-      "value": null,
+      "value": "opt_dev",
       "validation_rules": [
         {
           "type": "required",
@@ -85,7 +85,7 @@
       "field_type": "text",
       "field_name": "email",
       "label": "Email",
-      "value": null,
+      "value": "yo.dawg@gmail.com",
       "validation_rules": [
         {
           "type": "required",
@@ -103,7 +103,7 @@
       "field_type": "password",
       "field_name": "pwd",
       "label": "Password",
-      "value": null,
+      "value": "asdfasdfs",
       "validation_rules": [
         {
           "type": "required",
@@ -122,6 +122,7 @@
       "field_type": "file",
       "field_name": "avatar",
       "label": "Profile Picture",
+      "placeholder": "Please select a file",
       "value": null,
       "validation_rules": []
     },
@@ -131,7 +132,7 @@
       "field_type": "checkbox",
       "field_name": "terms",
       "label": "I accept terms",
-      "value": false
+      "value": true
     },
     {
       "id": "f_age",
@@ -139,7 +140,7 @@
       "field_type": "number",
       "field_name": "age",
       "label": "Age",
-      "value": null,
+      "value": 72,
       "validation_rules": [
         {
           "type": "min",
@@ -154,7 +155,7 @@
       "field_type": "datetime",
       "field_name": "dob",
       "label": "Birth Date & Time",
-      "value": null
+      "value": "2024-01-19T00:00:00.000"
     },
     {
       "id": "f_gender",
@@ -162,7 +163,7 @@
       "field_type": "radio",
       "field_name": "gender",
       "label": "Gender",
-      "value": null
+      "value": "opt_m"
     },
     {
       "id": "opt_m",
@@ -182,7 +183,9 @@
       "field_type": "multi_select",
       "field_name": "tags",
       "label": "Interests",
-      "value": null
+      "config": {
+        "allow_custom_option": true
+      }
     },
     {
       "id": "opt_tech",
@@ -201,44 +204,48 @@
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_province",
-      "label": "POB Province",
+      "label": "រាជធានី ខេត្ត",
       "value": null,
       "config": {
         "level": "province"
-      }
+      },
+      "validation_rules": []
     },
     {
       "id": "pob_dist",
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_district",
-      "label": "POB District",
+      "label": "ក្រុង​ ស្រុក ខណ្ឌ",
       "value": null,
       "config": {
         "level": "district"
-      }
+      },
+      "validation_rules": []
     },
     {
       "id": "pob_comm",
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_commune",
-      "label": "POB Commune",
+      "label": "សង្កាត់ ឃុំ",
       "value": null,
       "config": {
         "level": "commune"
-      }
+      },
+      "validation_rules": []
     },
     {
       "id": "pob_vill",
       "type": "input",
       "field_type": "address_dropdown",
       "field_name": "pob_village",
-      "label": "POB Village",
+      "label": "ភូមិ",
       "value": null,
       "config": {
         "level": "village"
-      }
+      },
+      "validation_rules": []
     },
     {
       "id": "cur_prov",

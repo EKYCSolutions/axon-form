@@ -20,6 +20,8 @@ import (
 // Initialization Methods
 // ==========================================
 
+const ALLOW_CUSTOM_OPTION_KEY = "allow_custom_option"
+
 func (g *Graph) InitGraph(jsonBytes []byte) (bool, error) {
 	var graphJson map[string]interface{}
 	if err := json.Unmarshal(jsonBytes, &graphJson); err != nil {
@@ -213,21 +215,54 @@ func (g Graph) GetFormValue() (bool, error, string) {
 	inputNodes := g.Nodes["inputs"]
 
 	for _, n := range inputNodes {
-		hasRequired := false
+		isRequired := false
 		for _, rule := range n.ValidationRules {
 			if rule.Type == node.ValidationRuleTypeRequired {
-				hasRequired = true
+				isRequired = true
 				break
 			}
 		}
 
 		hasValue := n.Value != nil
 
-		if !hasRequired && !hasValue {
+		//
+		if isRequired && !hasValue {
+			return false, fmt.Errorf("field name: %s | value required", n.FieldName), ""
+		}
+
+		// Skip not required node kthat has no value
+		if !isRequired && !hasValue {
 			continue
 		}
 
+		// Handle option nodes
+		// Set the value to the option nodes' values
+		isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
+		//
+		if isFieldTypeWithOption {
+			nodeValueIdString := n.Value.(string)
+			nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
+
+			nodeValues := make([]string, 0)
+
+			for _, optionId := range nodeValueOptionIds {
+				if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+					nodeValues = append(nodeValues, optionId)
+					continue
+				}
+
+				opt_node := g.Nodes["values"][optionId]
+				nodeValues = append(nodeValues, opt_node.Value.(string))
+			}
+
+			result[n.FieldName] = strings.Join(nodeValues, ",")
+			continue
+		}
+
+		// Handle adddress nodes
+		// Set the value to the address nodes' details
 		isAddressNode, level := node.IsAddressNode(n)
+		//
 		if isAddressNode {
 			parentNode, err := g.GetParentNode(n.ID)
 			if level != "province" && err != nil {
@@ -245,9 +280,11 @@ func (g Graph) GetFormValue() (bool, error, string) {
 					result[n.FieldName] = addr
 				}
 			}
-		} else {
-			result[n.FieldName] = n.Value
+
+			continue
 		}
+
+		result[n.FieldName] = n.Value
 	}
 
 	jsonBytes, err := json.Marshal(result)
@@ -298,6 +335,7 @@ func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*no
 }
 
 func (g Graph) updateNodeValue(input ValidateNodeInput, n *node.Node) (bool, error) {
+	// Update node value for non-option nodes
 	if !node.IsFieldTypeWithOptions(n.FieldType) {
 		n.Value = input.Value
 		return true, nil
@@ -319,7 +357,6 @@ func (g Graph) updateNodeValue(input ValidateNodeInput, n *node.Node) (bool, err
 
 func (g Graph) updateMultiSelectValue(input ValidateNodeInput, n *node.Node) (bool, error) {
 	optionNodeIds := strings.Split(input.Value, ",")
-	var selectedOptionValues []string
 
 	for _, id := range optionNodeIds {
 		id = strings.TrimSpace(id)
@@ -327,32 +364,35 @@ func (g Graph) updateMultiSelectValue(input ValidateNodeInput, n *node.Node) (bo
 			continue
 		}
 
-		optionNode, err := g.validateOptionNode(n.ID, id)
+		if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+			continue
+		}
+
+		_, err := g.validateOptionNode(n.ID, id)
 
 		if err != nil {
 			return false, err
 		}
-
-		if val, ok := optionNode.Value.(string); ok {
-			selectedOptionValues = append(selectedOptionValues, val)
-		} else {
-			// Fallback: convert to string representation only if it's not a string
-			selectedOptionValues = append(selectedOptionValues, fmt.Sprintf("%v", optionNode.Value))
-		}
 	}
 
-	n.Value = selectedOptionValues
+	n.Value = input.Value
 	return true, nil
 }
 
 func (g Graph) updateSingleSelectOptionValue(input ValidateNodeInput, n *node.Node) (bool, error) {
+
+	if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+		n.Value = input.Value
+		return true, nil
+	}
+
 	optionNodeId := input.Value
-	optionNode, err := g.validateOptionNode(n.ID, optionNodeId)
+	_, err := g.validateOptionNode(n.ID, optionNodeId)
 	if err != nil {
 		return false, err
 	}
 
-	n.Value = optionNode.Value
+	n.Value = optionNodeId
 	return true, nil
 }
 
@@ -436,6 +476,10 @@ func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []st
 
 	_, ok = g.Nodes["values"][input.Value]
 	if !ok {
+		if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+			return true, nil, []string{}
+		}
+
 		return false, []error{errors.New("Value node not found")}, []string{}
 	}
 

@@ -26,18 +26,33 @@ func main() {
 	g.InitGraph(jsonData)
 	g.AddEventListener("onNodeValidatedChanged", onNodeValidatedChanged)
 
-	// stringInput := ""
+	fmt.Println("dev node: ", g.Nodes["inputs"]["f_job_role"].Value)
 
+	// input := graph.ValidateNodeInput{
+	// 	NodeID: "pob_prov",
+	// 	Value:  "New Jersey",
+	// }
+
+	// succ, errs, childrennodes := g.ValidateAddressNode(input)
+	// if len(errs) == 0 {
+	// 	fmt.Println("validation success:", succ, childrennodes)
+	// } else {
+	// 	fmt.Println("validation errors:", errs)
+	// }
 	input := graph.ValidateNodeInput{
-		NodeID: "pob_prov",
-		Value:  "",
+		NodeID: "f_interests",
+		Value:  "opt_tech,dog",
 	}
 
-	succ, errs, childrennodes := g.ValidateAddressNode(input)
+	succ, errs := g.ValidateNode(input)
 	if len(errs) == 0 {
-		fmt.Println("validation success:", succ, childrennodes)
+		fmt.Println("validation success:", succ)
 	} else {
 		fmt.Println("validation errors:", errs)
 	}
+
+	_, err, result := g.GetFormValue()
+	fmt.Println("get form value validation errors:", err)
+	fmt.Println("get form value result:", result)
 
 }
