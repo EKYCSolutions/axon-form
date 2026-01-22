@@ -76,3 +76,6 @@ typedef GetPageFormValueC =
     Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
 typedef GetPageFormValueDart =
     int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
+
+typedef FreeStringC = Void Function(Pointer<Utf8>);
+typedef FreeStringDart = void Function(Pointer<Utf8>);

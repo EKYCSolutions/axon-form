@@ -41,6 +41,10 @@ class _AxonFormState extends State<AxonForm> {
       child: Selector<AxonFormProvider, List<dynamic>?>(
         selector: (context, provider) => provider.graph?.pages.values.toList(),
         builder: (context, pages, _) {
+          if (context.read<AxonFormProvider>().isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
           if (pages == null || pages.isEmpty) {
             return const SizedBox.shrink();
           }

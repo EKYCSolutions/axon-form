@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 class AxonFormProvider extends ChangeNotifier {
-  final AxonFormFFI _controller = AxonFormFFI();
+  static final AxonFormFFI _controller = AxonFormFFI();
 
   AxonFormGraph? _graph;
   AxonFormGraph? get graph => _graph;
@@ -73,23 +73,9 @@ class AxonFormProvider extends ChangeNotifier {
     }
   }
 
-  // CoreResponse validateAddressNode(String nodeId, String value) {
-  //   CoreResponse res = _controller.validateAddressNode(nodeId, value);
-
-  //   if (res.success) {
-  //     _addressNodeIdsToUpdate = res.data?["nodeIds"].cast<String>();
-  //     _addressError = res.error;
-  //     pulse++;
-  //     notifyListeners();
-  //   }
-
-  //   return res;
-  // }
-
   Map<String, dynamic> submitForm() {
     CoreResponse res = _controller.getFormValue();
     if (!res.success || res.data == null) {
-      print("Submit form error: ${res.error}");
       throw Exception(res.error);
     }
     Map<String, dynamic> resultJson = jsonDecode(res.data?["result"]);

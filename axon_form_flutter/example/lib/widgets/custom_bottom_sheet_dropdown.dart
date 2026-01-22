@@ -202,51 +202,65 @@ class _BottomSheetDropdownState
                 _optionsNotifier.value = options;
                 _showOptions(context, selectedValue, onChanged, onSearch);
               },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-                margin: EdgeInsets.symmetric(vertical: 2.0),
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey.withAlpha(20),
-                  borderRadius: BorderRadius.all(Radius.circular(14.0)),
-                ),
-                child: InputDecorator(
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 0,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.0,
+                      vertical: 8.0,
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        field.label,
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          color: Color(0XFF000080),
+                    margin: EdgeInsets.symmetric(vertical: 2.0),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey.withAlpha(20),
+                      borderRadius: BorderRadius.all(Radius.circular(14.0)),
+                    ),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 0,
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.location_on, color: Color(0XFF000080)),
-                          SizedBox(width: 5.0),
                           Text(
-                            selectedOption != null
-                                ? selectedOption.label.split("-")[0]
-                                : "",
+                            field.label,
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.0,
+                              fontSize: 12.0,
+                              color: Color(0XFF000080),
                             ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(Icons.location_on, color: Color(0XFF000080)),
+                              SizedBox(width: 5.0),
+                              Text(
+                                selectedOption != null
+                                    ? selectedOption.label.split("-")[0]
+                                    : "",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                  errorText != null
+                      ? Text(
+                          errorText,
+                          style: TextStyle(fontSize: 12.0, color: Colors.red),
+                        )
+                      : SizedBox.shrink(),
+                ],
               ),
             );
           },

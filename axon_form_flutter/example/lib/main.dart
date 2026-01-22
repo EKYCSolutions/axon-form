@@ -122,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Axon Form Demo"),
+        title: const Text("Axon Form Example"),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -132,12 +132,6 @@ class _MyHomePageState extends State<MyHomePage> {
               filePath: 'assets/example.json',
               onSubmit: (result) {
                 print("FORM RESULT OUTSIDE: $result");
-                // var selectedFileBytes = base64Decode(result["f_avatar"]);
-                // print("selected file bytesl ${selectedFileBytes.length}");
-
-                // setState(() {
-                //   fileByte = selectedFileBytes;
-                // });
               },
               pageBuilder: (context, page, nodes) {
                 if (page.id == "p1_account") {

@@ -19,13 +19,14 @@ class AxonFormFFI {
   late final GetResultDart _getResultDart;
   late final GetFormValueDart _getFormValueDart;
   late final GetPageFormValueDart _getPageFormValueDart;
+  late final FreeStringDart _freeStringDart;
 
   AxonFormFFI() {
     _loadLibrary();
     _bindFunctions();
   }
 
-  void _loadLibrary() async {
+  void _loadLibrary() {
     try {
       _dylib = Platform.isAndroid
           ? DynamicLibrary.open("axonlib.so")
@@ -75,6 +76,10 @@ class AxonFormFFI {
 
       _getPageFormValueDart = _dylib
           .lookup<NativeFunction<GetPageFormValueC>>('GetPageFormValue')
+          .asFunction();
+
+      _freeStringDart = _dylib
+          .lookup<NativeFunction<FreeStringC>>('FreeString')
           .asFunction();
     } catch (e) {
       throw Exception('Failed to bind functions: $e');
@@ -295,7 +300,7 @@ class AxonFormFFI {
       return CoreResponse(false, "Parse error: $e", null);
     } finally {
       // ALWAYS free the pointer to prevent memory leaks
-      malloc.free(resPtr);
+      _freeStringDart(resPtr);
     }
   }
 }
