@@ -124,49 +124,52 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text("Axon Form Example"),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            fileByte != null ? Image.memory(fileByte!) : Container(),
-            AxonForm(
-              filePath: 'assets/example.json',
-              onSubmit: (result) {
-                print("FORM RESULT OUTSIDE: $result");
-              },
-              pageBuilder: (context, page, nodes) {
-                if (page.id == "p1_account") {
-                  return Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("page title ${page.title}"),
-                        Text("page desc ${page.description}"),
-                        ...nodes.map((n) {
-                          return AxonFormFieldBuilder(node: n);
-                        }),
-                      ],
-                    ),
-                  );
-                }
+      body: AxonForm(
+        filePath: 'assets/example.json',
+        onSubmit: (result) {
+          print("FORM RESULT OUTSIDE: $result");
+        },
+        pageBuilder: (context, page, nodes) {
+          if (page.id == "p1_account") {
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("page title ${page.title}"),
+                  Text("page desc ${page.description}"),
+                  ...nodes.map((n) {
+                    return AxonFormFieldBuilder(node: n);
+                  }),
+                ],
+              ),
+            );
+          }
+          return null;
+        },
+        pageNavigatorBuilder:
+            (context, currentPage, pageCount, nextPage, prevPage) {
+              return Container(
+                child: Row(
+                  children: [
+                    TextButton(onPressed: prevPage, child: Text('prev')),
+                    Text('Page: $currentPage'),
+                    TextButton(onPressed: nextPage, child: Text('next')),
+                  ],
+                ),
+              );
+            },
+        fieldBuilder: (context, node) {
+          if ([
+            "pob_prov",
+            "pob_dist",
+            "pob_comm",
+            "pob_vill",
+          ].contains(node.id)) {
+            return CustomAddressBottomSheetDropdown(node: node);
+          }
 
-                return null;
-              },
-              fieldBuilder: (context, node) {
-                if ([
-                  "pob_prov",
-                  "pob_dist",
-                  "pob_comm",
-                  "pob_vill",
-                ].contains(node.id)) {
-                  // return CustomAddressDropdown(node: node);
-                  return CustomAddressBottomSheetDropdown(node: node);
-                }
-
-                return null;
-              },
-            ),
-          ],
-        ),
+          return null;
+        },
       ),
     );
   }

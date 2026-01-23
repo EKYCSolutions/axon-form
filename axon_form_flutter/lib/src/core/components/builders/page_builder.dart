@@ -45,35 +45,37 @@ class _PageBuilderState extends State<PageBuilder> {
     }
 
     //
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.page.title,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF1A1A1A),
-            letterSpacing: -0.5,
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.page.title,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF1A1A1A),
+              letterSpacing: -0.5,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          widget.page.description,
-          style: TextStyle(
-            fontSize: 15,
-            height: 1.4, // Improves readability
-            color: Colors.grey[600],
+          const SizedBox(height: 8),
+          Text(
+            widget.page.description,
+            style: TextStyle(
+              fontSize: 15,
+              height: 1.4, // Improves readability
+              color: Colors.grey[600],
+            ),
           ),
-        ),
-        ...nodes.map((n) {
-          return AxonFormFieldBuilder(
-            node: n,
-            fieldBuilder: widget.fieldBuilder,
-          );
-        }),
-        Divider(),
-      ],
+          ...nodes.map((n) {
+            return AxonFormFieldBuilder(
+              node: n,
+              fieldBuilder: widget.fieldBuilder,
+            );
+          }),
+          Divider(),
+        ],
+      ),
     );
   }
 }

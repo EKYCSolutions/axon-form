@@ -1,5 +1,3 @@
-import 'node.dart';
-
 class AxonFormPage {
   final String id;
   final String title;

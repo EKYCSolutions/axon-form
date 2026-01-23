@@ -11,6 +11,7 @@ class AxonForm extends StatefulWidget {
     required this.filePath,
     required this.onSubmit,
     this.pageBuilder,
+    this.pageNavigatorBuilder,
     this.fieldBuilder,
   });
 
@@ -25,6 +26,14 @@ class AxonForm extends StatefulWidget {
     List<AxonFormNode> nodes,
   )?
   pageBuilder;
+  final Widget? Function(
+    BuildContext context,
+    int currentPage,
+    int pageCount,
+    void Function() nextPage,
+    void Function() prevPage,
+  )?
+  pageNavigatorBuilder;
   final Widget? Function(BuildContext context, AxonFormNode field)?
   fieldBuilder;
 
@@ -53,6 +62,7 @@ class _AxonFormState extends State<AxonForm> {
             pages: pages as List<AxonFormPage>,
             onSubmit: widget.onSubmit,
             pageBuilder: widget.pageBuilder,
+            pageNavigatorBuilder: widget.pageNavigatorBuilder,
             fieldBuilder: widget.fieldBuilder,
           );
         },

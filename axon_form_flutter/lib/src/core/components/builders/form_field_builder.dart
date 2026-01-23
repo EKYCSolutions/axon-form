@@ -1,5 +1,4 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
-import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:flutter/material.dart';
 
 class AxonFormFieldBuilder extends StatelessWidget {

@@ -13,6 +13,14 @@ class AxonFormProvider extends ChangeNotifier {
   AxonFormGraph? _graph;
   AxonFormGraph? get graph => _graph;
 
+  late List<String> _pageIds;
+
+  int _currentPageIndex = 0;
+  int get currentPageIndex => _currentPageIndex;
+
+  int _pageCount = 0;
+  int get pageCount => _pageCount;
+
   bool _isLoading = true;
   bool get isLoading => _isLoading;
 
@@ -39,9 +47,17 @@ class AxonFormProvider extends ChangeNotifier {
     }
     //
     _graph = AxonFormGraph.fromJson(result.data!);
-    _isLoading = false;
+
+    if (_graph?.pages == null) {
+      throw Exception("There was a problem initializing the form");
+    }
+
+    _pageIds = _graph!.pages.keys.toList();
+    _pageCount = _graph!.pages.length;
 
     addEventListener('onNodeValidatedChanged', (data) {});
+
+    _isLoading = false;
     notifyListeners();
   }
 
@@ -71,6 +87,15 @@ class AxonFormProvider extends ChangeNotifier {
       pulse++;
       notifyListeners();
     }
+  }
+
+  Map<String, dynamic> validatePage(String pageId) {
+    CoreResponse res = _controller.getPageFormValue(pageId);
+    if (!res.success || res.data == null) {
+      throw Exception(res.error);
+    }
+    Map<String, dynamic> resultJson = jsonDecode(res.data?["result"]);
+    return resultJson;
   }
 
   Map<String, dynamic> submitForm() {
@@ -103,5 +128,24 @@ class AxonFormProvider extends ChangeNotifier {
         .toList();
 
     return nodes;
+  }
+
+  void prevPage() {
+    if (_currentPageIndex == 0) {
+      return;
+    }
+    _currentPageIndex -= 1;
+    notifyListeners();
+  }
+
+  void nextPage() {
+    if (_currentPageIndex == _pageCount - 1) {
+      return;
+    }
+
+    validatePage(_pageIds[_currentPageIndex]);
+    _currentPageIndex += 1;
+
+    notifyListeners();
   }
 }
