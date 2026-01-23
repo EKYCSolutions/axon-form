@@ -304,13 +304,18 @@ func GetPageFormValue(pageIDPtr unsafe.Pointer, pageIDLen C.int) C.int {
 		return 0
 	}
 
+	var errOut any
 	pageID := goString(pageIDPtr, pageIDLen)
-	result, err := g.GetPageFormValue(pageID)
+	success, err, result := g.GetPageFormValue(pageID)
 	if err != nil {
-		return setJSONResult(err)
+		errOut = err.Error()
 	}
 
-	return setJSONResult(result)
+	data := map[string]any{
+		"result": result,
+	}
+
+	return setJSONResult([]any{success, errOut, data})
 }
 
 /* -------------------- required -------------------- */

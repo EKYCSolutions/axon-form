@@ -168,45 +168,142 @@ func (g *Graph) AddEventListener(event string, callback func(map[string]any)) {
 // Form Value Methods
 // ==========================================
 
-func (g Graph) GetPageFormValue(pageID string) (string, error) {
-	result := make(map[string]any)
+// resolveNodeValue processes the raw value of a node into its final form output.
+// It performs three main tasks:
+// 1. Validates 'Required' constraints.
+// 2. Resolves Address IDs into full Address objects (e.g., getting proper structs for Province/District).
+// 3. Resolves Option IDs into their actual string values (for Select/MultiSelect inputs).
+func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
+	// ---------------------------------------------------------
+	// 1. Required Validation
+	// ---------------------------------------------------------
+	isRequired := n.IsRequired()
+	hasValue := n.Value != nil
+	// If the value is a string, empty string "" should be considered as no value
+	if val, ok := n.Value.(string); ok {
+		hasValue = val != ""
+	}
 
-	foundPage := page.GetPageByID(pageID, g.Pages)
+	if isRequired && !hasValue {
+		return nil, fmt.Errorf("field name: %s | value required", n.FieldName)
+	}
+
+	// If not required and empty, simply return nil (no value)
+	if !isRequired && !hasValue {
+		return nil, nil
+	}
+
+	// ---------------------------------------------------------
+	// 2. Address Node Resolution
+	// ---------------------------------------------------------
+	// Address nodes (Province, District, etc.) usually store an ID referencing the address data.
+	// We need to look up the actual Address object (Code, Key, Name) to return in the form data.
+	isAddressNode, level := node.IsAddressNode(n)
+	if isAddressNode {
+		addrNode := node.GetNodeByID(n.Value.(string), g.Nodes["values"])
+
+		// Case A: Custom Option
+		// If the value doesn't match a known ID and custom options are allowed, return raw value.
+		if addrNode == nil && n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+			return n.Value, nil
+		}
+
+		// Verify the selected ID exists in our known value nodes
+		optionValueNode, ok := g.Nodes["values"][n.Value.(string)]
+		if !ok {
+			return nil, fmt.Errorf("Option Id %s not found for field name %s", n.Value, n.FieldName)
+		}
+
+		// Case B: Standard ID Lookup
+		// We need the parent node (e.g., Province) to filter the list of children (e.g., Districts).
+		parentNode, err := g.GetParentNode(n.ID)
+		if level != "province" && err != nil {
+			return nil, err
+		}
+
+		// Retrieve the list of valid addresses for this level
+		addressList, err := g.getAddressList(parentNode, level)
+		if err != nil {
+			return nil, err
+		}
+
+		// Find and return the matching Address object from the list
+		for _, addr := range addressList {
+			if addr.Key == optionValueNode.Value {
+				return addr, nil
+			}
+		}
+	}
+
+	// ---------------------------------------------------------
+	// 3. Option Node Resolution (Select / MultiSelect)
+	// ---------------------------------------------------------
+	// For options, the node stores the ID(s) of the selected option(s).
+	// We must look up the corresponding 'value' node to get the actual underlying string value.
+	isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
+	if isFieldTypeWithOption {
+		nodeValueIdString := n.Value.(string)
+		nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
+
+		nodeValues := make([]string, 0, len(nodeValueOptionIds))
+
+		for _, optionId := range nodeValueOptionIds {
+			// If custom values are allowed and mixed in, handle them.
+			if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+				nodeValues = append(nodeValues, optionId)
+				continue
+			}
+
+			// Look up the value node by ID
+			opt_node, exists := g.Nodes["values"][optionId]
+			if !exists {
+				return nil, fmt.Errorf("Option Id %s not found for field name %s", optionId, n.FieldName)
+			}
+
+			if val, ok := opt_node.Value.(string); ok {
+				nodeValues = append(nodeValues, val)
+			}
+		}
+
+		// Join multi-select values back into a string
+		return strings.Join(nodeValues, ","), nil
+	}
+
+	// ---------------------------------------------------------
+	// 4. Default Resolution
+	// ---------------------------------------------------------
+	// For simple inputs (Text, Int, etc.), return the stored value directly.
+	return n.Value, nil
+}
+
+func (g Graph) GetPageFormValue(pageID string) (bool, error, string) {
+	result := make(map[string]any)
+	foundPage, ok := g.Pages[pageID]
+
+	if !ok {
+		return false, fmt.Errorf("Page id %s not found", pageID), ""
+	}
 
 	for _, id := range foundPage.FieldIDs {
 		n, ok := g.Nodes["inputs"][id]
 		if !ok {
-			return "", errors.New("Node not found")
+			return false, fmt.Errorf("Field not found %s", id), ""
 		}
-		isAddressNode, level := node.IsAddressNode(n)
-		if isAddressNode {
-			parentNode, err := g.GetParentNode(n.ID)
-			if level != "province" && err != nil {
-				return "", err
-			}
 
-			addressList, err := g.getAddressList(parentNode, level)
-
-			if err != nil {
-				return "", err
-			}
-
-			for _, addr := range addressList {
-				if addr.Key == n.Value {
-					result[n.FieldName] = addr
-				}
-			}
-		} else {
-			result[n.FieldName] = n.Value
+		nValue, err := g.resolveNodeValue(n)
+		if err != nil {
+			return false, err, ""
 		}
+
+		result[n.FieldName] = nValue
 	}
 
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
-		return "", err
+		return false, err, ""
 	}
 
-	return string(jsonBytes), nil
+	return true, nil, string(jsonBytes)
 }
 
 func (g Graph) GetFormValue() (bool, error, string) {
@@ -215,88 +312,12 @@ func (g Graph) GetFormValue() (bool, error, string) {
 	inputNodes := g.Nodes["inputs"]
 
 	for _, n := range inputNodes {
-		isRequired := n.IsRequired()
-		hasValue := n.Value != nil
-		// If the value is a string, empty string "" should be considered as no value
-		if val, ok := n.Value.(string); ok {
-			hasValue = val != ""
+		nValue, err := g.resolveNodeValue(n)
+		if err != nil {
+			return false, err, ""
 		}
 
-		//
-		if isRequired && !hasValue {
-			return false, fmt.Errorf("field name: %s | value required", n.FieldName), ""
-		}
-
-		// Skip not required node kthat has no value
-		if !isRequired && !hasValue {
-			continue
-		}
-
-		// // Handle adddress nodes
-		// // Set the value to the address nodes' details
-		isAddressNode, level := node.IsAddressNode(n)
-		// //
-		if isAddressNode {
-			addrNode := node.GetNodeByID(n.Value.(string), g.Nodes["values"])
-
-			// only return the value if value is not a node id and custom option is allowed
-			if addrNode == nil && n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
-				result[n.FieldName] = n.Value
-				continue
-			}
-
-			parentNode, err := g.GetParentNode(n.ID)
-			if level != "province" && err != nil {
-				return false, err, ""
-			}
-
-			addressList, err := g.getAddressList(parentNode, level)
-
-			if err != nil {
-				return false, err, ""
-			}
-
-			optionValueNode := g.Nodes["values"][n.Value.(string)]
-			for _, addr := range addressList {
-				if addr.Key == optionValueNode.Value {
-					result[n.FieldName] = addr
-				}
-			}
-
-			continue
-		}
-
-		// Handle option nodes
-		// Set the value to the option nodes' values
-		isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
-		//
-		if isFieldTypeWithOption {
-			nodeValueIdString := n.Value.(string)
-			nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
-
-			nodeValues := make([]string, 0, len(nodeValueOptionIds))
-
-			for _, optionId := range nodeValueOptionIds {
-				if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
-					nodeValues = append(nodeValues, optionId)
-					continue
-				}
-
-				opt_node, exists := g.Nodes["values"][optionId]
-				if !exists {
-					return false, fmt.Errorf("Option Id %s not found for field name %s", optionId, n.FieldName), ""
-				}
-
-				if val, ok := opt_node.Value.(string); ok {
-					nodeValues = append(nodeValues, val)
-				}
-			}
-
-			result[n.FieldName] = strings.Join(nodeValues, ",")
-			continue
-		}
-
-		result[n.FieldName] = n.Value
+		result[n.FieldName] = nValue
 	}
 
 	jsonBytes, err := json.Marshal(result)
