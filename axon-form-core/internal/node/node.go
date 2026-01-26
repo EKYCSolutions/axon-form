@@ -15,8 +15,8 @@ type Node struct {
 	FieldName   string         `json:"field_name"`
 	Placeholder string         `json:"placeholder"`
 	Config      map[string]any `json:"config"`
+	IsVisible   bool           `json:"is_visible"`
 	//
-	IsVisible       bool
 	ValidationRules []ValidationRule `json:"validation_rules"`
 	// Type any is used here because Value could be of type "string", "int", "float", "boolean"
 	// Golang does not have support for union type

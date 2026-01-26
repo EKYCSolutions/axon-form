@@ -58,7 +58,9 @@ func GetAddressNode(nodes map[string]*Node, level string) *[]Node {
 }
 
 func NewNodeFromJSON(nodeJson map[string]any) (*Node, error) {
-	var node Node
+	node := Node{
+		IsVisible: true,
+	}
 
 	nodeJsonBytes, err := json.Marshal(nodeJson)
 	if err != nil {

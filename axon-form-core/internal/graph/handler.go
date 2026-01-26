@@ -45,8 +45,17 @@ func (g *Graph) InitGraph(jsonBytes []byte) (bool, error) {
 	if err := g.parseConditionGroups(graphJson); err != nil {
 		return false, err
 	}
+	if err := g.initializeNodeVisibility(); err != nil {
+		return false, err
+	}
+	// This initializes a combined map of g.Nodes["pages"] and g.Nodes["inputs"]
+	// for faster access in validations
+	if err := g.initializeCombinedNodes(); err != nil {
+		return false, err
+	}
 
-	return g.InitAddress(graphJson["address"].(map[string]interface{}))
+	success, err := g.InitAddress(graphJson["address"].(map[string]interface{}))
+	return success, err
 }
 
 func (g *Graph) initializeMaps() {
@@ -117,6 +126,54 @@ func (g *Graph) parseConditionGroups(graphJson map[string]interface{}) error {
 	return nil
 }
 
+func (g *Graph) initializeNodeVisibility() error {
+	hiddenNodeIds := make(map[string]struct{})
+	for _, edgeList := range g.Edges {
+		for _, e := range edgeList {
+			if e.Type == edge.EdgeTypeShows {
+				hiddenNodeIds[e.TargetNode] = struct{}{}
+			}
+		}
+	}
+
+	pages := g.Nodes["pages"]
+	for id, n := range pages {
+		if _, shouldHide := hiddenNodeIds[id]; shouldHide {
+			n.IsVisible = false
+		}
+	}
+
+	inputs := g.Nodes["inputs"]
+	for id, n := range inputs {
+		if _, shouldHide := hiddenNodeIds[id]; shouldHide {
+			n.IsVisible = false
+		}
+	}
+
+	return nil
+}
+
+func (g *Graph) initializeCombinedNodes() error {
+	inputs := g.Nodes["inputs"]
+	pages := g.Nodes["pages"]
+
+	// Pre-allocate the sum of both lengths
+	combined := make(map[string]*node.Node, len(inputs)+len(pages))
+
+	// Copy everything from inputs
+	for id, n := range inputs {
+		combined[id] = n
+	}
+
+	// Copy everything from pages
+	for id, n := range pages {
+		combined[id] = n
+	}
+
+	g.AllNodes = combined
+	return nil
+}
+
 func (g *Graph) InitAddress(addressJson map[string]interface{}) (bool, error) {
 	a := address.Address{}
 	jsonBytes, err := json.Marshal(addressJson)
@@ -158,7 +215,7 @@ func (g *Graph) AddEventListener(event string, callback func(map[string]any)) {
 
 	switch event {
 	case "onNodeVisibilityChanged":
-		g.EventHandler.OnNodeVisibilityChange = callback
+		g.EventHandler.OnNodeVisibilityChanged = callback
 	case "onNodeValidatedChanged":
 		g.EventHandler.OnNodeValidatedChanged = callback
 	}
@@ -167,6 +224,15 @@ func (g *Graph) AddEventListener(event string, callback func(map[string]any)) {
 // ==========================================
 // Form Value Methods
 // ==========================================
+
+func (g Graph) GetNodeValue(nodeID string) (any, error) {
+	n, ok := g.Nodes["inputs"][nodeID]
+	if !ok {
+		return false, errors.New("Node not found")
+	}
+
+	return n.Value, nil
+}
 
 // resolveNodeValue processes the raw value of a node into its final form output.
 // It performs three main tasks:
@@ -458,6 +524,9 @@ func (g Graph) ValidateNode(input ValidateNodeInput) (bool, []error) {
 }
 
 func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
+	nodesToShowMap := make(map[string]struct{})
+	nodesToHideMap := make(map[string]struct{})
+
 	// Evaluate Edges
 	foundEdges := g.Edges[input.NodeID]
 	for _, e := range foundEdges {
@@ -465,30 +534,60 @@ func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
 			continue
 		}
 
-		_, edgeErrors := g.ValidateEdgeConditions(*e, input)
-		if len(edgeErrors) > 0 {
-			continue
-		}
-
-		nodeToUpdate, ok := g.Nodes["inputs"][e.TargetNode]
+		n, ok := g.AllNodes[e.TargetNode]
 		if !ok {
 			return errors.New("Node not found")
 		}
-		nodeToUpdate.IsVisible = true
+
+		_, edgeErrors := g.ValidateEdgeConditions(*e, input)
+		if len(edgeErrors) > 0 {
+			if n.IsVisible {
+				n.IsVisible = false
+				nodesToHideMap[n.ID] = struct{}{}
+			}
+			continue
+		}
+
+		n.IsVisible = true
+		nodesToShowMap[n.ID] = struct{}{}
 
 		g.UpdateConditionGroupEdgeValid(e.ID)
 	}
 
 	// Evaluate Condition Groups
 	for _, cg := range g.ConditionGroups {
-		if g.ValidateConditionGroup(*cg) {
-			n, ok := g.Nodes["inputs"][cg.NodeID]
-			if !ok {
-				return errors.New("Node not found")
-			}
+		isValid := g.ValidateConditionGroup(*cg)
+
+		fmt.Println("cg: ", cg)
+
+		n, ok := g.AllNodes[cg.NodeID]
+		if !ok {
+			return errors.New("Node not found")
+		}
+
+		if isValid {
 			n.IsVisible = true
+			nodesToShowMap[n.ID] = struct{}{}
+		} else {
+			n.IsVisible = false
+			nodesToHideMap[n.ID] = struct{}{}
 		}
 	}
+
+	nodesToShow := make([]string, 0, len(nodesToShowMap))
+	nodesToHide := make([]string, 0, len(nodesToHideMap))
+
+	for id := range nodesToShowMap {
+		nodesToShow = append(nodesToShow, id)
+	}
+	for id := range nodesToHideMap {
+		nodesToHide = append(nodesToHide, id)
+	}
+
+	if len(nodesToShow) > 0 || len(nodesToHide) > 0 {
+		g.EventHandler.OnNodeVisibilityChanged(map[string]any{"show_node_ids": nodesToShow, "hide_node_ids": nodesToHide})
+	}
+
 	return nil
 }
 

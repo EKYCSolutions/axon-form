@@ -5,4 +5,5 @@ type Page struct {
 	Title       string   `json:"title"`
 	Description string   `json:"description"`
 	FieldIDs    []string `json:"field_ids"`
+	Order       int      `json:"order"`
 }

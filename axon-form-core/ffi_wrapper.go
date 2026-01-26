@@ -169,6 +169,27 @@ func IsNodeVisible(nodeIDPtr unsafe.Pointer, nodeIDLen C.int) C.int {
 
 /* -------------------- node retrieval (NEW) -------------------- */
 
+//export GetNodeValue
+func GetNodeValue(nodeIDPtr unsafe.Pointer, nodeIDLen C.int) C.int {
+	if g == nil {
+		return setJSONResult([]string{"graph not initialized"})
+	}
+
+	nodeID := goString(nodeIDPtr, nodeIDLen)
+	nodeValue, err := g.GetNodeValue(nodeID)
+
+	if err != nil {
+		setJSONResult([]any{false, err.Error(), nil})
+		return 0
+	}
+
+	data := map[string]any{
+		"value": nodeValue,
+	}
+
+	return setJSONResult([]any{true, nil, data})
+}
+
 //export GetChildNode
 func GetChildNode(nodeIDPtr unsafe.Pointer, nodeIDLen C.int) C.int {
 	if g == nil {
