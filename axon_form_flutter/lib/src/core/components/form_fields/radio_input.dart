@@ -15,7 +15,7 @@ class AxonRadioInput extends AxonBaseInput {
     AxonFormNode field,
     List<AxonFormNode> options,
     String? selectedValue,
-    void Function(String? value) onChange,
+    void Function(String? value) onChanged,
     String? errorText,
   )?
   builder;
@@ -36,7 +36,7 @@ class _AxonRadioInputState extends State<AxonRadioInput> {
         AxonFormRadioInputStyle.fallback(context);
 
     return FormField<String?>(
-      initialValue: widget.node.value,
+      initialValue: controller.getNodeValue(widget.node.id),
       validator: (String? s) {
         var res = controller.validateNode(widget.node.id, s);
         return res.error;

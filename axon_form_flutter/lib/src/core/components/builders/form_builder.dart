@@ -96,14 +96,33 @@ class _FormBuilderState extends State<FormBuilder> {
             physics: const NeverScrollableScrollPhysics(),
             controller: _pageViewController,
             itemCount: widget.pages.length,
-            itemBuilder: (context, index) => Form(
-              key: _pageKeys[index],
-              child: PageBuilder(
-                page: widget.pages[index],
-                pageBuilder: widget.pageBuilder,
-                fieldBuilder: widget.fieldBuilder,
-              ),
-            ),
+            itemBuilder: (context, index) {
+              var currentPage = widget.pages[index];
+              return Form(
+                key: _pageKeys[index],
+                child: Selector<AxonFormProvider, bool>(
+                  selector: (context, provider) {
+                    return provider
+                            .graph
+                            ?.nodes["pages"]?[currentPage.id]
+                            ?.isVisible ??
+                        false;
+                  },
+
+                  builder: (context, isVisible, child) {
+                    if (!isVisible) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return PageBuilder(
+                      page: widget.pages[index],
+                      pageBuilder: widget.pageBuilder,
+                      fieldBuilder: widget.fieldBuilder,
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ),
         Consumer<AxonFormProvider>(

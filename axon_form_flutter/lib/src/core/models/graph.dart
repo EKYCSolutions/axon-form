@@ -5,8 +5,14 @@ import 'page.dart';
 class AxonFormGraph {
   final Map<String, AxonFormPage> pages;
   final Map<String, Map<String, AxonFormNode>> nodes;
+  //
+  Map<String, AxonFormPage> pagesToShow;
 
-  AxonFormGraph({required this.pages, required this.nodes});
+  AxonFormGraph({
+    required this.pages,
+    required this.nodes,
+    required this.pagesToShow,
+  });
 
   factory AxonFormGraph.fromJson(Map<String, dynamic> json) {
     return AxonFormGraph(
@@ -21,6 +27,7 @@ class AxonFormGraph {
           ),
         );
       }),
+      pagesToShow: {},
     );
   }
 }

@@ -68,9 +68,20 @@ class _PageBuilderState extends State<PageBuilder> {
             ),
           ),
           ...nodes.map((n) {
-            return AxonFormFieldBuilder(
-              node: n,
-              fieldBuilder: widget.fieldBuilder,
+            return Selector<AxonFormProvider, bool>(
+              selector: (context, provider) =>
+                  provider.graph?.nodes["inputs"]?[n.id]?.isVisible ?? false,
+
+              builder: (context, isVisible, child) {
+                if (!isVisible) {
+                  return const SizedBox.shrink();
+                }
+
+                return AxonFormFieldBuilder(
+                  node: n,
+                  fieldBuilder: widget.fieldBuilder,
+                );
+              },
             );
           }),
           Divider(),

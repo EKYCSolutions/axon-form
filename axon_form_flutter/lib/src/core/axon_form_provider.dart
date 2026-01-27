@@ -52,10 +52,70 @@ class AxonFormProvider extends ChangeNotifier {
       throw Exception("There was a problem initializing the form");
     }
 
-    _pageIds = _graph!.pages.keys.toList();
-    _pageCount = _graph!.pages.length;
+    var pagesToShow = _graph?.nodes["pages"]?.entries
+        .where((entry) => entry.value.isVisible)
+        .map((entry) => entry.key)
+        .toList();
+
+    if (pagesToShow == null) {
+      throw Exception("No visible pages found");
+    }
+
+    _graph!.pagesToShow = Map.fromEntries(
+      _graph!.pages.entries.where((entry) => pagesToShow.contains(entry.key)),
+    );
+
+    _pageIds = pagesToShow;
+    _pageCount = pagesToShow.length;
 
     addEventListener('onNodeValidatedChanged', (data) {});
+    addEventListener('onNodeVisibilityChanged', (data) {
+      var showNodeIds = (data["show_node_ids"] as List).cast<String>();
+      var hideNodeIds = (data["hide_node_ids"] as List).cast<String>();
+
+      void updateVisibility(List<String> ids, bool isVisible) {
+        for (var id in ids) {
+          // Check inputs
+          if (_graph?.nodes['inputs']?.containsKey(id) ?? false) {
+            var node = _graph!.nodes['inputs']![id]!;
+            _graph!.nodes['inputs']![id] = node.copyWith(isVisible: isVisible);
+          }
+          // Check pages
+          if (_graph?.nodes['pages']?.containsKey(id) ?? false) {
+            var node = _graph!.nodes['pages']![id]!;
+            _graph!.nodes['pages']![id] = node.copyWith(isVisible: isVisible);
+
+            var pagesToShow = _graph?.nodes["pages"]?.entries
+                .where((entry) => entry.value.isVisible)
+                .map((entry) => entry.key)
+                .toList();
+
+            if (pagesToShow == null) {
+              throw Exception("No visible pages found");
+            }
+
+            _graph!.pagesToShow = Map.fromEntries(
+              _graph!.pages.entries.where(
+                (entry) => pagesToShow.contains(entry.key),
+              ),
+            );
+
+            _pageIds = pagesToShow;
+            _pageCount = pagesToShow.length;
+          }
+        }
+      }
+
+      if (showNodeIds.isNotEmpty) {
+        updateVisibility(showNodeIds, true);
+      }
+
+      if (hideNodeIds.isNotEmpty) {
+        updateVisibility(hideNodeIds, false);
+      }
+
+      notifyListeners();
+    });
 
     _isLoading = false;
     notifyListeners();
@@ -66,6 +126,19 @@ class AxonFormProvider extends ChangeNotifier {
     void Function(Map<String, dynamic> data) onChange,
   ) {
     _controller.addEventListener(event, onChange);
+  }
+
+  dynamic getNodeValue(String nodeId) {
+    CoreResponse res = _controller.getNodeValue(nodeId);
+    if (!res.success) {
+      throw Exception(res.error);
+    }
+
+    if (res.data!["value"] != null && res.data!["value"].toString().isEmpty) {
+      return null;
+    }
+
+    return res.data!["value"];
   }
 
   CoreResponse validateNode(String nodeId, dynamic value) {

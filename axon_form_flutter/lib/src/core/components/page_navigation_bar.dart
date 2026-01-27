@@ -32,7 +32,7 @@ class PageNavigationBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Row(
-            children: List.generate(4, (index) {
+            children: List.generate(pageCount, (index) {
               return Expanded(
                 child: Container(
                   height: 6,

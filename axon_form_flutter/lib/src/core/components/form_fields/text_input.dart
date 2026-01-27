@@ -29,8 +29,7 @@ class _AxonTextInputState extends State<AxonTextInput> {
   @override
   void initState() {
     super.initState();
-    final initialValue = widget.node.value?.toString();
-    _textController = TextEditingController(text: initialValue);
+    _textController = TextEditingController();
   }
 
   @override
@@ -42,6 +41,14 @@ class _AxonTextInputState extends State<AxonTextInput> {
   @override
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
+
+    final String newValue = controller.getNodeValue(widget.node.id) ?? '';
+    if (_textController.text != newValue) {
+      _textController.value = _textController.value.copyWith(
+        text: newValue,
+        selection: TextSelection.collapsed(offset: newValue.length),
+      );
+    }
 
     var style =
         widget.style ??

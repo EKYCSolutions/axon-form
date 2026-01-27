@@ -35,8 +35,10 @@ class _AxonDropdownInputState extends State<AxonDropdownInput> {
         Theme.of(context).extension<AxonFormDropdownInputStyle>() ??
         AxonFormDropdownInputStyle.fallback(context);
 
+    var value = controller.getNodeValue(widget.node.id);
+
     return FormField<String?>(
-      initialValue: widget.node.value,
+      initialValue: value,
       validator: (String? s) {
         var res = controller.validateNode(widget.node.id, s);
         return res.error;

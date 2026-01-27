@@ -33,8 +33,10 @@ class _AxonCheckboxInputState extends State<AxonCheckboxInput> {
         Theme.of(context).extension<AxonFormCheckboxInputStyle>() ??
         AxonFormCheckboxInputStyle.fallback(context);
 
+    var value = controller.getNodeValue(widget.node.id);
+
     return FormField<bool?>(
-      initialValue: widget.node.value ?? false,
+      initialValue: value != null ? bool.tryParse(value) : false,
       validator: (bool? value) {
         var res = controller.validateNode(widget.node.id, value?.toString());
         return res.error;

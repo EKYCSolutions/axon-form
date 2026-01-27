@@ -100,6 +100,7 @@ extern void FreeString(char* ptr);
 extern int InitGraph(void* dataPtr, int dataLen);
 extern int AddEventListener(void* eventPtr, int eventLen, void* callbackPtr);
 extern int IsNodeVisible(void* nodeIDPtr, int nodeIDLen);
+extern int GetNodeValue(void* nodeIDPtr, int nodeIDLen);
 extern int GetChildNode(void* nodeIDPtr, int nodeIDLen);
 extern int GetOptionNodes(void* nodeIDPtr, int nodeIDLen);
 extern int ValidateAddressNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);

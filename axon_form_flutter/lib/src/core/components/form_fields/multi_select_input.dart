@@ -35,8 +35,10 @@ class AxonMultiSelectInputState extends State<AxonMultiSelectInput> {
         Theme.of(context).extension<AxonFormMultiSelectInputStyle>() ??
         AxonFormMultiSelectInputStyle.fallback(context);
 
+    var value = controller.getNodeValue(widget.node.id);
+
     return FormField<List<String>?>(
-      initialValue: widget.node.value?.split(",") ?? [],
+      initialValue: value?.split(",") ?? [],
       validator: (List<String>? s) {
         var res = controller.validateNode(widget.node.id, s?.join(","));
         return res.error;

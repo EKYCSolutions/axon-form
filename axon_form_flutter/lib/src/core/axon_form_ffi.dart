@@ -12,6 +12,7 @@ class AxonFormFFI {
   late final InitGraphDart _initGraphDart;
   late final AddEventListenerDart _addEventListenerDart;
   late final IsNodeVisibleDart _isNodeVisibleDart;
+  late final GetNodeValueDart _getNodeValueDart;
   late final ValidateNodeDart _validateNodeDart;
   late final ValidateAddressNodeDart _validateAddressNodeDart;
   late final GetChildNodeDart _getChildNodeDart;
@@ -48,6 +49,10 @@ class AxonFormFFI {
 
       _isNodeVisibleDart = _dylib
           .lookup<NativeFunction<IsNodeVisibleC>>('IsNodeVisible')
+          .asFunction();
+
+      _getNodeValueDart = _dylib
+          .lookup<NativeFunction<GetNodeValueC>>('GetNodeValue')
           .asFunction();
 
       _validateNodeDart = _dylib
@@ -146,6 +151,20 @@ class AxonFormFFI {
       return _getCoreResponse("isNodeVisible");
     } catch (e) {
       debugPrint("[isNodeVisible] Error : $e");
+    } finally {
+      malloc.free(nodeIdPtr);
+    }
+    return CoreResponse(false, null, null);
+  }
+
+  CoreResponse getNodeValue(String nodeId) {
+    final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
+
+    try {
+      _getNodeValueDart(nodeIdPtr.cast<Void>(), nodeIdPtr.length);
+      return _getCoreResponse("getNodeValue");
+    } catch (e) {
+      debugPrint("[getNodeValue] Error : $e");
     } finally {
       malloc.free(nodeIdPtr);
     }

@@ -48,18 +48,21 @@ class _AxonFormState extends State<AxonForm> {
       lazy: false,
       create: (_) => AxonFormProvider(widget.filePath),
       child: Selector<AxonFormProvider, List<dynamic>?>(
-        selector: (context, provider) => provider.graph?.pages.values.toList(),
-        builder: (context, pages, _) {
+        selector: (context, provider) =>
+            provider.graph?.pagesToShow.values.toList(),
+        builder: (context, pagesList, _) {
           if (context.read<AxonFormProvider>().isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (pages == null || pages.isEmpty) {
+          if (pagesList == null || pagesList.isEmpty) {
             return const SizedBox.shrink();
           }
 
+          var pages = pagesList as List<AxonFormPage>;
+
           return FormBuilder(
-            pages: pages as List<AxonFormPage>,
+            pages: pages,
             onSubmit: widget.onSubmit,
             pageBuilder: widget.pageBuilder,
             pageNavigatorBuilder: widget.pageNavigatorBuilder,

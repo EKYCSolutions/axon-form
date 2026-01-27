@@ -35,10 +35,10 @@ class _AxonDateInputState extends State<AxonDateInput> {
         Theme.of(context).extension<AxonFormDateInputStyle>() ??
         AxonFormDateInputStyle.fallback(context);
 
+    var value = controller.getNodeValue(widget.node.id);
+
     return FormField<DateTime?>(
-      initialValue: widget.node.value != null
-          ? DateTime.tryParse(widget.node.value)
-          : null,
+      initialValue: value != null ? DateTime.tryParse(value) : null,
       validator: (DateTime? dt) {
         String? s = dt?.toIso8601String();
         var res = controller.validateNode(widget.node.id, s);

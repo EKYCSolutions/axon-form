@@ -26,6 +26,10 @@ typedef IsNodeVisibleC =
 typedef IsNodeVisibleDart =
     int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
 
+typedef GetNodeValueC =
+    Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);
+typedef GetNodeValueDart = int Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
+
 typedef ValidateNodeC =
     Int32 Function(
       Pointer<Void> nodeIdPtr,

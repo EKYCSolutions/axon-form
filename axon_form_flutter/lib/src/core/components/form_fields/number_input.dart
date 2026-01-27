@@ -44,6 +44,14 @@ class _AxonNumberInputState extends State<AxonNumberInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
 
+    final String newValue = controller.getNodeValue(widget.node.id).toString();
+    if (_textController.text != newValue) {
+      _textController.value = _textController.value.copyWith(
+        text: newValue,
+        selection: TextSelection.collapsed(offset: newValue.length),
+      );
+    }
+
     var style =
         widget.style ??
         Theme.of(context).extension<AxonFormNumberInputStyle>() ??

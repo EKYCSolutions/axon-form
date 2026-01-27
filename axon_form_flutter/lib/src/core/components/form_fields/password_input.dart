@@ -13,6 +13,7 @@ class AxonPasswordInput extends AxonBaseInput {
   final Widget Function(
     BuildContext context,
     AxonFormNode field,
+    TextEditingController controller,
     void Function(String? val) onChanged,
     String? errorText,
   )?
@@ -26,9 +27,31 @@ class _AxonPasswordInputState extends State<AxonPasswordInput> {
   bool _obscureText = true;
   String? errorMessage;
 
+  late TextEditingController _textController;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
+
+    final String newValue = controller.getNodeValue(widget.node.id) ?? '';
+    if (_textController.text != newValue) {
+      _textController.value = _textController.value.copyWith(
+        text: newValue,
+        selection: TextSelection.collapsed(offset: newValue.length),
+      );
+    }
 
     var style =
         widget.style ??
@@ -36,6 +59,7 @@ class _AxonPasswordInputState extends State<AxonPasswordInput> {
         AxonFormPasswordInputStyle.fallback(context);
 
     return FormField<String?>(
+      initialValue: _textController.text,
       validator: (String? s) {
         var res = controller.validateNode(widget.node.id, s);
         return res.error;
@@ -43,7 +67,7 @@ class _AxonPasswordInputState extends State<AxonPasswordInput> {
       autovalidateMode: AutovalidateMode.onUserInteraction,
       builder: (formFieldState) {
         if (widget.builder != null) {
-          return widget.builder!(context, widget.node, (val) {
+          return widget.builder!(context, widget.node, _textController, (val) {
             formFieldState.didChange(val);
           }, formFieldState.errorText);
         }
@@ -51,6 +75,7 @@ class _AxonPasswordInputState extends State<AxonPasswordInput> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
+              controller: _textController,
               obscureText: _obscureText,
               decoration: style.decoration?.copyWith(
                 labelText: widget.node.label,
