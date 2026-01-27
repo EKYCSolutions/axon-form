@@ -45,12 +45,12 @@ func (g *Graph) InitGraph(jsonBytes []byte) (bool, error) {
 	if err := g.parseConditionGroups(graphJson); err != nil {
 		return false, err
 	}
-	if err := g.initializeNodeVisibility(); err != nil {
-		return false, err
-	}
 	// This initializes a combined map of g.Nodes["pages"] and g.Nodes["inputs"]
 	// for faster access in validations
 	if err := g.initializeCombinedNodes(); err != nil {
+		return false, err
+	}
+	if err := g.initializeNodeVisibility(); err != nil {
 		return false, err
 	}
 
@@ -131,6 +131,24 @@ func (g *Graph) initializeNodeVisibility() error {
 	for _, edgeList := range g.Edges {
 		for _, e := range edgeList {
 			if e.Type == edge.EdgeTypeShows {
+				n, ok := g.AllNodes[e.SourceNode]
+
+				if !ok {
+					return errors.New("Node not found")
+				}
+
+				if n.Value != nil {
+					input := ValidateNodeInput{
+						NodeID: e.SourceNode,
+						Value:  n.Value.(string),
+					}
+					_, edgeErrors := g.ValidateEdgeConditions(*e, input)
+
+					if len(edgeErrors) == 0 {
+						continue
+					}
+				}
+
 				hiddenNodeIds[e.TargetNode] = struct{}{}
 			}
 		}
@@ -245,12 +263,13 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	// ---------------------------------------------------------
 	isRequired := n.IsRequired()
 	hasValue := n.Value != nil
+	isVisible := n.IsVisible
 	// If the value is a string, empty string "" should be considered as no value
 	if val, ok := n.Value.(string); ok {
 		hasValue = val != ""
 	}
 
-	if isRequired && !hasValue {
+	if isRequired && isVisible && !hasValue {
 		return nil, fmt.Errorf("field name: %s | value required", n.FieldName)
 	}
 
@@ -557,8 +576,6 @@ func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
 	// Evaluate Condition Groups
 	for _, cg := range g.ConditionGroups {
 		isValid := g.ValidateConditionGroup(*cg)
-
-		fmt.Println("cg: ", cg)
 
 		n, ok := g.AllNodes[cg.NodeID]
 		if !ok {

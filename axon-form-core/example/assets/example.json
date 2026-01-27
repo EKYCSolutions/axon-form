@@ -11,24 +11,27 @@
           "f_pass",
           "f_avatar",
           "f_job_role",
-          "f_terms"
+          "f_terms",
+          "f_born_in",
+          "f_born_dom_province",
+          "f_born_intl_country"
         ]
       },
       {
         "id": "p2_personal",
-        "order": 1,
+        "order": 2,
         "title": "Personal Details",
         "description": "Demographics and preferences.",
         "field_ids": [
           "f_age",
-          "f_dob",
           "f_gender",
-          "f_interests"
+          "f_interests",
+          "f_dob"
         ]
       },
       {
         "id": "p3_birth_place",
-        "order": 2,
+        "order": 1,
         "title": "Place of Birth",
         "description": "Geographic origin details.",
         "field_ids": [
@@ -53,6 +56,34 @@
     ]
   },
   "nodes": [
+    {
+      "id": "p1_account",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
+    {
+      "id": "p2_personal",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
+    {
+      "id": "p3_birth_place",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
+    {
+      "id": "p4_current_addr",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
     {
       "id": "f_job_role",
       "type": "input",
@@ -91,6 +122,33 @@
       ]
     },
     {
+      "id": "f_born_dom_province",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "born_dom_province",
+      "label": "Province",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Province is required"
+        }
+      ]
+    },
+    {
+      "id": "f_born_intl_country",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "born_intl_country",
+      "label": "Country",
+      "value": "opt_domestic",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Country is required"
+        }
+      ]
+    },
+    {
       "id": "f_pass",
       "type": "input",
       "field_type": "password",
@@ -125,7 +183,7 @@
       "field_type": "checkbox",
       "field_name": "terms",
       "label": "I accept terms",
-      "value": true
+      "value": null
     },
     {
       "id": "f_age",
@@ -155,8 +213,7 @@
       "type": "input",
       "field_type": "radio",
       "field_name": "gender",
-      "label": "Gender",
-      "value": "opt_m"
+      "label": "Gender"
     },
     {
       "id": "opt_m",
@@ -169,6 +226,26 @@
       "type": "value",
       "label": "Female",
       "value": "f"
+    },
+    {
+      "id": "f_born_in",
+      "type": "input",
+      "field_type": "radio",
+      "field_name": "born_in",
+      "label": "Born in",
+      "value": "opt_domestic"
+    },
+    {
+      "id": "opt_domestic",
+      "type": "value",
+      "label": "Domestic",
+      "value": "domestic"
+    },
+    {
+      "id": "opt_abroad",
+      "type": "value",
+      "label": "Abroad",
+      "value": "abroad"
     },
     {
       "id": "f_interests",
@@ -333,6 +410,18 @@
       "type": "has_options"
     },
     {
+      "id": "eg_born_dom",
+      "source_node": "f_born_in",
+      "target_node": "opt_domestic",
+      "type": "has_options"
+    },
+    {
+      "id": "eg_born_abr",
+      "source_node": "f_born_in",
+      "target_node": "opt_abroad",
+      "type": "has_options"
+    },
+    {
       "id": "eg3",
       "source_node": "f_interests",
       "target_node": "opt_tech",
@@ -379,6 +468,70 @@
       "source_node": "cur_vill",
       "target_node": "cur_comm",
       "type": "filter_by"
+    },
+    {
+      "id": "cond_show_pob_page",
+      "label": "show-place-of-brith-page",
+      "source_node": "f_gender",
+      "target_node": "p3_birth_place",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cond_1",
+          "check_node": "f_gender",
+          "edge": "cond_show_pob_page",
+          "expr": "equal",
+          "value": "opt_m"
+        }
+      ]
+    },
+    {
+      "id": "cond_show_dob_input",
+      "label": "show_dob_input",
+      "source_node": "f_terms",
+      "target_node": "f_dob",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cond_2",
+          "check_node": "f_terms",
+          "edge": "cond_show_dob_input",
+          "expr": "equal",
+          "value": "true"
+        }
+      ]
+    },
+    {
+      "id": "cond_show_dom_province_input",
+      "label": "show_dom_province_input",
+      "source_node": "f_born_in",
+      "target_node": "f_born_dom_province",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cond_3",
+          "check_node": "f_born_in",
+          "edge": "cond_show_dom_province_input",
+          "expr": "equal",
+          "value": "opt_domestic"
+        }
+      ]
+    },
+    {
+      "id": "cond_show_intl_country_input",
+      "label": "show_intl_country_input",
+      "source_node": "f_born_in",
+      "target_node": "f_born_intl_country",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cond_4",
+          "check_node": "f_born_in",
+          "edge": "cond_show_intl_country_input",
+          "expr": "equal",
+          "value": "opt_abroad"
+        }
+      ]
     }
   ],
   "condition_groups": [],
