@@ -16,7 +16,7 @@ func onNodeValidatedChanged(result map[string]any) {
 
 func main() {
 	// // Read the JSON file
-	jsonData, err := os.ReadFile("/Users/panharithsun/Documents/EYKC/axon-form/axon-form-core/example/assets/example.json")
+	jsonData, err := os.ReadFile("/Users/panharithsun/Documents/EYKC/axon-form/axon-form-core/example/assets/gdi-online-sample.json")
 	if err != nil {
 		fmt.Printf("Error reading JSON file: %v", err)
 	}
@@ -27,14 +27,12 @@ func main() {
 	g.AddEventListener("onNodeValidatedChanged", onNodeValidatedChanged)
 	g.AddEventListener("onNodeVisibilityChanged", onNodeVisibilityChanged)
 
-	fmt.Println("p3_birth_place: ", g.Nodes["pages"]["p3_birth_place"].IsVisible)
-	fmt.Println("f_dob: ", g.Nodes["inputs"]["f_dob"].IsVisible)
-	fmt.Println("f_born_dom_province: ", g.Nodes["inputs"]["f_born_dom_province"].IsVisible)
-	fmt.Println("f_born_intl_country: ", g.Nodes["inputs"]["f_born_intl_country"].IsVisible)
+	_, errors, _ := g.GetPageFormValue("page_service_type")
+	fmt.Println("errors: ", errors)
 
 	// input := graph.ValidateNodeInput{
-	// 	NodeID: "f_gender",
-	// 	Value:  "opt_m",
+	// 	NodeID: "wu16d202mgqo6bm",
+	// 	Value:  "6zjjy5smwoi8es4",
 	// }
 
 	// succ, errs := g.ValidateNode(input)
@@ -44,47 +42,27 @@ func main() {
 	// 	fmt.Println("validation errors:", errs)
 	// }
 
-	// input = graph.ValidateNodeInput{
-	// 	NodeID: "f_terms",
-	// 	Value:  "true",
-	// }
+	input := graph.ValidateNodeInput{
+		NodeID: "hkllsjo4yopmjeh",
+		Value:  "phnom_penh",
+	}
 
-	// succ, errs = g.ValidateNode(input)
-	// if len(errs) == 0 {
-	// 	fmt.Println("validation success:", succ)
-	// } else {
-	// 	fmt.Println("validation errors:", errs)
-	// }
+	succ, errs, children := g.ValidateAddressNode(input)
+	if len(errs) == 0 {
+		fmt.Println("validation success:", succ, "children: ", children)
+	} else {
+		fmt.Println("validation errors:", errs)
+	}
 
-	// input = graph.ValidateNodeInput{
-	// 	NodeID: "f_terms",
-	// 	Value:  "false",
-	// }
+	input = graph.ValidateNodeInput{
+		NodeID: "wu16d202mgqo6bm",
+		Value:  "6zjjy5smwoi8es4",
+	}
 
-	// succ, errs = g.ValidateNode(input)
-
-	// fmt.Println("p3_birth_place: ", g.Nodes["pages"]["p3_birth_place"].IsVisible)
-	// fmt.Println("f_dob: ", g.Nodes["inputs"]["f_dob"].IsVisible)
-	// if len(errs) == 0 {
-	// 	fmt.Println("validation success:", succ)
-	// } else {
-	// 	fmt.Println("validation errors:", errs)
-	// }
-
-	// input := graph.ValidateNodeInput{
-	// 	NodeID: "pob_prov",
-	// 	Value:  "kandal",
-	// }
-
-	// succ, errs, childrennodes := g.ValidateAddressNode(input)
-	// if len(errs) == 0 {
-	// 	fmt.Println("validation success:", succ, childrennodes)
-	// } else {
-	// 	fmt.Println("validation errors:", errs)
-	// }
-
-	// _, err, result := g.GetFormValue()
-	// fmt.Println("get form value validation errors:", err)
-	// fmt.Println("get form value result:", result)
-
+	succ, errs = g.ValidateNode(input)
+	if len(errs) == 0 {
+		fmt.Println("validation success:", succ)
+	} else {
+		fmt.Println("validation errors:", errs)
+	}
 }

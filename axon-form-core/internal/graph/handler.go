@@ -269,6 +269,10 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 		hasValue = val != ""
 	}
 
+	if !isVisible {
+		return nil, nil
+	}
+
 	if isRequired && isVisible && !hasValue {
 		return nil, fmt.Errorf("field name: %s | value required", n.FieldName)
 	}
@@ -327,6 +331,10 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	// We must look up the corresponding 'value' node to get the actual underlying string value.
 	isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
 	if isFieldTypeWithOption {
+		if n.Value == nil {
+			return nil, fmt.Errorf("field name: %s | value required", n.FieldName)
+		}
+
 		nodeValueIdString := n.Value.(string)
 		nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
 
@@ -800,7 +808,8 @@ func (g Graph) GetOptionNodes(nodeId string) (*[]node.Node, error) {
 func (g Graph) GetParentNode(nodeId string) (*node.Node, error) {
 	var n *node.Node
 
-	tEdge := edge.GetEdgeByNode(nodeId, "source", g.Edges)
+	filter := edge.EdgeTypeFilterBy
+	tEdge := edge.GetEdgeByNode(nodeId, "source", g.Edges, &filter)
 
 	if tEdge == nil {
 		return n, errors.New("Parent node not found")
@@ -818,7 +827,7 @@ func (g Graph) GetParentNode(nodeId string) (*node.Node, error) {
 func (g Graph) GetChildNode(nodeId string) (*node.Node, error) {
 	var n *node.Node
 
-	tEdge := edge.GetEdgeByNode(nodeId, "target", g.Edges)
+	tEdge := edge.GetEdgeByNode(nodeId, "target", g.Edges, nil)
 
 	if tEdge == nil {
 		return n, errors.New("Child node not found")
@@ -838,7 +847,8 @@ func (g Graph) GetChildNode(nodeId string) (*node.Node, error) {
 // ==========================================
 
 func (g Graph) updateAddressNodeOptions(parentNode node.Node) (bool, error) {
-	e := edge.GetEdgeByNode(parentNode.ID, "target", g.Edges)
+	filter := edge.EdgeTypeFilterBy
+	e := edge.GetEdgeByNode(parentNode.ID, "target", g.Edges, &filter)
 
 	if e == nil {
 		return false, errors.New("Edge not found")
@@ -937,7 +947,8 @@ func (g Graph) createAddressOption(sourceNode node.Node, addr address.AddressInf
 }
 
 func (g Graph) getAddressParentNode(childNode node.Node) (*node.Node, error) {
-	edge := edge.GetEdgeByNode(childNode.ID, "source", g.Edges)
+	filter := edge.EdgeTypeFilterBy
+	edge := edge.GetEdgeByNode(childNode.ID, "source", g.Edges, &filter)
 
 	if edge == nil {
 		return nil, errors.New("Edge not found")
@@ -974,7 +985,8 @@ func (g Graph) getAddressChildrenNodeIds(parentNode node.Node) ([]string, error)
 	// The source node of this edge is the child, and the target node is the parent,
 	// indicating that the child's options are filtered based on the parent's selection.
 	//
-	tEdge := edge.GetEdgeByNode(parentNode.ID, "target", g.Edges)
+	filter := edge.EdgeTypeFilterBy
+	tEdge := edge.GetEdgeByNode(parentNode.ID, "target", g.Edges, &filter)
 
 	if tEdge == nil {
 		return []string{}, nil

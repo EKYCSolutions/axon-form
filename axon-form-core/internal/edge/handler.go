@@ -88,12 +88,16 @@ func NewEdgeConditionGroupFromJSON(conditionGroupJson map[string]any) (*EdgeCond
 	return &conditionGroup, nil
 }
 
-func GetEdgeByNode(nodeId string, nodeType string, edges map[string][]*Edge) *Edge {
+func GetEdgeByNode(nodeId string, nodeType string, edges map[string][]*Edge, edgeType *EdgeType) *Edge {
 	var foundEdge *Edge
 
 	// Find the edge
 	for _, edgeList := range edges {
 		for _, e := range edgeList {
+			if edgeType != nil && e.Type != *edgeType {
+				continue
+			}
+
 			if nodeType == "target" && e.TargetNode == nodeId {
 				foundEdge = e
 				break
