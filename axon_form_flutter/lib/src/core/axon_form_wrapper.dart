@@ -1,22 +1,14 @@
+import 'dart:convert';
+
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/components/builders/form_builder.dart';
 import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:axon_form_flutter/src/core/models/page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class AxonForm extends StatefulWidget {
-  const AxonForm({
-    super.key,
-    required this.filePath,
-    required this.onSubmit,
-    this.pageBuilder,
-    this.pageNavigatorBuilder,
-    this.fieldBuilder,
-  });
-
-  // The asset path to the form configuration file.
-  final String filePath;
   final void Function(Map<String, dynamic> result) onSubmit;
 
   //
@@ -37,6 +29,46 @@ class AxonForm extends StatefulWidget {
   final Widget? Function(BuildContext context, AxonFormNode field)?
   fieldBuilder;
 
+  final Future<Uint8List> Function() _loader;
+
+  AxonForm.file(
+    String filePath, {
+    super.key,
+    required this.onSubmit,
+    this.pageBuilder,
+    this.pageNavigatorBuilder,
+    this.fieldBuilder,
+  }) : _loader = (() async {
+         try {
+           final data = await rootBundle.load(filePath);
+           return data.buffer.asUint8List();
+         } catch (e) {
+           rethrow;
+         }
+       });
+
+  AxonForm.json(
+    Map<String, dynamic> json, {
+    super.key,
+    required this.onSubmit,
+    this.pageBuilder,
+    this.pageNavigatorBuilder,
+    this.fieldBuilder,
+  }) : _loader = (() async {
+         try {
+           final String jsonString = jsonEncode(json);
+           var fileBytes = utf8.encoder.convert(jsonString);
+           if (fileBytes.length < 5) {
+             throw Exception(
+               'JSON data is a not valid AxonForm configuration.',
+             );
+           }
+           return fileBytes;
+         } catch (e) {
+           rethrow;
+         }
+       });
+
   @override
   State<AxonForm> createState() => _AxonFormState();
 }
@@ -46,19 +78,29 @@ class _AxonFormState extends State<AxonForm> {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       lazy: false,
-      create: (_) => AxonFormProvider(widget.filePath),
+      create: (_) => AxonFormProvider(widget._loader),
       child: Selector<AxonFormProvider, String>(
         selector: (context, provider) {
           if (provider.graph?.pagesToShow == null) return "";
-          // Sort keys to ensure stable comparison string
-          var keys = provider.graph!.pagesToShow.map((e) => e.id).toList();
-          keys.sort();
-          return keys.join(',');
+          var keys = provider.graph!.pagesToShow
+              .map((e) => e.id)
+              .toList()
+              .join(',');
+          return keys;
         },
         builder: (context, _, __) {
           var provider = context.read<AxonFormProvider>();
           if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.errorMessage != null) {
+            return Center(
+              child: Text(
+                provider.errorMessage!,
+                style: TextStyle(color: Colors.redAccent),
+              ),
+            );
           }
 
           var pagesList = provider.graph?.pagesToShow;

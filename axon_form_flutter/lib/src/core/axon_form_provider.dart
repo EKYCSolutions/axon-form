@@ -5,10 +5,15 @@ import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:axon_form_flutter/src/core/models/graph.dart';
 import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 class AxonFormProvider extends ChangeNotifier {
   static final AxonFormFFI _controller = AxonFormFFI();
+
+  bool _isLoading = true;
+  bool get isLoading => _isLoading;
+
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
 
   AxonFormGraph? _graph;
   AxonFormGraph? get graph => _graph;
@@ -21,9 +26,6 @@ class AxonFormProvider extends ChangeNotifier {
   int _pageCount = 0;
   int get pageCount => _pageCount;
 
-  bool _isLoading = true;
-  bool get isLoading => _isLoading;
-
   /*
     Address Inputs variables
   */
@@ -32,97 +34,106 @@ class AxonFormProvider extends ChangeNotifier {
   //
   int pulse = 0;
 
-  AxonFormProvider(String filePath) {
-    initialize(filePath);
+  AxonFormProvider(Future<Uint8List> Function() loader) {
+    initialize(loader);
   }
 
-  Future<void> initialize(String filePath) async {
-    final ByteData file = await rootBundle.load(filePath);
-    final Uint8List fileBytes = file.buffer.asUint8List();
-    //
-    CoreResponse result = _controller.initialize(fileBytes);
-    //
-    if (!result.success || result.data == null) {
-      throw Exception(result.error);
-    }
-    //
-    _graph = AxonFormGraph.fromJson(result.data!);
+  Future<void> initialize(Future<Uint8List> Function() loader) async {
+    try {
+      final jsonBytes = await loader();
+      //
+      CoreResponse result = _controller.initialize(jsonBytes);
+      //
+      if (!result.success || result.data == null) {
+        throw Exception(result.error);
+      }
+      //
+      _graph = AxonFormGraph.fromJson(result.data!);
 
-    if (_graph?.pages == null) {
-      throw Exception("There was a problem initializing the form");
-    }
+      if (_graph?.pages == null) {
+        throw Exception(
+          "[AxonFormProvider: initialize] There was a problem initializing the form",
+        );
+      }
 
-    var pagesToShow = _graph?.nodes["pages"]?.entries
-        .where((entry) => entry.value.isVisible)
-        .map((entry) => entry.key)
-        .toList();
+      var pagesToShow = _graph?.nodes["pages"]?.entries
+          .where((entry) => entry.value.isVisible)
+          .map((entry) => entry.key)
+          .toList();
 
-    if (pagesToShow == null) {
-      throw Exception("No visible pages found");
-    }
+      if (pagesToShow == null) {
+        throw Exception(
+          "[AxonFormProvider: initialize] No visible pages found",
+        );
+      }
 
-    _graph!.pagesToShow = Map.fromEntries(
-      _graph!.pages.entries.where((entry) => pagesToShow.contains(entry.key)),
-    ).values.toList();
+      _graph!.pagesToShow = Map.fromEntries(
+        _graph!.pages.entries.where((entry) => pagesToShow.contains(entry.key)),
+      ).values.toList();
 
-    _graph!.pagesToShow.sort((a, b) => a.order.compareTo(b.order));
+      _graph!.pagesToShow.sort((a, b) => a.order.compareTo(b.order));
 
-    _pageIds = _graph!.pagesToShow.map((e) => e.id).toList();
-    _pageCount = _graph!.pagesToShow.length;
+      _pageIds = _graph!.pagesToShow.map((e) => e.id).toList();
+      _pageCount = _graph!.pagesToShow.length;
 
-    addEventListener('onNodeValidatedChanged', (data) {});
-    addEventListener('onNodeVisibilityChanged', (data) {
-      var showNodeIds = (data["show_node_ids"] as List).cast<String>();
-      var hideNodeIds = (data["hide_node_ids"] as List).cast<String>();
+      addEventListener('onNodeValidatedChanged', (data) {});
+      addEventListener('onNodeVisibilityChanged', (data) {
+        var showNodeIds = (data["show_node_ids"] as List).cast<String>();
+        var hideNodeIds = (data["hide_node_ids"] as List).cast<String>();
 
-      void updateVisibility(List<String> ids, bool isVisible) {
-        for (var id in ids) {
-          // Check inputs
-          if (_graph?.nodes['inputs']?.containsKey(id) ?? false) {
-            var node = _graph!.nodes['inputs']![id]!;
-            _graph!.nodes['inputs']![id] = node.copyWith(isVisible: isVisible);
-          }
-          // Check pages
-          if (_graph?.nodes['pages']?.containsKey(id) ?? false) {
-            var node = _graph!.nodes['pages']![id]!;
-            _graph!.nodes['pages']![id] = node.copyWith(isVisible: isVisible);
-
-            var pagesToShow = _graph?.nodes["pages"]?.entries
-                .where((entry) => entry.value.isVisible)
-                .map((entry) => entry.key)
-                .toList();
-
-            if (pagesToShow == null) {
-              throw Exception("No visible pages found");
+        void updateVisibility(List<String> ids, bool isVisible) {
+          for (var id in ids) {
+            // Check inputs
+            if (_graph?.nodes['inputs']?.containsKey(id) ?? false) {
+              var node = _graph!.nodes['inputs']![id]!;
+              _graph!.nodes['inputs']![id] = node.copyWith(
+                isVisible: isVisible,
+              );
             }
+            // Check pages
+            if (_graph?.nodes['pages']?.containsKey(id) ?? false) {
+              var node = _graph!.nodes['pages']![id]!;
+              _graph!.nodes['pages']![id] = node.copyWith(isVisible: isVisible);
 
-            _graph!.pagesToShow = Map.fromEntries(
-              _graph!.pages.entries.where(
-                (entry) => pagesToShow.contains(entry.key),
-              ),
-            ).values.toList();
+              var pagesToShow = _graph?.nodes["pages"]?.entries
+                  .where((entry) => entry.value.isVisible)
+                  .map((entry) => entry.key)
+                  .toList();
 
-            _graph!.pagesToShow.sort((a, b) => a.order.compareTo(b.order));
+              if (pagesToShow == null) {
+                throw Exception("No visible pages found");
+              }
 
-            _pageIds = _graph!.pagesToShow.map((e) => e.id).toList();
-            _pageCount = _graph!.pagesToShow.length;
+              _graph!.pagesToShow = Map.fromEntries(
+                _graph!.pages.entries.where(
+                  (entry) => pagesToShow.contains(entry.key),
+                ),
+              ).values.toList();
+
+              _graph!.pagesToShow.sort((a, b) => a.order.compareTo(b.order));
+
+              _pageIds = _graph!.pagesToShow.map((e) => e.id).toList();
+              _pageCount = _graph!.pagesToShow.length;
+            }
           }
         }
-      }
 
-      if (showNodeIds.isNotEmpty) {
-        updateVisibility(showNodeIds, true);
-      }
+        if (showNodeIds.isNotEmpty) {
+          updateVisibility(showNodeIds, true);
+        }
 
-      if (hideNodeIds.isNotEmpty) {
-        updateVisibility(hideNodeIds, false);
-      }
+        if (hideNodeIds.isNotEmpty) {
+          updateVisibility(hideNodeIds, false);
+        }
 
+        notifyListeners();
+      });
+    } catch (e) {
+      _errorMessage = "[AxonFormProvider: initialize] ${e.toString()}";
+    } finally {
+      _isLoading = false;
       notifyListeners();
-    });
-
-    _isLoading = false;
-    notifyListeners();
+    }
   }
 
   void addEventListener(
