@@ -40,6 +40,9 @@ PODS:
     - Flutter
   - integration_test (0.0.1):
     - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - SDWebImage (5.21.2):
     - SDWebImage/Core (= 5.21.2)
   - SDWebImage/Core (5.21.2)
@@ -51,6 +54,7 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -70,6 +74,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker_ios/ios"
   integration_test:
     :path: ".symlinks/plugins/integration_test/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
 
 SPEC CHECKSUMS:
   axon_form_flutter: ff90d6df0dd677d1f1ca80b314843217d20dd036
@@ -79,6 +85,7 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   image_picker_ios: 4f2f91b01abdb52842a8e277617df877e40f905b
   integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  path_provider_foundation: 0b743cbb62d8e47eab856f09262bb8c1ddcfe6ba
   SDWebImage: 9f177d83116802728e122410fb25ad88f5c7608a
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
 

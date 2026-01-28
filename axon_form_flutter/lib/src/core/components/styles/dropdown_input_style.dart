@@ -15,7 +15,7 @@ class AxonFormDropdownInputStyle
     this.iconEnabledColor,
     this.iconSize = 24.0,
     this.isDense = false,
-    this.isExpanded = false,
+    this.isExpanded = true,
     this.itemHeight = kMinInteractiveDimension,
     this.menuWidth,
     this.focusColor,

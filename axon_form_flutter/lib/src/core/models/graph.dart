@@ -6,7 +6,7 @@ class AxonFormGraph {
   final Map<String, AxonFormPage> pages;
   final Map<String, Map<String, AxonFormNode>> nodes;
   //
-  Map<String, AxonFormPage> pagesToShow;
+  List<AxonFormPage> pagesToShow;
 
   AxonFormGraph({
     required this.pages,
@@ -27,7 +27,7 @@ class AxonFormGraph {
           ),
         );
       }),
-      pagesToShow: {},
+      pagesToShow: [],
     );
   }
 }

@@ -47,22 +47,27 @@ class _AxonFormState extends State<AxonForm> {
     return ChangeNotifierProvider(
       lazy: false,
       create: (_) => AxonFormProvider(widget.filePath),
-      child: Selector<AxonFormProvider, List<dynamic>?>(
-        selector: (context, provider) =>
-            provider.graph?.pagesToShow.values.toList(),
-        builder: (context, pagesList, _) {
-          if (context.read<AxonFormProvider>().isLoading) {
+      child: Selector<AxonFormProvider, String>(
+        selector: (context, provider) {
+          if (provider.graph?.pagesToShow == null) return "";
+          // Sort keys to ensure stable comparison string
+          var keys = provider.graph!.pagesToShow.map((e) => e.id).toList();
+          keys.sort();
+          return keys.join(',');
+        },
+        builder: (context, _, __) {
+          var provider = context.read<AxonFormProvider>();
+          if (provider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          var pagesList = provider.graph?.pagesToShow;
           if (pagesList == null || pagesList.isEmpty) {
             return const SizedBox.shrink();
           }
 
-          var pages = pagesList as List<AxonFormPage>;
-
           return FormBuilder(
-            pages: pages,
+            pages: pagesList,
             onSubmit: widget.onSubmit,
             pageBuilder: widget.pageBuilder,
             pageNavigatorBuilder: widget.pageNavigatorBuilder,

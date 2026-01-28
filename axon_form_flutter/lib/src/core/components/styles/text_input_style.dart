@@ -25,6 +25,6 @@ class AxonFormTextInputStyle extends ThemeExtension<AxonFormTextInputStyle> {
 
   // Helper to create a fallback based on the current context
   static AxonFormTextInputStyle fallback(BuildContext context) {
-    return AxonFormTextInputStyle();
+    return AxonFormTextInputStyle(decoration: InputDecoration());
   }
 }

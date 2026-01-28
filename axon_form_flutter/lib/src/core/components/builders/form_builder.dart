@@ -40,23 +40,23 @@ class FormBuilder extends StatefulWidget {
 }
 
 class _FormBuilderState extends State<FormBuilder> {
-  late List<GlobalKey<FormState>> _pageKeys;
+  final Map<String, GlobalKey<FormState>> _pageKeys = {};
   late PageController _pageViewController;
 
   @override
   void initState() {
     super.initState();
     _pageViewController = PageController();
-    _pageKeys = List.generate(
-      widget.pages.length,
-      (_) => GlobalKey<FormState>(),
-    );
+  }
+
+  GlobalKey<FormState> _getPageKey(String pageId) {
+    return _pageKeys.putIfAbsent(pageId, () => GlobalKey<FormState>());
   }
 
   @override
   void dispose() {
-    super.dispose();
     _pageViewController.dispose();
+    super.dispose();
   }
 
   void _onNavigate(int targetIndex, AxonFormProvider controller) {
@@ -66,7 +66,10 @@ class _FormBuilderState extends State<FormBuilder> {
       return;
     }
 
-    final currentFormKey = _pageKeys[controller.currentPageIndex];
+    // Get current page ID to find the correct form key
+    final currentPageId = widget.pages[controller.currentPageIndex].id;
+    final currentFormKey = _getPageKey(currentPageId);
+
     if (!(currentFormKey.currentState?.validate() ?? false)) return;
 
     if (targetIndex == controller.pageCount) {
@@ -99,7 +102,7 @@ class _FormBuilderState extends State<FormBuilder> {
             itemBuilder: (context, index) {
               var currentPage = widget.pages[index];
               return Form(
-                key: _pageKeys[index],
+                key: _getPageKey(currentPage.id),
                 child: Selector<AxonFormProvider, bool>(
                   selector: (context, provider) {
                     return provider

@@ -63,10 +63,12 @@ class AxonFormProvider extends ChangeNotifier {
 
     _graph!.pagesToShow = Map.fromEntries(
       _graph!.pages.entries.where((entry) => pagesToShow.contains(entry.key)),
-    );
+    ).values.toList();
 
-    _pageIds = pagesToShow;
-    _pageCount = pagesToShow.length;
+    _graph!.pagesToShow.sort((a, b) => a.order.compareTo(b.order));
+
+    _pageIds = _graph!.pagesToShow.map((e) => e.id).toList();
+    _pageCount = _graph!.pagesToShow.length;
 
     addEventListener('onNodeValidatedChanged', (data) {});
     addEventListener('onNodeVisibilityChanged', (data) {
@@ -98,10 +100,12 @@ class AxonFormProvider extends ChangeNotifier {
               _graph!.pages.entries.where(
                 (entry) => pagesToShow.contains(entry.key),
               ),
-            );
+            ).values.toList();
 
-            _pageIds = pagesToShow;
-            _pageCount = pagesToShow.length;
+            _graph!.pagesToShow.sort((a, b) => a.order.compareTo(b.order));
+
+            _pageIds = _graph!.pagesToShow.map((e) => e.id).toList();
+            _pageCount = _graph!.pagesToShow.length;
           }
         }
       }
@@ -155,6 +159,7 @@ class AxonFormProvider extends ChangeNotifier {
   // The "Active" update for User Interaction
   void validateAddressNode(String nodeId, String value) {
     final res = _controller.validateAddressNode(nodeId, value);
+
     if (res.success) {
       _addressNodeIdsToUpdate = res.data?["nodeIds"].cast<String>();
       pulse++;
@@ -199,6 +204,8 @@ class AxonFormProvider extends ChangeNotifier {
     List<AxonFormNode> nodes = (res.data!["options"] as List<dynamic>)
         .map((node) => AxonFormNode.fromJson(node))
         .toList();
+
+    nodes.sort((a, b) => a.order.compareTo(b.order));
 
     return nodes;
   }

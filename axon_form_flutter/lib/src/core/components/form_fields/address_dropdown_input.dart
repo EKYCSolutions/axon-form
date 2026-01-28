@@ -56,7 +56,10 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
         Theme.of(context).extension<AxonFormAddressDropdownInputStyle>() ??
         AxonFormAddressDropdownInputStyle.fallback(context);
 
+    var value = controller.getNodeValue(widget.node.id);
+
     return FormField<String?>(
+      initialValue: value,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (val) {
         if (val != null && val.isNotEmpty) return null;
