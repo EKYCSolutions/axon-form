@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:axon_form_flutter/axon_form_flutter.dart';
@@ -63,7 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
         // filePath: 'assets/example.json',
         filePath: 'assets/gdi-online-sample.json',
         onSubmit: (result) {
-          print("FORM RESULT OUTSIDE: $result");
+          String fullResult = JsonEncoder.withIndent('  ').convert(result);
+          print("FORM RESULT OUTSIDE: $fullResult");
         },
         pageBuilder: (context, page, nodes) {
           // if (page.id == "p1_account") {

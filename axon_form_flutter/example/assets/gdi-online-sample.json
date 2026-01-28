@@ -39,7 +39,6 @@
           "pt0xxyq43l95gts",
           "b6m1w00464sn4ed",
           "1iw2sv8445ptft9",
-          "doffg63adzwhrz3",
           "doffg63wgzwhrz3",
           "2f9xfgwk4ai28v1",
           "46xwz9uu5qdo4hf",
@@ -291,12 +290,7 @@
       "field_type": "file",
       "label": "input-important-file-national-id",
       "field_name": "input_important_file_national_id",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "Please select a file"
-        }
-      ]
+      "validation_rules": []
     },
     {
       "id": "3v0zlvoxm5db7xh",
@@ -427,17 +421,18 @@
       "validation_rules": []
     },
     {
-      "id": "doffg63adzwhrz3",
-      "type": "input",
-      "field_type": "dropdown",
-      "label": "សញ្ជាតិ",
-      "field_name": "input_person_ethnicity",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "ទិន្នន័យនេះមិនអាចទទេបានទេ"
-        }
-      ]
+      "id": "yt44n228rqxw5mk",
+      "type": "value",
+      "label": "ខ្មែរ",
+      "value": "input-ethnicity-khmer",
+      "validation_rules": []
+    },
+    {
+      "id": "nr1izx6ce5o06v3",
+      "type": "value",
+      "label": "អាមេរិក",
+      "value": "input-ethnicity-american",
+      "validation_rules": []
     },
     {
       "id": "doffg63wgzwhrz3",
@@ -457,13 +452,6 @@
       "type": "value",
       "label": "ខ្មែរ",
       "value": "input-nationality-khmer",
-      "validation_rules": []
-    },
-    {
-      "id": "nr1izx6ce5o06v3",
-      "type": "value",
-      "label": "អាមេរិក",
-      "value": "input-nationality-american",
       "validation_rules": []
     },
     {
@@ -981,20 +969,38 @@
     {
       "id": "tktyxu4w7tgyvm2",
       "type": "value",
-      "label": "select-service-duration-15-days",
-      "validation_rules": []
+      "label": "១៥ ថ្ងៃ",
+      "value": "select-service-duration-15-days",
+      "validation_rules": [],
+      "config": {
+        "description": {
+          "detail": "សេវាធម្មតា"
+        }
+      }
     },
     {
       "id": "o8dicooy12miuie",
       "type": "value",
-      "label": "select-service-duration-7-days",
-      "validation_rules": []
+      "label": "៧ ថ្ងៃ",
+      "value": "select-service-duration-7-days",
+      "validation_rules": [],
+      "config": {
+        "description": {
+          "detail": "សេវាឆាប់រហ័សកម្រិតមធ្យម"
+        }
+      }
     },
     {
       "id": "negez3io2ktpk56",
       "type": "value",
-      "label": "select-service-duration-1-day",
-      "validation_rules": []
+      "label": "១ ថ្ងៃ",
+      "value": "select-service-duration-1-day",
+      "validation_rules": [],
+      "config": {
+        "description": {
+          "detail": "សេវាឆាប់រហ័ស"
+        }
+      }
     },
     {
       "id": "5e567lpletq6ayb",
@@ -1169,6 +1175,20 @@
       "label": "select-occupation-employee",
       "source_node": "luscph0ocw7hpdg",
       "target_node": "0f8jurxguspvs7j",
+      "type": "has_options"
+    },
+    {
+      "id": "kz19s440mwfz8qx",
+      "label": "select-ethinicity-khmer",
+      "source_node": "bv91d663hjlp7tv",
+      "target_node": "yt44n228rqxw5mk",
+      "type": "has_options"
+    },
+    {
+      "id": "np67j512wbly3tc",
+      "label": "select-ethinicity-american",
+      "source_node": "bv91d663hjlp7tv",
+      "target_node": "nr1izx6ce5o06v3",
       "type": "has_options"
     },
     {
