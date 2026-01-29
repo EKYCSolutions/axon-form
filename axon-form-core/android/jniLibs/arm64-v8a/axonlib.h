@@ -12,8 +12,6 @@
 
 #ifndef GO_CGO_GOSTRING_TYPEDEF
 typedef struct { const char *p; ptrdiff_t n; } _GoString_;
-extern size_t _GoStringLen(_GoString_ s);
-extern const char *_GoStringPtr(_GoString_ s);
 #endif
 
 #endif
@@ -21,6 +19,25 @@ extern const char *_GoStringPtr(_GoString_ s);
 /* Start of preamble from import "C" comments.  */
 
 
+#line 5 "ffi_wrapper.go"
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef void (*dart_json_callback)(char* json_data);
+
+static void invoke_callback(void* callback_ptr, char* json_data) {
+    if (callback_ptr == NULL) return;
+    dart_json_callback cb = (dart_json_callback)callback_ptr;
+    cb(json_data);
+}
+
+static void debug_print(char* str) {
+    printf("[Native] %s\n", str);
+}
+
+#line 1 "cgo-generated-wrapper"
 
 
 /* End of preamble from import "C" comments.  */
@@ -46,15 +63,9 @@ typedef size_t GoUintptr;
 typedef float GoFloat32;
 typedef double GoFloat64;
 #ifdef _MSC_VER
-#if !defined(__cplusplus) || _MSVC_LANG <= 201402L
 #include <complex.h>
 typedef _Fcomplex GoComplex64;
 typedef _Dcomplex GoComplex128;
-#else
-#include <complex>
-typedef std::complex<float> GoComplex64;
-typedef std::complex<double> GoComplex128;
-#endif
 #else
 typedef float _Complex GoComplex64;
 typedef double _Complex GoComplex128;
@@ -82,14 +93,21 @@ typedef struct { void *data; GoInt len; GoInt cap; } GoSlice;
 extern "C" {
 #endif
 
-extern char* GetResult(void);
+extern char* ResultPtr();
+extern int ResultLen();
+extern char* GetResult();
+extern void FreeString(char* ptr);
 extern int InitGraph(void* dataPtr, int dataLen);
+extern int AddEventListener(void* eventPtr, int eventLen, void* callbackPtr);
 extern int IsNodeVisible(void* nodeIDPtr, int nodeIDLen);
+extern int GetNodeValue(void* nodeIDPtr, int nodeIDLen);
+extern int GetChildNode(void* nodeIDPtr, int nodeIDLen);
+extern int GetOptionNodes(void* nodeIDPtr, int nodeIDLen);
+extern int ValidateAddressNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);
 extern int ValidateNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);
-extern int GetFormValue(void);
-extern char* ResultPtr(void);
-extern int ResultLen(void);
-extern void enforce_binding(void);
+extern int GetFormValue();
+extern int GetPageFormValue(void* pageIDPtr, int pageIDLen);
+extern void enforce_binding();
 
 #ifdef __cplusplus
 }

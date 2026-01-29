@@ -134,7 +134,7 @@ func (g *Graph) initializeNodeVisibility() error {
 				n, ok := g.AllNodes[e.SourceNode]
 
 				if !ok {
-					return errors.New("Node not found")
+					return fmt.Errorf("[initializeNodeVisibility] Node not found | ID: %s", e.SourceNode)
 				}
 
 				if n.Value != nil {
@@ -246,7 +246,7 @@ func (g *Graph) AddEventListener(event string, callback func(map[string]any)) {
 func (g Graph) GetNodeValue(nodeID string) (any, error) {
 	n, ok := g.Nodes["inputs"][nodeID]
 	if !ok {
-		return false, errors.New("Node not found")
+		return false, fmt.Errorf("[GetNodeValue] Node not found | ID: %s", nodeID)
 	}
 
 	return n.Value, nil
@@ -274,7 +274,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	}
 
 	if isRequired && isVisible && !hasValue {
-		return nil, fmt.Errorf("field name: %s | value required", n.FieldName)
+		return nil, fmt.Errorf("[resolveNodeValue] field name: %s | value required", n.FieldName)
 	}
 
 	// If not required and empty, simply return nil (no value)
@@ -300,7 +300,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 		// Verify the selected ID exists in our known value nodes
 		optionValueNode, ok := g.Nodes["values"][n.Value.(string)]
 		if !ok {
-			return nil, fmt.Errorf("Option Id %s not found for field name %s", n.Value, n.FieldName)
+			return nil, fmt.Errorf("[resolveNodeValue] Option Id %s not found for field name %s", n.Value, n.FieldName)
 		}
 
 		// Case B: Standard ID Lookup
@@ -332,7 +332,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
 	if isFieldTypeWithOption {
 		if n.Value == nil {
-			return nil, fmt.Errorf("field name: %s | value required", n.FieldName)
+			return nil, fmt.Errorf("[resolveNodeValue] field name: %s | value required", n.FieldName)
 		}
 
 		nodeValueIdString := n.Value.(string)
@@ -350,7 +350,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 			// Look up the value node by ID
 			opt_node, exists := g.Nodes["values"][optionId]
 			if !exists {
-				return nil, fmt.Errorf("Option Id %s not found for field name %s", optionId, n.FieldName)
+				return nil, fmt.Errorf("[resolveNodeValue] Option Id %s not found for field name %s", optionId, n.FieldName)
 			}
 
 			if val, ok := opt_node.Value.(string); ok {
@@ -374,13 +374,13 @@ func (g Graph) GetPageFormValue(pageID string) (bool, error, string) {
 	foundPage, ok := g.Pages[pageID]
 
 	if !ok {
-		return false, fmt.Errorf("Page id %s not found", pageID), ""
+		return false, fmt.Errorf("[GetPageFormValue] Page id %s not found", pageID), ""
 	}
 
 	for _, id := range foundPage.FieldIDs {
 		n, ok := g.Nodes["inputs"][id]
 		if !ok {
-			return false, fmt.Errorf("Field not found %s", id), ""
+			return false, fmt.Errorf("[GetPageFormValue] Field not found %s", id), ""
 		}
 
 		nValue, err := g.resolveNodeValue(n)
@@ -428,7 +428,7 @@ func (g Graph) GetFormValue() (bool, error, string) {
 func (g Graph) IsNodeVisible(nodeID string) (bool, error) {
 	n, ok := g.Nodes["inputs"][nodeID]
 	if !ok {
-		return false, errors.New("Node not found")
+		return false, fmt.Errorf("[IsNodeVisible] Node not found | ID: %s", nodeID)
 	}
 
 	return n.IsVisible, nil
@@ -439,7 +439,7 @@ func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*no
 	optionNode, ok := g.Nodes["values"][optionNodeId]
 
 	if !ok {
-		return nil, errors.New("Option node not found")
+		return nil, fmt.Errorf("[validateOptionNode] Option node not found | ID: %s", optionNodeId)
 	}
 
 	var foundEdge *edge.Edge
@@ -455,7 +455,7 @@ func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*no
 	}
 
 	if foundEdge == nil {
-		return nil, errors.New("Invalid option node")
+		return nil, errors.New("[validateOptionNode] Invalid option node")
 	}
 	return optionNode, nil
 }
@@ -526,7 +526,7 @@ func (g Graph) ValidateNode(input ValidateNodeInput) (bool, []error) {
 	n, ok := g.Nodes["inputs"][input.NodeID]
 
 	if !ok {
-		return false, []error{errors.New("Node not found")}
+		return false, []error{fmt.Errorf("[ValidateNode] Node not found | ID: %s", input.NodeID)}
 	}
 
 	// 1. Validate Field Rules
@@ -563,7 +563,7 @@ func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
 
 		n, ok := g.AllNodes[e.TargetNode]
 		if !ok {
-			return errors.New("Node not found")
+			return fmt.Errorf("[evaluateDependentLogic] Node not found | ID: %s", e.TargetNode)
 		}
 
 		_, edgeErrors := g.ValidateEdgeConditions(*e, input)
@@ -587,7 +587,7 @@ func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
 
 		n, ok := g.AllNodes[cg.NodeID]
 		if !ok {
-			return errors.New("Node not found")
+			return fmt.Errorf("[evaluateDependentLogic] Node not found | ID: %s", cg.NodeID)
 		}
 
 		if isValid {
@@ -616,6 +616,11 @@ func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
 	return nil
 }
 
+func (g Graph) SetFormValue(formValue map[string]any) (bool, error) {
+
+	return true, nil
+}
+
 func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []string) {
 	valid, valErr := g.ValidateNode(input)
 
@@ -631,7 +636,7 @@ func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []st
 
 	n, ok := g.Nodes["inputs"][input.NodeID]
 	if !ok {
-		return false, []error{errors.New("Input node not found")}, []string{}
+		return false, []error{fmt.Errorf("[ValidateAddressNode] Node not found | ID: %s", input.NodeID)}, []string{}
 	}
 
 	_, ok = g.Nodes["values"][input.Value]
@@ -640,10 +645,14 @@ func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []st
 			return true, nil, []string{}
 		}
 
-		return false, []error{errors.New("Value node not found")}, []string{}
+		return false, []error{fmt.Errorf("[ValidateAddressNode] Value node not found | ID: %s", input.Value)}, []string{}
 	}
 
-	g.updateAddressNodeOptions(*n)
+	_, err := g.updateAddressNodeOptions(*n)
+
+	if err != nil {
+		return false, []error{err}, []string{}
+	}
 
 	childrenNodes, err := g.getAddressChildrenNodeIds(*n)
 
@@ -796,7 +805,7 @@ func (g Graph) GetOptionNodes(nodeId string) (*[]node.Node, error) {
 		if e.Type == edge.EdgeTypeHasOption {
 			n, ok := g.Nodes["values"][e.TargetNode]
 			if !ok {
-				return nil, errors.New("Node not found")
+				return nil, fmt.Errorf("[GetOptionNodes] Node not found | ID: %s", e.TargetNode)
 			}
 			optionNodes = append(optionNodes, *n)
 		}
@@ -812,13 +821,13 @@ func (g Graph) GetParentNode(nodeId string) (*node.Node, error) {
 	tEdge := edge.GetEdgeByNode(nodeId, "source", g.Edges, &filter)
 
 	if tEdge == nil {
-		return n, errors.New("Parent node not found")
+		return n, fmt.Errorf("[GetParentNode] Parent node not found | ID: %s", nodeId)
 	}
 
 	n, ok := g.Nodes["inputs"][tEdge.TargetNode]
 
 	if !ok {
-		return n, errors.New("Child Node not found")
+		return n, fmt.Errorf("[GetParentNode] Child node not found | ID: %s", tEdge.TargetNode)
 	}
 
 	return n, nil
@@ -830,13 +839,13 @@ func (g Graph) GetChildNode(nodeId string) (*node.Node, error) {
 	tEdge := edge.GetEdgeByNode(nodeId, "target", g.Edges, nil)
 
 	if tEdge == nil {
-		return n, errors.New("Child node not found")
+		return n, fmt.Errorf("[GetChildNode] Parent node not found | ID: %s", nodeId)
 	}
 
 	n, ok := g.Nodes["inputs"][tEdge.SourceNode]
 
 	if !ok {
-		return n, errors.New("Child Node not found")
+		return n, fmt.Errorf("[GetChildNode] Child node not found | ID: %s", tEdge.SourceNode)
 	}
 
 	return n, nil
@@ -851,18 +860,18 @@ func (g Graph) updateAddressNodeOptions(parentNode node.Node) (bool, error) {
 	e := edge.GetEdgeByNode(parentNode.ID, "target", g.Edges, &filter)
 
 	if e == nil {
-		return false, errors.New("Edge not found")
+		return false, errors.New("[updateAddressNodeOptions] Edge not found")
 	}
 
 	n, ok := g.Nodes["inputs"][e.SourceNode]
 	if !ok {
-		return false, errors.New("Node not found")
+		return false, fmt.Errorf("[updateAddressNodeOptions] Node not found | ID: %s", e.SourceNode)
 	}
 
 	_, level := node.IsAddressNode(n)
 	addressList, err := g.getAddressList(&parentNode, level)
 	if err != nil {
-		return false, errors.New("Address not found")
+		return false, errors.New("[updateAddressNodeOptions] Address not found")
 	}
 	g.refreshAddressOptionNodesAndEdges(addressList, *n)
 	return true, nil
@@ -901,7 +910,7 @@ func (g Graph) clearExistingAddressOptions(sourceNode node.Node) error {
 	for _, id := range nodesToRefresh {
 		n, ok := g.Nodes["inputs"][id]
 		if !ok {
-			return errors.New("Node not found during option cleanup")
+			return fmt.Errorf("[clearExistingAddressOptions] Node not found during option cleanup | ID: %s", id)
 		}
 		g.clearAddressOptionNode(*n)
 	}
@@ -951,12 +960,12 @@ func (g Graph) getAddressParentNode(childNode node.Node) (*node.Node, error) {
 	edge := edge.GetEdgeByNode(childNode.ID, "source", g.Edges, &filter)
 
 	if edge == nil {
-		return nil, errors.New("Edge not found")
+		return nil, errors.New("[getAddressParentNode] Edge not found")
 	}
 
 	parentNode, ok := g.Nodes["inputs"][edge.TargetNode]
 	if !ok {
-		return nil, errors.New("Node not found")
+		return nil, fmt.Errorf("[getAddressParentNode] Node not found | ID: %s", edge.TargetNode)
 	}
 
 	return parentNode, nil
@@ -995,7 +1004,7 @@ func (g Graph) getAddressChildrenNodeIds(parentNode node.Node) ([]string, error)
 
 	childNode, ok := g.Nodes["inputs"][tEdge.SourceNode]
 	if !ok {
-		return []string{}, errors.New("Node not found")
+		return []string{}, fmt.Errorf("[getAddressChildrenNodeIds] Node not found | ID: %s", tEdge.SourceNode)
 	}
 	//
 	childrenNodeIds = append(childrenNodeIds, childNode.ID)
