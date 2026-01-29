@@ -7,7 +7,7 @@ import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:flutter/foundation.dart';
 
 class AxonFormProvider extends ChangeNotifier {
-  static final AxonFormFFI _controller = AxonFormFFI();
+  late AxonFormFFI _controller;
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -40,6 +40,7 @@ class AxonFormProvider extends ChangeNotifier {
 
   Future<void> initialize(Future<Uint8List> Function() loader) async {
     try {
+      _controller = AxonFormFFI();
       final jsonBytes = await loader();
       //
       CoreResponse result = _controller.initialize(jsonBytes);
