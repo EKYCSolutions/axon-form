@@ -22,12 +22,12 @@ func initGraph(this js.Value, args []js.Value) interface{} {
 func isNodeVisible(this js.Value, args []js.Value) interface{} {
 	nodeId := args[0].String()
 
-	isVisible := g.IsNodeVisible(nodeId)
+	isVisible, _ := g.IsNodeVisible(nodeId)
 	return js.ValueOf([]interface{}{isVisible, js.ValueOf(nil)})
 }
 
 func validateNode(this js.Value, args []js.Value) interface{} {
-	input := graph.VerifyNodeInput{
+	input := graph.ValidateNodeInput{
 		NodeID: args[0].String(),
 		Value:  args[1].String(),
 	}
@@ -44,11 +44,15 @@ func validateNode(this js.Value, args []js.Value) interface{} {
 }
 
 func getFormValue(this js.Value, args []js.Value) interface{} {
-	return g.GetFormValue()
+	_, _, result := g.GetFormValue()
+	return js.ValueOf([]interface{}{result, js.ValueOf(nil)})
 }
 
 func getPageFormValue(this js.Value, args []js.Value) interface{} {
-	return g.GetPageFormValue(args[0].String())
+	pageId := args[0].String()
+
+	_, _, result := g.GetPageFormValue(pageId)
+	return js.ValueOf([]interface{}{result, js.ValueOf(nil)})
 }
 
 func main() {
