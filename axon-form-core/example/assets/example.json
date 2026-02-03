@@ -117,7 +117,7 @@
         },
         {
           "type": "email",
-          "message": "Invalid format"
+          "message": "Invalid email format"
         }
       ]
     },

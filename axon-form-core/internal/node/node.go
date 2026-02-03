@@ -22,37 +22,3 @@ type Node struct {
 	// Golang does not have support for union type
 	Value any `json:"value"`
 }
-
-func (n *Node) IsRequired() bool {
-	for _, rule := range n.ValidationRules {
-		if rule.Type == ValidationRuleTypeRequired {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (n *Node) GetBoolConfig(key string) bool {
-	if n.Config == nil {
-		return false
-	}
-	if v, ok := n.Config[key]; ok {
-		if boolVal, ok := v.(bool); ok {
-			return boolVal
-		}
-	}
-	return false
-}
-
-func (n *Node) GetStringConfig(key string) *string {
-	if n.Config == nil {
-		return nil
-	}
-	if v, ok := n.Config[key]; ok {
-		if val, ok := v.(string); ok {
-			return &val
-		}
-	}
-	return nil
-}

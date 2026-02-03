@@ -28,14 +28,23 @@ func main() {
 	g.AddEventListener("onNodeVisibilityChanged", onNodeVisibilityChanged)
 
 	input := graph.ValidateNodeInput{
-		NodeID: "wu16d202mgqo6bm",
-		Value:  "6zjjy5smwoi8es4",
+		NodeID: "pob_prov",
+		Value:  "tboung_khmum",
 	}
 
-	succ, errs := g.ValidateNode(input)
+	// succ, errs := g.ValidateNode(input)
+	succ, errs, _ := g.ValidateAddressNode(input)
 	// succ, errs := g.SetFormValue({
 
 	// })
+
+	children, err := g.GetOptionNodes("pob_distric")
+
+	fmt.Println("children: ", children)
+
+	if err != nil {
+		fmt.Println("error: ", err)
+	}
 
 	if len(errs) == 0 {
 		fmt.Println("validation success:", succ)
