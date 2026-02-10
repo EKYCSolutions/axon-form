@@ -812,6 +812,14 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         }));
 
         const json = convertGraphToJSON(nodes, edges, conditionGroups, pages);
+
+        const addressResponse = await fetch(
+          `${import.meta.env.BASE_URL}address.json`,
+        );
+        const addressData = await addressResponse.json();
+
+        json['address'] = addressData;
+
         exportJSON(json, fileName);
       } catch (err) {
         handleError(err);
