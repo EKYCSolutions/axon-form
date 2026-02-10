@@ -138,7 +138,13 @@ export const convertGraphToJSON = (
       validation_rules: node.validation_rules,
       config: node.config,
     })),
-    edges: edges,
+    edges: edges.map((edge) => ({
+      id: edge.id,
+      label: edge.label,
+      source_node: edge.sourceNode,
+      target_node: edge.targetNode,
+      type: edge.edgeType,
+    })),
     condition_groups: conditionGroups,
   };
 };
