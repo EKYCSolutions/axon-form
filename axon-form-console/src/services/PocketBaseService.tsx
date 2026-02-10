@@ -217,6 +217,23 @@ export const deleteConditionGroup = async (id: string): Promise<unknown> => {
     .delete(id);
 };
 
+export const clearAllData = async (): Promise<void> => {
+  const collections = [
+    PocketBaseCollection.CONDITIONS,
+    PocketBaseCollection.CONDITION_GROUPS,
+    PocketBaseCollection.EDGES,
+    PocketBaseCollection.VALIDATIONS,
+    PocketBaseCollection.NODES,
+    PocketBaseCollection.PAGES,
+  ];
+
+  for (const collection of collections) {
+    const records = await client.collection(collection).getFullList();
+    if (!records.length) continue;
+    await Promise.all(records.map((record) => client.collection(collection).delete(record.id)));
+  }
+};
+
 export const getAllPages = async (): Promise<PageResponse[]> => {
   return await client.collection(PocketBaseCollection.PAGES).getFullList({
     expand: 'fields',

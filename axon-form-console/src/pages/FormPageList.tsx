@@ -1,6 +1,16 @@
 import { PageDataTable } from '@/components/PageDataTable.js';
 import PageHeader from '@/components/form-builder-view/PageHeader';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Separator } from '@/components/ui/separator';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
@@ -11,12 +21,20 @@ import { useNavigate } from 'react-router';
 
 export default function FormPageList() {
   const navigate = useNavigate();
-  const { pages, updatePageOrder, deletePage, exportForm, importForm } =
-    useFormBuilder();
+  const {
+    pages,
+    updatePageOrder,
+    deletePage,
+    exportForm,
+    importForm,
+    clearAllData,
+  } = useFormBuilder();
 
   const [reOrderedPage, setReOrderedPage] = useState<Page[]>([]);
   const [isReordering, setIsReordering] = useState<boolean>(false);
   const [shouldResetOrder, setShouldResetOrder] = useState<boolean>(false);
+  const [pendingImportData, setPendingImportData] = useState<unknown>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleReordering = (status: boolean, pages: Page[]) => {
@@ -51,12 +69,28 @@ export default function FormPageList() {
     try {
       const text = await file.text();
       const json = JSON.parse(text) as unknown;
-      await importForm(json);
+      setPendingImportData(json);
+      setIsConfirmOpen(true);
     } catch (error) {
       handleError(error);
     } finally {
       event.target.value = '';
     }
+  };
+
+  const handleLoadWithoutClearing = async () => {
+    if (!pendingImportData) return;
+    await importForm(pendingImportData);
+    setPendingImportData(null);
+    setIsConfirmOpen(false);
+  };
+
+  const handleClearAndLoad = async () => {
+    if (!pendingImportData) return;
+    await clearAllData();
+    await importForm(pendingImportData);
+    setPendingImportData(null);
+    setIsConfirmOpen(false);
   };
 
   return (
@@ -99,6 +133,25 @@ export default function FormPageList() {
         </div>
       </div>
       <Separator />
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Load JSON</AlertDialogTitle>
+            <AlertDialogDescription>
+              Do you want to clear existing PocketBase data before loading this
+              form?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleLoadWithoutClearing}>
+              Keep Existing
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleClearAndLoad}>
+              Clear & Load
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {pages.length > 0 ? (
         <PageDataTable
           shouldResetOrder={shouldResetOrder}

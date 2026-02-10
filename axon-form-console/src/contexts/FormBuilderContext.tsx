@@ -32,6 +32,7 @@ export interface FormBuilderContextType {
   //
   exportForm: (fileName: string) => void;
   importForm: (data: unknown) => void;
+  clearAllData: () => void;
 }
 
 export const FormBuilderContext = createContext<

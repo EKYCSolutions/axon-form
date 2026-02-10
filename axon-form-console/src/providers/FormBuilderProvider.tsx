@@ -15,6 +15,7 @@ import {
   createEdge as createEdgeService,
   createNode as createNodeService,
   createPage as createPageService,
+  clearAllData as clearAllDataService,
   deleteCondition as deleteConditionService,
   deleteNode as deleteNodeService,
   deletePage as deletePageService,
@@ -1018,6 +1019,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [refreshPages, replaceEdgeIdsInConditionString],
   );
 
+  const clearAllData = useCallback(async () => {
+    try {
+      await clearAllDataService();
+      await refreshPages();
+    } catch (error) {
+      handleError(error);
+    }
+  }, [refreshPages]);
+
   const value: FormBuilderContextType = {
     pages,
     selectedPage,
@@ -1033,6 +1043,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     updatePageOrder,
     exportForm,
     importForm,
+    clearAllData,
   };
 
   return (
