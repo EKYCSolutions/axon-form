@@ -61,8 +61,6 @@ export default function PageConditionForm() {
         (cond) => cond.target_node_id == selectedPage.node_id,
       );
 
-      console.log('page condition >>', selectedPage.conditions);
-
       setInitialPageConditions({
         conditions:
           pageConditions?.map((cond) => ({
@@ -103,7 +101,6 @@ export default function PageConditionForm() {
 
   //
   function onSubmit(data: PageConditionFormSchemaData) {
-    console.log('data >>', data);
     if (!selectedPage?.node_id || !initialPageConditions) {
       return;
     }
@@ -201,7 +198,7 @@ export default function PageConditionForm() {
                   />
                 </div>
                 <div className='w-full flex items-center gap-2'>
-                  <p className='text-primary/50 w-12'>When</p>
+                  <p className='text-primary/50 w-12'>When Field</p>
                   <div className='grid grid-cols-5 gap-2 w-full'>
                     <FormField
                       control={form.control}

@@ -65,7 +65,6 @@ export default function OptionFormField({
                       <FormLabel>Label</FormLabel>
                       <FormControl>
                         <Input
-                          className='font-light text-sm'
                           placeholder='Enter the option label'
                           {...field}
                         />
@@ -82,7 +81,6 @@ export default function OptionFormField({
                       <FormLabel>Value</FormLabel>
                       <FormControl>
                         <Input
-                          className='font-light text-sm'
                           placeholder='Enter the option value'
                           {...field}
                         />

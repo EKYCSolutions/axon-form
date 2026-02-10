@@ -136,6 +136,7 @@ export const convertGraphToJSON = (
       field_type: node.field_type,
       field_name: node.field_name,
       validation_rules: node.validation_rules,
+      config: node.config,
     })),
     edges: edges,
     condition_groups: conditionGroups,

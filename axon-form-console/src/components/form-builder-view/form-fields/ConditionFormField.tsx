@@ -46,16 +46,14 @@ export default function ConditionFormField({
       className='w-full space-y-2 bg-secondary/30 border border-secondary p-4 rounded-sm last:mb-2'
     >
       <div className='flex justify-between items-center'>
-        <FormLabel className='font-light'>
-          Condition {conditionIndex + 1}
-        </FormLabel>
+        <FormLabel>Condition {conditionIndex + 1}</FormLabel>
         <DeleteButton
           onClick={onRemoveCondition}
           showConfirmationDialog={false}
         />
       </div>
       <div className='w-full flex items-center gap-2'>
-        <p className='text-primary/50 w-12'>When</p>
+        <p className='text-primary/50 w-24'>When Field</p>
         <div className='grid grid-cols-5 gap-2 w-full'>
           <FormField
             control={control}
@@ -65,7 +63,6 @@ export default function ConditionFormField({
                 <FormControl>
                   <Select
                     onValueChange={(value) => {
-                      console.log('value >>', value);
                       setValue(
                         `fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`,
                         value,
@@ -144,7 +141,7 @@ export default function ConditionFormField({
         </div>
       </div>
       <div className='w-full flex items-center gap-2'>
-        <p className='text-primary/50 w-12'>Then</p>
+        <p className='text-primary/50 w-24'>Then</p>
         <div className='grid grid-cols-4 gap-2 w-full'>
           <FormField
             control={control}

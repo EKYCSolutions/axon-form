@@ -1,4 +1,5 @@
 import {
+  ConditionExpression,
   EdgeType,
   NodeFieldType,
   NodeFieldTypeWithOptions,
@@ -10,6 +11,7 @@ import {
 } from '@/contexts/FormBuilderContext';
 import {
   createCondition,
+  createConditionGroupFromString as createConditionGroupFromStringService,
   createEdge as createEdgeService,
   createNode as createNodeService,
   createPage as createPageService,
@@ -45,12 +47,64 @@ import { type NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageConditionFormSchemaData } from '@/validations/PageConditionValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
+import type { ValidationRuleSchemaData } from '@/validations/ValidationRulesValidation';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState, type ReactNode } from 'react';
 import { validate } from 'uuid';
 
 interface FormBuilderProviderProps {
   children: ReactNode;
+}
+
+interface FormImportLayoutPage {
+  id: string;
+  order: number;
+  title: string;
+  description: string;
+  field_ids: string[];
+}
+
+interface FormImportNode {
+  id: string;
+  order?: number;
+  type?: string;
+  label?: string;
+  value?: string;
+  placeholder?: string;
+  field_type?: string;
+  field_name?: string;
+  validation_rules?: unknown[];
+  config?: Record<string, unknown>;
+}
+
+interface FormImportEdge {
+  id: string;
+  label?: string;
+  source_node: string;
+  target_node: string;
+  type: string;
+  conditions?: Array<{
+    id: string;
+    check_node: string;
+    edge: string;
+    expression: string;
+    expected_value: string;
+  }>;
+}
+
+interface FormImportConditionGroup {
+  id: string;
+  node: string;
+  conditions: string;
+}
+
+interface FormImportPayload {
+  layout?: {
+    pages?: FormImportLayoutPage[];
+  };
+  nodes?: FormImportNode[];
+  edges?: FormImportEdge[];
+  condition_groups?: FormImportConditionGroup[];
 }
 
 export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
@@ -116,7 +170,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         order: page.order,
         title: page.title,
         description: page.description,
-        fields: page.expand.fields.map(parseNodeResponse),
+        fields:
+          page.expand?.fields && page.expand.fields.length > 0
+            ? page.expand.fields.map(parseNodeResponse)
+            : [],
       }))
       .sort((a, b) => a.order - b.order);
   }, [pagesData]);
@@ -131,7 +188,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       order: singlePageData.order,
       title: singlePageData.title,
       description: singlePageData.description,
-      fields: singlePageData.expand.fields.map(parseNodeResponse),
+      fields: singlePageData.expand?.fields?.map(parseNodeResponse),
     };
   }, [singlePageData, pageNodeData]);
 
@@ -140,7 +197,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     if (!selectedPageData) return [];
 
     return selectedPageData.fields
-      .filter((field) =>
+      ?.filter((field) =>
         NodeFieldTypeWithOptions.includes(field.field_type as NodeFieldType),
       )
       .map((field) => field.id);
@@ -148,7 +205,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // Fetch options for all matching fields
   const optionsQueries = useQueries({
-    queries: fieldIdsWithOptions.map((fieldId) => ({
+    queries: (fieldIdsWithOptions ?? []).map((fieldId) => ({
       queryKey: ['fieldOptions', fieldId],
       queryFn: () => getValueNodesService(fieldId!),
       enabled: !!fieldId,
@@ -160,6 +217,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   // Combine selected page with options and conditions
   const selectedPage: Page | undefined = useMemo(() => {
     if (!selectedPageData || isAllOptionsLoading) return undefined;
+
     return {
       ...selectedPageData,
       conditions: fieldConditionsData?.map((cond) => ({
@@ -170,7 +228,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         expression: cond.expression,
         target_node_id: cond.target_node_id,
       })),
-      fields: selectedPageData.fields.map((field) => {
+      fields: (selectedPageData.fields ?? []).map((field) => {
         // Update conditions
         const conditions = fieldConditionsData
           ?.filter((cond) => cond.target_node_id === field.id)
@@ -184,7 +242,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           }));
 
         // Find field with options
-        const fieldIndex = fieldIdsWithOptions.indexOf(field.id);
+        const fieldIndex = (fieldIdsWithOptions ?? []).indexOf(field.id);
         const optionsData =
           fieldIndex !== -1
             ? optionsQueries[fieldIndex]?.data?.map((option) => ({
@@ -219,6 +277,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       value: node.value,
       field_type: node.field_type,
       field_name: node.field_name ?? '',
+      config: node.config ?? {},
     }));
   }, [inputFieldNodesData]);
 
@@ -231,6 +290,32 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(error);
         return undefined;
       }
+    },
+    [],
+  );
+
+  const createFilterByEdges = useCallback(
+    async (
+      fields: NodeFormSchemaData[],
+      resolveNodeId: (field: NodeFormSchemaData) => string | undefined,
+    ) => {
+      await Promise.all(
+        fields.map((field) => {
+          const childNodeId = resolveNodeId(field);
+          const parentNodeId = (
+            field.config as Record<string, unknown> | undefined
+          )?.parent_field_id as string | undefined;
+          if (!parentNodeId) return Promise.resolve();
+          if (!childNodeId || !parentNodeId) return Promise.resolve();
+
+          return createEdgeService({
+            label: '',
+            source_node: childNodeId,
+            target_node: parentNodeId,
+            type: EdgeType.FilterBy,
+          });
+        }),
+      );
     },
     [],
   );
@@ -249,9 +334,11 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           type: NodeType.Value,
           label: option.label,
           value: option.value,
+          placeholder: undefined,
           field_name: undefined,
           field_type: undefined,
           validation_rules: [],
+          config: undefined,
         };
 
         const addValueNodeRes = await createNodeService(valueNodeData);
@@ -309,8 +396,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           field_type: data.field_type,
           label: data.label,
           value: data.default_value,
+          placeholder: data.placeholder,
           type: data.type,
           validation_rules: data.validation_rules ?? [],
+          config: data.config,
         };
 
         const addNodeRes = await createNodeService(addNodeBody);
@@ -447,6 +536,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const addPage = useCallback(
     async (data: PageFormSchemaData) => {
       try {
+        const nextOrder =
+          pages.length > 0
+            ? Math.max(...pages.map((page) => page.order)) + 1
+            : 0;
         const pageRes = await createPageService(data);
         await createNodeService({
           type: NodeType.Page,
@@ -456,7 +549,9 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           field_type: undefined,
           label: undefined,
           value: undefined,
+          placeholder: undefined,
           validation_rules: [],
+          config: undefined,
         });
 
         const nodeIds = await Promise.all(
@@ -468,9 +563,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         const nodeIdMap = createNodeIdMap(data.fields, nodeIds);
         await processFieldConditions(data.fields, nodeIdMap);
+        await createFilterByEdges(
+          data.fields,
+          (field) => nodeIdMap[field.id as string],
+        );
 
         const updatePageBody: PageBody = {
-          order: undefined,
+          order: nextOrder,
           title: data.title,
           description: data.description,
           fields: nodeIds,
@@ -483,7 +582,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(error);
       }
     },
-    [addNode, processFieldConditions, refreshPages],
+    [addNode, pages, processFieldConditions, refreshPages],
   );
 
   // API: Get page by ID
@@ -529,6 +628,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         // Create new fields
         const newFields = data.fields.filter((field) => validate(field.id!));
+        let newFieldIdMap: Record<string, string> = {};
 
         if (newFields.length > 0) {
           const newFieldIdsRes = await Promise.all(
@@ -538,11 +638,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             }),
           );
 
-          const nodeIdMap = createNodeIdMap(newFields, newFieldIdsRes);
-          await processFieldConditions(newFields, nodeIdMap);
+          newFieldIdMap = createNodeIdMap(newFields, newFieldIdsRes);
+          await processFieldConditions(newFields, newFieldIdMap);
 
           fieldIds.push(...newFieldIdsRes);
         }
+
+        await createFilterByEdges(data.fields, (field) => {
+          if (validate(field.id!)) {
+            return newFieldIdMap[field.id as string];
+          }
+          return field.id;
+        });
 
         const updatePageBody: PageBody = {
           order: undefined,
@@ -563,6 +670,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       addNode,
       updateNode,
       processFieldConditions,
+      createFilterByEdges,
       refreshPages,
       refreshSinglePage,
     ],
@@ -672,6 +780,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     return Array.from(edgeMap.values());
   }, []);
 
+  const replaceEdgeIdsInConditionString = useCallback(
+    (conditionString: string, edgeIdMap: Map<string, string>) => {
+      let updated = conditionString;
+      edgeIdMap.forEach((newId, oldId) => {
+        const regex = new RegExp(`\\b${oldId}\\b`, 'g');
+        updated = updated.replace(regex, newId);
+      });
+      return updated;
+    },
+    [],
+  );
+
   // API: Export form
   const exportForm = useCallback(
     async (fileName: string) => {
@@ -700,6 +820,196 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [pages, fetchNodes, fetchConditionGroups, parseEdges],
   );
 
+  // API: Import form from JSON
+  const importForm = useCallback(
+    async (rawData: unknown) => {
+      try {
+        const data = rawData as FormImportPayload;
+
+        if (
+          !data?.layout?.pages ||
+          !Array.isArray(data.layout.pages) ||
+          !data.nodes ||
+          !Array.isArray(data.nodes) ||
+          !data.edges ||
+          !Array.isArray(data.edges)
+        ) {
+          handleError('Invalid form JSON structure');
+          return;
+        }
+
+        const layoutPages = data.layout.pages;
+        const nodes = data.nodes;
+        const edges = data.edges;
+        const conditionGroups = data.condition_groups ?? [];
+
+        const oldPageIdToNew = new Map<string, string>();
+        const oldNodeIdToNew = new Map<string, string>();
+        const oldEdgeIdToNew = new Map<string, string>();
+        const nodesById = new Map(nodes.map((node) => [node.id, node]));
+
+        // Create pages
+        for (const page of layoutPages) {
+          const pageRes = await createPageService({
+            title: page.title,
+            description: page.description,
+            order: page.order,
+            fields: [],
+          });
+          oldPageIdToNew.set(page.id, pageRes.id);
+        }
+
+        // Create page nodes
+        for (const page of layoutPages) {
+          const pageNode = nodesById.get(page.id);
+          const pageLabel = pageNode?.label ?? page.title;
+          const newPageId = oldPageIdToNew.get(page.id);
+
+          if (!newPageId) {
+            throw new Error(`Missing page mapping for ${page.id}`);
+          }
+
+          const pageNodeRes = await createNodeService({
+            page: newPageId,
+            order: undefined,
+            type: NodeType.Page,
+            label: pageLabel,
+            value: undefined,
+            placeholder: undefined,
+            field_name: undefined,
+            field_type: undefined,
+            validation_rules: [],
+            config: undefined,
+          });
+
+          oldNodeIdToNew.set(page.id, pageNodeRes.id);
+        }
+
+        // Map nodes to pages
+        const nodePageMap = new Map<string, string>();
+        for (const page of layoutPages) {
+          for (const fieldId of page.field_ids ?? []) {
+            nodePageMap.set(fieldId, page.id);
+          }
+          nodePageMap.set(page.id, page.id);
+        }
+
+        // Create non-page nodes
+        const nonPageNodes = nodes.filter(
+          (node) => node.type !== NodeType.Page,
+        );
+
+        for (const node of nonPageNodes) {
+          const oldPageId = nodePageMap.get(node.id);
+          const newPageId = oldPageIdToNew.get(oldPageId ?? '');
+
+          const nodeRes = await createNodeService({
+            // page: newPageId,
+            page: newPageId ?? '',
+            order: node.order,
+            type: node.type as NodeType,
+            label: node.label,
+            value: node.value,
+            placeholder: node.placeholder,
+            //
+            field_name: node.field_name,
+            field_type:
+              node.field_type && node.field_type.length > 0
+                ? (node.field_type as NodeFieldType)
+                : undefined,
+            validation_rules: (node.validation_rules ??
+              []) as ValidationRuleSchemaData[],
+            config: node.config,
+          });
+
+          oldNodeIdToNew.set(node.id, nodeRes.id);
+        }
+
+        // Create edges and conditions
+        for (const edge of edges) {
+          const sourceNodeId = oldNodeIdToNew.get(edge.source_node);
+          const targetNodeId = oldNodeIdToNew.get(edge.target_node);
+
+          if (!sourceNodeId || !targetNodeId) {
+            throw new Error(`Missing node mapping for edge ${edge.id}`);
+          }
+
+          const edgeRes = await createEdgeService({
+            label: edge.label ?? '',
+            source_node: sourceNodeId,
+            target_node: targetNodeId,
+            type: edge.type as EdgeType,
+          });
+
+          oldEdgeIdToNew.set(edge.id, edgeRes.id);
+
+          if (edge.conditions?.length) {
+            await Promise.all(
+              edge.conditions.map((condition) => {
+                const checkNodeId = oldNodeIdToNew.get(condition.check_node);
+                if (!checkNodeId) {
+                  throw new Error(
+                    `Missing check node mapping for condition ${condition.id}`,
+                  );
+                }
+
+                return createCondition({
+                  check_node_id: checkNodeId,
+                  edge: edgeRes.id,
+                  expr: condition.expression as ConditionExpression,
+                  value: condition.expected_value?.toString() ?? '',
+                });
+              }),
+            );
+          }
+        }
+
+        // Create condition groups
+        for (const group of conditionGroups) {
+          const nodeId = oldNodeIdToNew.get(group.node);
+          if (!nodeId) {
+            throw new Error(
+              `Missing node mapping for condition group ${group.id}`,
+            );
+          }
+
+          const updatedConditions = replaceEdgeIdsInConditionString(
+            group.conditions,
+            oldEdgeIdToNew,
+          );
+
+          await createConditionGroupFromStringService(
+            nodeId,
+            updatedConditions,
+          );
+        }
+
+        // Update pages with fields and order
+        for (const page of layoutPages) {
+          const newPageId = oldPageIdToNew.get(page.id);
+          if (!newPageId) continue;
+
+          const fieldIds = (page.field_ids ?? [])
+            .map((fieldId) => oldNodeIdToNew.get(fieldId))
+            .filter(Boolean) as string[];
+
+          await updatePageService(newPageId, {
+            order: page.order,
+            title: page.title,
+            description: page.description,
+            fields: fieldIds,
+          });
+        }
+
+        await refreshPages();
+        handleSuccess('Load JSON Success');
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [refreshPages, replaceEdgeIdsInConditionString],
+  );
+
   const value: FormBuilderContextType = {
     pages,
     selectedPage,
@@ -714,6 +1024,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     deleteCondition,
     updatePageOrder,
     exportForm,
+    importForm,
   };
 
   return (

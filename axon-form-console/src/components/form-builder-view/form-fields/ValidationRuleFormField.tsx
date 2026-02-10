@@ -46,9 +46,7 @@ export default function ValidationRuleFormField({
       className='space-y-2 bg-secondary/30 border border-secondary p-4 rounded-sm last:mb-2'
     >
       <div className='flex justify-between items-center'>
-        <FormLabel className='font-light'>
-          Validation {validationRuleIndex + 1}
-        </FormLabel>
+        <FormLabel>Validation {validationRuleIndex + 1}</FormLabel>
         <DeleteButton
           onClick={onRemoveValidationRule}
           showConfirmationDialog={false}

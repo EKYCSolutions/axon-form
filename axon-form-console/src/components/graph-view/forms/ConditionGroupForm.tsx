@@ -103,7 +103,6 @@ export default function ConditionGroupForm({
             );
           }}
           onUpdateEdge={(edge, idx) => {
-            console.log('updating this edge >>', edge);
             const updatedEdges = [...form.watch('edges')];
             updatedEdges[idx] = edge;
             form.setValue('edges', updatedEdges, { shouldValidate: true });

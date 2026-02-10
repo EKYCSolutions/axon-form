@@ -41,6 +41,11 @@ export const inputFieldTypes: InputFieldTypeSelectItem[] = [
     type: NodeFieldType.Dropdown,
   },
   {
+    label: 'Address Dropdown',
+    value: 'address_dropdown',
+    type: NodeFieldType.AddressDropdown,
+  },
+  {
     label: 'Checkbox',
     value: 'checkbox',
     type: NodeFieldType.Checkbox,

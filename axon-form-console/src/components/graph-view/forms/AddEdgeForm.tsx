@@ -29,8 +29,6 @@ export default function AddEdgeForm({ className }: IProps) {
   });
 
   function onSubmit(data: EdgeFormSchemaData) {
-    console.log('data >> ', data);
-
     addEdge(data);
     form.reset();
     //

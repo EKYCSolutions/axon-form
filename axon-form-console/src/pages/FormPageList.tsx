@@ -5,17 +5,19 @@ import { Separator } from '@/components/ui/separator';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import type { Page } from '@/types/Page';
-import { handleSuccess } from '@/utils/Toast';
-import { useState } from 'react';
+import { handleError, handleSuccess } from '@/utils/Toast';
+import { useRef, useState, type ChangeEvent } from 'react';
 import { useNavigate } from 'react-router';
 
 export default function FormPageList() {
   const navigate = useNavigate();
-  const { pages, updatePageOrder, deletePage, exportForm } = useFormBuilder();
+  const { pages, updatePageOrder, deletePage, exportForm, importForm } =
+    useFormBuilder();
 
   const [reOrderedPage, setReOrderedPage] = useState<Page[]>([]);
   const [isReordering, setIsReordering] = useState<boolean>(false);
   const [shouldResetOrder, setShouldResetOrder] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleReordering = (status: boolean, pages: Page[]) => {
     setIsReordering(status);
@@ -38,10 +40,29 @@ export default function FormPageList() {
     deletePage(id);
   };
 
+  const handleLoadJsonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const json = JSON.parse(text) as unknown;
+      await importForm(json);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      event.target.value = '';
+    }
+  };
+
   return (
     <FormBuilderViewLayout>
       <div className='flex justify-between items-center my-8 gap-4'>
-        <PageHeader title='Sections' />
+        <PageHeader title='Pages' />
         <div className='flex gap-2'>
           {isReordering ? (
             <>
@@ -57,6 +78,16 @@ export default function FormPageList() {
               <Button variant='outline' onClick={() => exportForm('form.json')}>
                 Export to JSON
               </Button>
+              <Button variant='outline' onClick={handleLoadJsonClick}>
+                Load JSON
+              </Button>
+              <input
+                ref={fileInputRef}
+                type='file'
+                accept='application/json'
+                className='hidden'
+                onChange={handleFileChange}
+              />
               <Button
                 variant='secondary'
                 onClick={() => navigate('/page/create')}

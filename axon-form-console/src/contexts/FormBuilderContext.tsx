@@ -31,6 +31,7 @@ export interface FormBuilderContextType {
   deleteCondition: (conditionId: string) => void;
   //
   exportForm: (fileName: string) => void;
+  importForm: (data: unknown) => void;
 }
 
 export const FormBuilderContext = createContext<

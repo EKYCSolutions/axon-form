@@ -21,7 +21,7 @@ export const NodeFormSchema = z.object({
   placeholder: z.string().optional(),
   label: z.string().min(1),
   select_options: z.array(SelectOptionFormSchema).optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  config: z.record(z.string(), z.any()).optional(),
   order: z.number().optional(),
   validation_rules: z.array(ValidationRuleFormSchema).optional(),
   conditions: z.array(ConditionFormSchema).optional(),
@@ -30,6 +30,22 @@ export const NodeFormSchema = z.object({
 export type NodeFormSchemaData = z.infer<typeof NodeFormSchema>;
 
 export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
+  const config = (node.config ?? {}) as Record<string, unknown>;
+  const mergedConfig = {
+    ...config,
+  };
+
+  if (mergedConfig.level === undefined) {
+    mergedConfig.level =
+      (config.level as string | undefined) ??
+      (config.level as string | undefined);
+  }
+  if (mergedConfig.allow_custom_value === undefined) {
+    mergedConfig.allow_custom_value =
+      (config.allow_custom_value as boolean | undefined) ??
+      (config.allow_custom_option as boolean | undefined);
+  }
+
   return {
     id: node.id,
     type: node.type as NodeType,
@@ -37,6 +53,8 @@ export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
     order: node.order,
     field_type: node.field_type as NodeFieldType,
     field_name: node.field_name,
+    placeholder: node.placeholder,
+    config: mergedConfig,
     select_options: node.options?.map((option) => ({
       id: option.id,
       label: option.label,
@@ -72,7 +90,6 @@ export function convertNodeResponseToGraphNode(node: NodeResponse): GraphNode {
   // Each node could be a source or a target node
   // All the connected edges are destructured into expandedEdges
 
-  console.log('edges >>', node.expand);
   const edges = [
     ...(node.expand?.edges_via_source_node
       ? node.expand.edges_via_source_node.map((edge) =>

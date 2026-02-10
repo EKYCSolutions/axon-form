@@ -11,8 +11,9 @@ export interface NodeResponse extends BaseResponse {
   type: string;
   field_type: string;
   field_name?: string;
+  placeholder?: string;
   //
-  metadata: Record<string, unknown>;
+  config: Record<string, unknown>;
   validation_rules: Record<string, string | number>[];
   //
   expand?: {

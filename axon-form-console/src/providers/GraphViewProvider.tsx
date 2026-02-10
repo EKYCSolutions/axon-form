@@ -428,7 +428,7 @@ export function GraphViewProvider({
           type: NodeType.Page,
           label: data.title ?? '',
           validation_rules: [],
-          metadata: {
+          config: {
             title: data.title,
             description: data.description,
           },

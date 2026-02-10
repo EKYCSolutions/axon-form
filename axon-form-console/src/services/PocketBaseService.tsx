@@ -178,6 +178,16 @@ export const createConditionGroup = async (
   });
 };
 
+export const createConditionGroupFromString = async (
+  nodeId: string,
+  conditions: string,
+): Promise<unknown> => {
+  return await client.collection(PocketBaseCollection.CONDITION_GROUPS).create({
+    node: nodeId,
+    conditions,
+  });
+};
+
 export const getAllConditionGroups = async (): Promise<
   ConditionGroupResponse[]
 > => {
@@ -215,17 +225,14 @@ export const getAllPages = async (): Promise<PageResponse[]> => {
 
 export const getPageById = async (id: string): Promise<PageResponse> => {
   return await client.collection(PocketBaseCollection.PAGES).getOne(id, {
-    expand: 'fields,edges_via_source_node',
+    expand: 'fields,fields.edges_via_source_node,fields.edges_via_source_node',
   });
 };
 
 export const createPage = async (
   data: PageFormSchemaData,
 ): Promise<PageResponse> => {
-  return await client.collection(PocketBaseCollection.PAGES).create({
-    title: data.title,
-    description: data.description,
-  });
+  return await client.collection(PocketBaseCollection.PAGES).create(data);
 };
 
 export const getPage = async (id: string): Promise<NodeResponse> => {
