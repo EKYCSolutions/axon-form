@@ -330,6 +330,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     ) => {
       try {
         const valueNodeData: NodeBody = {
+          id: undefined,
           page: pageId,
           order: undefined,
           type: NodeType.Value,
@@ -391,6 +392,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     ): Promise<NodeResponse | undefined> => {
       try {
         const addNodeBody: NodeBody = {
+          id: undefined,
           page: pageId,
           order: data.order,
           field_name: data.field_name,
@@ -543,6 +545,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             : 0;
         const pageRes = await createPageService(data);
         await createNodeService({
+          id: pageRes.id,
           type: NodeType.Page,
           order: undefined,
           page: pageRes.id,
@@ -879,6 +882,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           }
 
           const pageNodeRes = await createNodeService({
+            id: oldPageIdToNew.get(page.id),
             page: newPageId,
             order: undefined,
             type: NodeType.Page,
@@ -913,7 +917,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           const newPageId = oldPageIdToNew.get(oldPageId ?? '');
 
           const nodeRes = await createNodeService({
-            // page: newPageId,
+            id: undefined,
             page: newPageId ?? '',
             order: node.order,
             type: node.type as NodeType,
