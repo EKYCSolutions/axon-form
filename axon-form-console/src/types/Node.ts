@@ -75,6 +75,7 @@ export function parseNodeCondition(
 }
 
 export interface NodeBody {
+  id: string | undefined;
   page: string;
   order: number | undefined;
   //
