@@ -13,6 +13,7 @@ export enum NodeFieldType {
   Select = 'select',
   Radio = 'radio',
   Dropdown = 'dropdown',
+  AddressDropdown = 'address_dropdown',
   Checkbox = 'checkbox',
   File = 'file',
   Password = 'password',
@@ -23,7 +24,7 @@ export const NodeFieldTypeWithOptions = [
   NodeFieldType.Select,
   NodeFieldType.Radio,
   NodeFieldType.Dropdown,
-  NodeFieldType.Checkbox,
+  NodeFieldType.AddressDropdown,
 ];
 
 export enum EdgeType {
@@ -31,6 +32,7 @@ export enum EdgeType {
   HasField = 'has_field',
   Validates = 'validates',
   Shows = 'shows',
+  FilterBy = 'filter_by',
 }
 
 export enum GraphSheetType {

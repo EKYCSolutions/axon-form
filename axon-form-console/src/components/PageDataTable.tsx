@@ -222,7 +222,7 @@ export function PageDataTable({
           <TableHeader className='bg-muted sticky top-0 z-10'>
             <TableRow>
               <TableHead className='w-8'></TableHead>
-              <TableHead>No.</TableHead>
+              <TableHead>Order</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>No. of Fields</TableHead>

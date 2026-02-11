@@ -67,7 +67,6 @@ export function SelectNodeCombobox({
                   value={node?.id}
                   key={node?.id}
                   onSelect={(value) => {
-                    console.log(value);
                     const nodeFound = nodes.find((e) => e.id == value);
 
                     if (nodeFound) {

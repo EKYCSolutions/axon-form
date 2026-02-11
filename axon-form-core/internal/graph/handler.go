@@ -287,7 +287,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	// ---------------------------------------------------------
 	// Address nodes (Province, District, etc.) usually store an ID referencing the address data.
 	// We need to look up the actual Address object (Code, Key, Name) to return in the form data.
-	isAddressNode, level := node.IsAddressNode(n)
+	isAddressNode, level := n.IsAddressNode()
 	if isAddressNode {
 		addrNode := node.GetNodeByID(n.Value.(string), g.Nodes["values"])
 
@@ -329,8 +329,8 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	// ---------------------------------------------------------
 	// For options, the node stores the ID(s) of the selected option(s).
 	// We must look up the corresponding 'value' node to get the actual underlying string value.
-	isFieldTypeWithOption := node.IsFieldTypeWithOptions(n.FieldType)
-	if isFieldTypeWithOption {
+
+	if n.IsFieldTypeWithOptions() {
 		if n.Value == nil {
 			return nil, fmt.Errorf("[resolveNodeValue] field name: %s | value required", n.FieldName)
 		}
@@ -462,7 +462,7 @@ func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*no
 
 func (g Graph) updateNodeValue(input ValidateNodeInput, n *node.Node) (bool, error) {
 	// Update node value for non-option nodes
-	if !node.IsFieldTypeWithOptions(n.FieldType) {
+	if !n.IsFieldTypeWithOptions() {
 		n.Value = input.Value
 		return true, nil
 	}
@@ -797,6 +797,11 @@ func (g Graph) ValidateCondition(c edge.EdgeCondition, v string) (bool, error) {
 // ==========================================
 
 func (g Graph) GetOptionNodes(nodeId string) (*[]node.Node, error) {
+	_, ok := g.Nodes["inputs"][nodeId]
+	if !ok {
+		return nil, fmt.Errorf("[GetOptionNodes] Node not found | ID: %s", nodeId)
+	}
+
 	var optionNodes []node.Node
 
 	edges := g.Edges[nodeId]
@@ -868,7 +873,7 @@ func (g Graph) updateAddressNodeOptions(parentNode node.Node) (bool, error) {
 		return false, fmt.Errorf("[updateAddressNodeOptions] Node not found | ID: %s", e.SourceNode)
 	}
 
-	_, level := node.IsAddressNode(n)
+	_, level := n.IsAddressNode()
 	addressList, err := g.getAddressList(&parentNode, level)
 	if err != nil {
 		return false, errors.New("[updateAddressNodeOptions] Address not found")

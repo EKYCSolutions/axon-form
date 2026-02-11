@@ -125,8 +125,6 @@ export default function GraphPageForm({ className, form, onSubmit }: IProps) {
                       updatedKanbanItems.map((n) => n.id),
                       { shouldValidate: true },
                     );
-
-                    console.log('field ids >>', form.getValues('field_ids'));
                   }}
                   className='flex-1'
                 />

@@ -146,11 +146,7 @@ export default function PageForm({ form, onSubmit }: IProps) {
                 <FormItem>
                   <FormLabel required>Title</FormLabel>
                   <FormControl>
-                    <Input
-                      className='font-light text-sm'
-                      placeholder='Enter the title'
-                      {...field}
-                    />
+                    <Input placeholder='Enter the title' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -165,11 +161,7 @@ export default function PageForm({ form, onSubmit }: IProps) {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input
-                      className='font-light text-sm'
-                      placeholder='Enter the description'
-                      {...field}
-                    />
+                    <Input placeholder='Enter the description' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

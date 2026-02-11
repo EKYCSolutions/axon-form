@@ -25,8 +25,10 @@ export interface Node {
   type?: string;
   label?: string;
   value?: string;
+  placeholder?: string;
   field_type?: string;
   field_name?: string;
+  config?: Record<string, unknown>;
   validation_rules?: ValidationRule[];
   options?: NodeOption[];
   conditions?: NodeCondition[];
@@ -51,6 +53,8 @@ export function parseNodeResponse(node: NodeResponse): Node {
     value: node.value,
     field_type: node.field_type,
     field_name: node.field_name ?? '',
+    placeholder: node.placeholder,
+    config: node.config ?? {},
     validation_rules: node.validation_rules as ValidationRule[],
     options: [],
     edges: edges,
@@ -78,6 +82,8 @@ export interface NodeBody {
   field_type: NodeFieldType | undefined;
   label: string | undefined;
   value: string | undefined;
+  placeholder: string | undefined;
   type: NodeType | undefined;
   validation_rules: ValidationRuleSchemaData[];
+  config?: Record<string, unknown>;
 }

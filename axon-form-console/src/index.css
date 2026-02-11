@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
@@ -116,6 +117,8 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Kantumruy Pro', sans-serif;
+    /* font-weight: 400; */
   }
   button {
     @apply hover:cursor-pointer;

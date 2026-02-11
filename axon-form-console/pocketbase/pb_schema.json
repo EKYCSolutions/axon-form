@@ -873,7 +873,7 @@
         "type": "text"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "pbc_3598433047",
         "hidden": false,
         "id": "relation1175298007",
@@ -886,7 +886,7 @@
         "type": "relation"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "pbc_1961669470",
         "hidden": false,
         "id": "relation1768767806",
@@ -996,11 +996,12 @@
           "validates",
           "shows",
           "has_options",
-          "has_field"
+          "has_field",
+          "filter_by"
         ]
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "pbc_3598433047",
         "hidden": false,
         "id": "relation2372216508",
@@ -1108,7 +1109,8 @@
           "dropdown",
           "checkbox",
           "file",
-          "password"
+          "password",
+          "address_dropdown"
         ]
       },
       {
@@ -1124,26 +1126,6 @@
         "required": false,
         "system": false,
         "type": "text"
-      },
-      {
-        "hidden": false,
-        "id": "json1114208307",
-        "maxSize": 0,
-        "name": "metadata",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "json"
-      },
-      {
-        "hidden": false,
-        "id": "json2970758927",
-        "maxSize": 0,
-        "name": "validation_rules",
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "json"
       },
       {
         "autogeneratePattern": "",
@@ -1172,6 +1154,65 @@
         "required": false,
         "system": false,
         "type": "text"
+      },
+      {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text4125531906",
+        "max": 0,
+        "min": 0,
+        "name": "placeholder",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "cascadeDelete": true,
+        "collectionId": "pbc_3945946014",
+        "hidden": false,
+        "id": "relation336246304",
+        "maxSelect": 1,
+        "minSelect": 0,
+        "name": "page",
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "relation"
+      },
+      {
+        "hidden": false,
+        "id": "number4113142680",
+        "max": null,
+        "min": null,
+        "name": "order",
+        "onlyInt": false,
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "number"
+      },
+      {
+        "hidden": false,
+        "id": "json2970758927",
+        "maxSize": 0,
+        "name": "validation_rules",
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "json"
+      },
+      {
+        "hidden": false,
+        "id": "json1114208307",
+        "maxSize": 0,
+        "name": "config",
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "json"
       },
       {
         "hidden": false,
@@ -1250,6 +1291,18 @@
         "type": "text"
       },
       {
+        "hidden": false,
+        "id": "number4113142680",
+        "max": null,
+        "min": null,
+        "name": "order",
+        "onlyInt": false,
+        "presentable": false,
+        "required": false,
+        "system": false,
+        "type": "number"
+      },
+      {
         "cascadeDelete": false,
         "collectionId": "pbc_3598433047",
         "hidden": false,
@@ -1261,18 +1314,6 @@
         "required": false,
         "system": false,
         "type": "relation"
-      },
-      {
-        "hidden": false,
-        "id": "number4113142680",
-        "max": null,
-        "min": null,
-        "name": "order",
-        "onlyInt": false,
-        "presentable": false,
-        "required": false,
-        "system": false,
-        "type": "number"
       },
       {
         "hidden": false,
