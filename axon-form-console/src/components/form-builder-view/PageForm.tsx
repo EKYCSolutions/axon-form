@@ -196,6 +196,9 @@ export default function PageForm({ form, onSubmit }: IProps) {
                       fieldId={field.id}
                       fieldIndex={idx}
                       fieldLabel={form.watch(`fields.${idx}.label`)}
+                      fieldConditionsLength={
+                        form.watch(`fields.${idx}.conditions`)?.length ?? 0
+                      }
                       onFieldDelete={() => remove(idx)}
                     />
                   );

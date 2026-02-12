@@ -37,6 +37,7 @@ interface IProps {
   fieldId: string;
   fieldIndex: number;
   fieldLabel: string;
+  fieldConditionsLength: number;
   //
   onFieldDelete: MouseEventHandler<HTMLDivElement>;
 }
@@ -45,6 +46,7 @@ export default function FormAccordion({
   fieldId,
   fieldIndex,
   fieldLabel,
+  fieldConditionsLength,
   onFieldDelete,
 }: IProps) {
   const { getValues } = useFormContext();
@@ -94,6 +96,11 @@ export default function FormAccordion({
                 )}
               </Badge>
               {fieldLabel}
+              {fieldConditionsLength > 0 && (
+                <Badge variant='destructive'>
+                  Hidden: {fieldConditionsLength} conditions
+                </Badge>
+              )}
             </div>
             <FormAccordionDropdown onDelete={onFieldDelete} />
           </div>

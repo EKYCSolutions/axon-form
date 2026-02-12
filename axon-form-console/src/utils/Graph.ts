@@ -144,6 +144,7 @@ export const convertGraphToJSON = (
       source_node: edge.sourceNode,
       target_node: edge.targetNode,
       type: edge.edgeType,
+      conditions: edge.conditions,
     })),
     condition_groups: conditionGroups,
   };

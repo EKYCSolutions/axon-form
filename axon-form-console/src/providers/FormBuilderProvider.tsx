@@ -88,8 +88,8 @@ interface FormImportEdge {
     id: string;
     check_node: string;
     edge: string;
-    expression: string;
-    expected_value: string;
+    expr: string;
+    value: string;
   }>;
 }
 
@@ -225,8 +225,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         id: cond.id,
         check_node: cond.check_node,
         edge: cond.edge,
-        expected_value: cond.expected_value,
-        expression: cond.expression,
+        value: cond.expected_value,
+        expr: cond.expression,
         target_node_id: cond.target_node_id,
       })),
       fields: (selectedPageData.fields ?? []).map((field) => {
@@ -237,8 +237,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             id: cond.id,
             edge: cond.edge,
             check_node: cond.check_node,
-            expected_value: cond.expected_value,
-            expression: cond.expression,
+            value: cond.expected_value,
+            expr: cond.expression,
             target_node_id: cond.target_node_id,
           }));
 
@@ -346,7 +346,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         const addValueNodeRes = await createNodeService(valueNodeData);
 
         const hasOptionEdgeData: EdgeFormSchemaData = {
-          label: '',
+          label: `select-${option.value}`,
           source_node: parentNodeId,
           target_node: addValueNodeRes.id,
           type: EdgeType.HasOption,
@@ -362,12 +362,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // Helper: Add condition
   const addCondition = useCallback(
-    async (targetNodeId: string, condition: ConditionFormSchemaData) => {
+    async (
+      targetNode: NodeFormSchemaData,
+      condition: ConditionFormSchemaData,
+    ) => {
       try {
         const showEdgeData: EdgeFormSchemaData = {
-          label: '',
+          label: `show-${targetNode.field_name}`,
           source_node: condition.check_node_id!,
-          target_node: targetNodeId,
+          target_node: targetNode.id!,
           type: EdgeType.Shows,
         };
 
@@ -442,8 +445,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             updated: updatedConditions,
           } = getFieldArrayChanges(initialData.conditions, data.conditions);
 
-          if (addedConditions.length > 0) {
-            addedConditions.forEach((cond) => addCondition(id, cond));
+          const nodeConditionData = {
+            ...initialData,
+            field_name: data.field_name,
+          };
+
+          if (data && addedConditions.length > 0) {
+            addedConditions.forEach((cond) =>
+              addCondition(nodeConditionData, cond),
+            );
           }
 
           if (deletedConditions.length > 0) {
@@ -519,15 +529,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       for (const field of fields) {
         if (!field.conditions) continue;
 
-        const fieldId = nodeIdMap[field.id as string];
-
         await Promise.all(
           field.conditions.map((cond) => {
             const conditionData = {
               ...cond,
               node_id: nodeIdMap[cond.check_node_id as string],
             };
-            return addCondition(fieldId, conditionData);
+            return addCondition(field, conditionData);
           }),
         );
       }
@@ -704,7 +712,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
               ...cond,
               node_id: cond.check_node_id,
             };
-            return addCondition(pageNodeId, conditionData);
+
+            const nodeConditionData: NodeFormSchemaData = {
+              id: pageNodeId,
+              type: NodeType.Page,
+              label: '',
+              field_name: '',
+            };
+
+            return addCondition(nodeConditionData, conditionData);
           }),
         );
         handleSuccess('Add Page Conditions Success');
@@ -806,6 +822,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         if (!nodesData) return;
 
         const nodes = nodesData.map(parseNodeResponse);
+
         const edges = parseEdges(nodes);
         const conditionGroups: EdgeConditionGroup[] = (
           conditionGroupsData ?? []
@@ -969,8 +986,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                 return createCondition({
                   check_node_id: checkNodeId,
                   edge: edgeRes.id,
-                  expr: condition.expression as ConditionExpression,
-                  value: condition.expected_value?.toString() ?? '',
+                  expr: condition.expr as ConditionExpression,
+                  value: condition.value?.toString() ?? '',
                 });
               }),
             );

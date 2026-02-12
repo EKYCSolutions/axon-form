@@ -14,8 +14,8 @@ export interface NodeCondition {
   id: string;
   check_node: string;
   edge: string;
-  expected_value: string;
-  expression: string;
+  value: string;
+  expr: string;
   target_node_id: string;
 }
 
@@ -68,8 +68,8 @@ export function parseNodeCondition(
     id: condition.id,
     check_node: condition.check_node,
     edge: condition.edge,
-    expression: condition.expression,
-    expected_value: condition.expected_value,
+    expr: condition.expression,
+    value: condition.expected_value,
     target_node_id: condition.target_node_id,
   };
 }

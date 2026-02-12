@@ -67,8 +67,8 @@ export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
       id: cond.id,
       check_node_id: cond.check_node,
       edge: cond.edge,
-      expr: cond.expression as ConditionExpression,
-      value: cond.expected_value.toString(),
+      expr: cond.expr as ConditionExpression,
+      value: cond.value.toString(),
     })),
   };
 }

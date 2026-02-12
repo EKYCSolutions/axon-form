@@ -18,6 +18,7 @@ import {
 
 import DeleteButton from '@/components/DeleteButton';
 
+import { Badge } from '@/components/ui/badge';
 import { convertPascalCaseToTitleCase } from '@/utils/String.ts';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { MouseEventHandler } from 'react';
@@ -72,7 +73,28 @@ export default function ConditionFormField({
                   >
                     <FormControl className='w-full'>
                       <SelectTrigger>
-                        <SelectValue placeholder='Select a field' />
+                        <SelectValue placeholder='Select a field'>
+                          {(() => {
+                            const selectedId = getValues(
+                              `fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`,
+                            );
+                            const selectedField = getValues('fields').find(
+                              (f: NodeFormSchemaData) => f.id === selectedId,
+                            );
+                            if (!selectedField) return null;
+                            return (
+                              <div className='flex flex-row items-center gap-2'>
+                                <span>{selectedField.label}</span>
+                                <Badge
+                                  variant='outline'
+                                  className='text-gray-400'
+                                >
+                                  {selectedField.field_name}
+                                </Badge>
+                              </div>
+                            );
+                          })()}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -84,7 +106,12 @@ export default function ConditionFormField({
                         .map((field: NodeFormSchemaData) => {
                           return (
                             <SelectItem key={field.id} value={field.id!}>
-                              {field.label}
+                              <div className='flex flex-col items-start'>
+                                <p>{field.label}</p>
+                                <span className='text-gray-400 text-xs'>
+                                  {field.field_name}
+                                </span>
+                              </div>
                             </SelectItem>
                           );
                         })}
@@ -132,7 +159,44 @@ export default function ConditionFormField({
             render={({ field }) => (
               <FormItem className='col-span-2'>
                 <FormControl>
-                  <Input placeholder='Enter condition value' {...field} />
+                  {(() => {
+                    const selectedCheckNodeId = getValues(
+                      `fields.${fieldIndex}.conditions.${conditionIndex}.check_node_id`,
+                    );
+                    const selectedField = getValues('fields').find(
+                      (f: NodeFormSchemaData) => f.id === selectedCheckNodeId,
+                    );
+                    const options = selectedField?.select_options ?? [];
+
+                    if (options.length > 0) {
+                      return (
+                        <Select
+                          value={field.value || ''}
+                          onValueChange={field.onChange}
+                        >
+                          <FormControl className='w-full'>
+                            <SelectTrigger>
+                              <SelectValue placeholder='Select an option' />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {options.map((option) => (
+                              <SelectItem
+                                key={option.id ?? option.value}
+                                value={option.id ?? option.value}
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      );
+                    }
+
+                    return (
+                      <Input placeholder='Enter condition value' {...field} />
+                    );
+                  })()}
                 </FormControl>
                 <FormMessage />
               </FormItem>

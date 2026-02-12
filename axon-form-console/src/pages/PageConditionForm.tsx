@@ -67,8 +67,8 @@ export default function PageConditionForm() {
             id: cond.id,
             edge: cond.edge,
             check_node_id: cond.check_node,
-            expr: cond.expression as ConditionExpression,
-            value: cond.expected_value.toString(),
+            expr: cond.expr as ConditionExpression,
+            value: cond.value.toString(),
           })) ?? [],
       });
 
@@ -77,8 +77,8 @@ export default function PageConditionForm() {
           id: cond.id,
           edge: cond.edge,
           check_node_id: cond.check_node,
-          expr: cond.expression as ConditionExpression,
-          value: cond.expected_value.toString(),
+          expr: cond.expr as ConditionExpression,
+          value: cond.value.toString(),
         })),
       });
     }
