@@ -983,11 +983,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                   );
                 }
 
+                const rawConditionValue = condition.value?.toString() ?? '';
+                const mappedConditionValue =
+                  oldNodeIdToNew.get(rawConditionValue) ?? rawConditionValue;
+
                 return createCondition({
                   check_node_id: checkNodeId,
                   edge: edgeRes.id,
                   expr: condition.expr as ConditionExpression,
-                  value: condition.value?.toString() ?? '',
+                  value: mappedConditionValue,
                 });
               }),
             );
