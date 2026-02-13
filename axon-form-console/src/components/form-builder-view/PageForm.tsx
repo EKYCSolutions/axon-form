@@ -175,7 +175,7 @@ export default function PageForm({ form, onSubmit }: IProps) {
             render={() => {
               return (
                 <FormItem>
-                  <FormLabel>Fields</FormLabel>
+                  <FormLabel required>Fields</FormLabel>
                   <SelectFieldTypeDialog onFieldTypeSelect={onAddFormField} />
                   <FormMessage />
                 </FormItem>

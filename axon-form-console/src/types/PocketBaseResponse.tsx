@@ -1,7 +1,7 @@
 export interface BaseResponse {
   id: string;
-  created_at: Date;
-  updated_at: Date;
+  created: Date;
+  updated: Date;
 }
 
 export interface NodeResponse extends BaseResponse {
@@ -46,6 +46,7 @@ export interface ConditionGroupResponse extends BaseResponse {
 }
 
 export interface PageResponse extends BaseResponse {
+  form: string;
   order: number;
   title: string;
   description: string;
@@ -54,4 +55,9 @@ export interface PageResponse extends BaseResponse {
   expand: {
     fields: NodeResponse[];
   };
+}
+
+export interface FormResponse extends BaseResponse {
+  title: string;
+  description: string;
 }

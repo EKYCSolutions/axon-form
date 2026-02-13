@@ -13,23 +13,18 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
-import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import type { Page } from '@/types/Page';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import { Loader2 } from 'lucide-react';
 import { useRef, useState, type ChangeEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 export default function FormPageList() {
   const navigate = useNavigate();
-  const {
-    pages,
-    updatePageOrder,
-    deletePage,
-    exportForm,
-    importForm,
-    clearAllData,
-  } = useFormBuilder();
+  const location = useLocation();
+  //
+  const { pages, updatePageOrder, deletePage, importForm, clearAllData } =
+    useFormBuilder();
 
   const [reOrderedPage, setReOrderedPage] = useState<Page[]>([]);
   const [isReordering, setIsReordering] = useState<boolean>(false);
@@ -123,7 +118,7 @@ export default function FormPageList() {
   };
 
   return (
-    <FormBuilderViewLayout>
+    <>
       <div className='flex justify-between items-center my-8 gap-4'>
         <PageHeader title='Pages' />
         <div className='flex gap-2'>
@@ -138,9 +133,6 @@ export default function FormPageList() {
             </>
           ) : (
             <>
-              <Button variant='outline' onClick={() => exportForm('form.json')}>
-                Export to JSON
-              </Button>
               <Button
                 variant='outline'
                 onClick={handleLoadJsonClick}
@@ -157,7 +149,7 @@ export default function FormPageList() {
               />
               <Button
                 variant='secondary'
-                onClick={() => navigate('/page/create')}
+                onClick={() => navigate(`${location.pathname}/page/create`)}
               >
                 Create New
               </Button>
@@ -215,6 +207,6 @@ export default function FormPageList() {
           <p>No pages available</p>
         </div>
       )}
-    </FormBuilderViewLayout>
+    </>
   );
 }

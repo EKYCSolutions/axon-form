@@ -99,7 +99,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
           return (
             <FormItem className='h-16'>
               <div className='flex items-center gap-2'>
-                <FormLabel>Field Name</FormLabel>
+                <FormLabel required>Field Name</FormLabel>
                 <HelpTooltip text='Unique key used in data and logic (e.g. first_name).' />
               </div>
               <FormControl>
@@ -117,7 +117,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
           return (
             <FormItem className='h-16'>
               <div className='flex items-center gap-2'>
-                <FormLabel>Field Label</FormLabel>
+                <FormLabel required>Field Label</FormLabel>
                 <HelpTooltip text='User-facing label shown on the form.' />
               </div>
               <FormControl>

@@ -2,6 +2,7 @@ import type { Node, NodeCondition } from './Node';
 
 export interface Page {
   id: string;
+  form: string;
   order: number;
   title: string;
   description: string;

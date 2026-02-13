@@ -14,26 +14,32 @@ import {
   createCondition,
   createConditionGroupFromString as createConditionGroupFromStringService,
   createEdge as createEdgeService,
+  createForm as createFormService,
   createNode as createNodeService,
   createPage as createPageService,
   deleteCondition as deleteConditionService,
+  deleteForm as deleteFormService,
   deleteNode as deleteNodeService,
   deletePage as deletePageService,
   getAllConditionGroups as getAllConditionGroupsService,
   getAllConditionsFromNode as getAllConditionsFromNodeService,
+  getAllForms as getAllFormsService,
   getAllInputFieldNodes as getAllInputFieldNodesService,
   getAllNodes as getAllNodesService,
   getAllPages as getAllPagesService,
+  getFormById as getFormByIdService,
   getPageById as getPageByIdService,
   getPageNode as getPageNodeService,
   getValueNodes as getValueNodesService,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
+  updateForm as updateFormService,
   updateNode as updateNodeService,
   updatePageOrder as updatePageOrderService,
   updatePage as updatePageService,
 } from '@/services/PocketBaseService';
 import type { Edge } from '@/types/Edge';
+import type { Form } from '@/types/Form';
 import type { EdgeConditionGroup } from '@/types/Graph';
 import { parseNodeResponse, type Node, type NodeBody } from '@/types/Node';
 import type { Page, PageBody } from '@/types/Page';
@@ -44,6 +50,7 @@ import { convertGraphToJSON } from '@/utils/Graph';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
+import type { FormSchemaData } from '@/validations/FormValidation';
 import { type NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageConditionFormSchemaData } from '@/validations/PageConditionValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
@@ -110,13 +117,28 @@ interface FormImportPayload {
 
 export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const [selectedPageId, setSelectedPageId] = useState<string>();
+  const [selectedFormId, setSelectedFormId] = useState<string>();
   const [fetchInputFieldNodes, setFetchInputFieldNodes] =
     useState<boolean>(false);
 
   // Query: Fetch all pages
+  const { data: formsData, refetch: refreshForms } = useQuery({
+    queryKey: ['forms'],
+    queryFn: () => getAllFormsService(),
+  });
+
+  // Query: Fetch single page details
+  const { data: singleFormData, refetch: refreshSingleForm } = useQuery({
+    queryKey: ['form', selectedFormId],
+    queryFn: () => getFormByIdService(selectedFormId!),
+    enabled: !!selectedFormId,
+  });
+
+  // Query: Fetch all pages
   const { data: pagesData, refetch: refreshPages } = useQuery({
-    queryKey: ['pages'],
-    queryFn: getAllPagesService,
+    queryKey: ['pages', selectedFormId],
+    queryFn: () => getAllPagesService(selectedFormId!),
+    enabled: !!selectedFormId,
   });
 
   // Query: Fetch single page details
@@ -162,12 +184,39 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   });
 
   // Transform pages data
+  const forms = useMemo(() => {
+    if (!formsData) return [];
+
+    return formsData
+      .map((form) => ({
+        ...form,
+        updated_at: form.updated,
+        created_at: form.created,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
+      );
+  }, [formsData]);
+
+  const selectedForm: Form | undefined = useMemo(() => {
+    if (!singleFormData) return undefined;
+
+    return {
+      ...singleFormData,
+      updated_at: singleFormData.updated,
+      created_at: singleFormData.created,
+    };
+  }, [singleFormData]);
+
+  // Transform pages data
   const pages = useMemo(() => {
     if (!pagesData) return [];
 
     return pagesData
       .map((page) => ({
         id: page.id,
+        form: page.form,
         order: page.order,
         title: page.title,
         description: page.description,
@@ -185,6 +234,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
     return {
       id: singlePageData.id,
+      form: singlePageData.form,
       node_id: pageNodeData.id,
       order: singlePageData.order,
       title: singlePageData.title,
@@ -543,6 +593,47 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [addCondition],
   );
 
+  // API: Get form
+  const getForm = useCallback(async (id: string) => {
+    setSelectedFormId(id);
+  }, []);
+
+  // API: Add form
+  const addForm = useCallback(async (data: FormSchemaData) => {
+    try {
+      await createFormService(data);
+      await refreshForms();
+      handleSuccess('Add Form Success');
+    } catch (err) {
+      handleError(err);
+    }
+  }, []);
+
+  // API: Add form
+  const updateForm = useCallback(
+    async (id: string, data: Partial<FormSchemaData>) => {
+      try {
+        await updateFormService(id, data);
+        await refreshForms();
+        await refreshSingleForm();
+        handleSuccess('Update Form Success');
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [],
+  );
+
+  const deleteForm = useCallback(async (id: string) => {
+    try {
+      await deleteFormService(id);
+      await refreshForms();
+      handleSuccess('Delete Form Success');
+    } catch (err) {
+      handleError(err);
+    }
+  }, []);
+
   // API: Add page
   const addPage = useCallback(
     async (data: PageFormSchemaData) => {
@@ -880,6 +971,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         // Create pages
         for (const page of layoutPages) {
           const pageRes = await createPageService({
+            form: '',
             title: page.title,
             description: page.description,
             order: page.order,
@@ -983,15 +1075,11 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                   );
                 }
 
-                const rawConditionValue = condition.value?.toString() ?? '';
-                const mappedConditionValue =
-                  oldNodeIdToNew.get(rawConditionValue) ?? rawConditionValue;
-
                 return createCondition({
                   check_node_id: checkNodeId,
                   edge: edgeRes.id,
                   expr: condition.expr as ConditionExpression,
-                  value: mappedConditionValue,
+                  value: condition.value?.toString() ?? '',
                 });
               }),
             );
@@ -1054,17 +1142,26 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   }, [refreshPages]);
 
   const value: FormBuilderContextType = {
+    forms,
+    selectedForm,
     pages,
     selectedPage,
     inputFieldNodes,
     refreshPages,
+    addForm,
+    getForm,
+    updateForm,
+    deleteForm,
+    //
     addPage,
     getPage,
     updatePage,
     deletePage,
+    //
     addPageConditions,
     updateCondition,
     deleteCondition,
+    //
     updatePageOrder,
     exportForm,
     importForm,
