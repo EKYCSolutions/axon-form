@@ -5,6 +5,7 @@ export interface BaseResponse {
 }
 
 export interface NodeResponse extends BaseResponse {
+  page: string;
   order: number;
   label: string;
   value: string;

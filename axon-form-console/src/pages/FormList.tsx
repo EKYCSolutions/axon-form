@@ -1,6 +1,15 @@
 import CustomAlertDialog from '@/components/CustomAlertDialog';
 import Header from '@/components/form-builder-view/Header';
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import {
   Table,
@@ -21,14 +31,36 @@ import { useFormBuilder } from '@/hooks/useFormBuilder';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import { formatDateTime } from '@/utils/Datetime';
 import { MoreVertical } from 'lucide-react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 
 export default function FormList() {
   const navigate = useNavigate();
   const { forms, deleteForm, exportForm } = useFormBuilder();
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [exportFormId, setExportFormId] = useState<string | null>(null);
+  const [exportFileName, setExportFileName] = useState('form');
 
   function onDelete(id: string) {
     deleteForm(id);
+  }
+
+  function openExportDialog(id: string) {
+    setExportFormId(id);
+    setExportFileName('form');
+    setIsExportDialogOpen(true);
+  }
+
+  function handleExportSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmedFileName = exportFileName.trim();
+    const normalizedFileName = trimmedFileName.endsWith('.json')
+      ? trimmedFileName
+      : `${trimmedFileName || 'form'}.json`;
+    if (!exportFormId) return;
+    exportForm(exportFormId, normalizedFileName);
+    setIsExportDialogOpen(false);
+    setExportFormId(null);
   }
 
   return (
@@ -64,13 +96,12 @@ export default function FormList() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     {formatDateTime(data.updated_at)}
-                    <DropdownMenu>
+                    <DropdownMenu modal={false}>
                       <DropdownMenuTrigger asChild>
                         <Button
                           variant='ghost'
                           className='data-[state=open]:bg-muted text-muted-foreground flex size-8'
                           size='icon'
-                          onClick={(e) => e.preventDefault()}
                         >
                           <MoreVertical />
                           <span className='sr-only'>Open menu</span>
@@ -78,7 +109,10 @@ export default function FormList() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align='end' className='w-36'>
                         <DropdownMenuItem
-                          onClick={() => exportForm('form.json')}
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            openExportDialog(data.id);
+                          }}
                         >
                           Export form
                         </DropdownMenuItem>
@@ -109,6 +143,47 @@ export default function FormList() {
           <p>No forms available</p>
         </div>
       )}
+      <Dialog
+        open={isExportDialogOpen}
+        onOpenChange={(open) => {
+          setIsExportDialogOpen(open);
+          if (!open) {
+            setExportFormId(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <form onSubmit={handleExportSubmit} className='space-y-4'>
+            <DialogHeader>
+              <DialogTitle>Export form</DialogTitle>
+              <DialogDescription>
+                Enter a filename for the exported JSON file.
+              </DialogDescription>
+            </DialogHeader>
+            <ButtonGroup className='w-full'>
+              <Input
+                value={exportFileName}
+                onChange={(event) => setExportFileName(event.target.value)}
+                placeholder='form'
+                autoFocus
+              />
+              <Button disabled variant='outline'>
+                .json
+              </Button>
+            </ButtonGroup>
+            <DialogFooter>
+              <Button
+                type='button'
+                variant='outline'
+                onClick={() => setIsExportDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type='submit'>Export</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </FormBuilderViewLayout>
   );
 }

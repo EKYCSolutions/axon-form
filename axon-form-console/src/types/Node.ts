@@ -21,6 +21,7 @@ export interface NodeCondition {
 
 export interface Node {
   id?: string;
+  page?: string;
   order?: number;
   type?: string;
   label?: string;
@@ -47,6 +48,7 @@ export function parseNodeResponse(node: NodeResponse): Node {
 
   return {
     id: node.id,
+    page: node.page,
     order: node.order,
     type: node.type,
     label: node.label,

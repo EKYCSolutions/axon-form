@@ -28,9 +28,15 @@ client.autoCancellation(false);
 
 export const getAllNodes = async (
   searchString: string = '',
+  pageIds: string[] = [],
 ): Promise<NodeResponse[]> => {
+  let filter = `label ~ "${searchString}"`;
+  if (pageIds.length > 0) {
+    const pageFilter = pageIds.map((id) => `page="${id}"`).join('||');
+    filter += ` && (${pageFilter})`;
+  }
   return await client.collection(PocketBaseCollection.NODES).getFullList({
-    filter: `label ~ "${searchString}"`,
+    filter,
     expand:
       'edges_via_source_node.conditions_via_edge,edges_via_target_node.conditions_via_edge',
   });

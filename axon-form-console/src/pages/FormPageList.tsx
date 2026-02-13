@@ -17,13 +17,14 @@ import type { Page } from '@/types/Page';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import { Loader2 } from 'lucide-react';
 import { useRef, useState, type ChangeEvent } from 'react';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 
 export default function FormPageList() {
+  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   //
-  const { pages, updatePageOrder, deletePage, importForm, clearAllData } =
+  const { pages, updatePageOrder, deletePage, importForm, clearAllFormPages } =
     useFormBuilder();
 
   const [reOrderedPage, setReOrderedPage] = useState<Page[]>([]);
@@ -81,10 +82,10 @@ export default function FormPageList() {
   };
 
   const handleLoadWithoutClearing = async () => {
-    if (!pendingImportData) return;
+    if (!pendingImportData || !id) return;
     try {
       setIsLoadingJson(true);
-      await importForm(pendingImportData);
+      await importForm(id, pendingImportData);
       setPendingImportData(null);
       setIsConfirmOpen(false);
     } catch (error) {
@@ -95,11 +96,12 @@ export default function FormPageList() {
   };
 
   const handleClearAndLoad = async () => {
-    if (!pendingImportData) return;
+    if (!pendingImportData || !id) return;
     try {
       setIsLoadingJson(true);
-      await clearAllData();
-      await importForm(pendingImportData);
+      const pageIds = pages.map((page) => page.id);
+      await clearAllFormPages(pageIds);
+      await importForm(id, pendingImportData);
       setPendingImportData(null);
       setIsConfirmOpen(false);
     } catch (error) {

@@ -39,6 +39,7 @@
     "lucide-react": "^0.525.0",
     "neo4jd3-ts": "^1.0.2",
     "pocketbase": "^0.26.1",
+    "radix-ui": "^1.4.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.60.0",

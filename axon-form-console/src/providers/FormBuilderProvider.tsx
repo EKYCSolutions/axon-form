@@ -10,7 +10,6 @@ import {
   type FormBuilderContextType,
 } from '@/contexts/FormBuilderContext';
 import {
-  clearAllData as clearAllDataService,
   createCondition,
   createConditionGroupFromString as createConditionGroupFromStringService,
   createEdge as createEdgeService,
@@ -74,6 +73,7 @@ interface FormImportLayoutPage {
 
 interface FormImportNode {
   id: string;
+  page: string;
   order?: number;
   type?: string;
   label?: string;
@@ -155,13 +155,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     enabled: !!selectedPageId,
   });
 
-  // Query: Fetch all nodes (lazy)
-  const { refetch: fetchNodes } = useQuery({
-    queryKey: ['nodes'],
-    queryFn: () => getAllNodesService(),
-    enabled: false,
-  });
-
   // Query: Fetch page node by page id
   const { data: pageNodeData } = useQuery({
     queryKey: ['pageNode', selectedPageId],
@@ -182,6 +175,40 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     queryFn: getAllConditionGroupsService,
     enabled: false,
   });
+
+  // Query: Fetch nodes by pageIds (lazy)
+  const fetchFormById = useCallback(async (id: string): Promise<Form> => {
+    const res = await getFormByIdService(id);
+    return {
+      id: res.id,
+      title: res.title,
+      description: res.description,
+      created_at: res.created,
+      updated_at: res.updated,
+    };
+  }, []);
+
+  // Query: Fetch nodes by pageIds (lazy)
+  const fetchNodesByPageIds = useCallback(async (pageIds: string[]) => {
+    return await getAllNodesService('', pageIds);
+  }, []);
+
+  // Query: Fetch nodes by pageIds (lazy)
+  const fetchFormPages = useCallback(
+    async (formId: string): Promise<Page[]> => {
+      const res = await getAllPagesService(formId);
+
+      return res.map((page) => ({
+        id: page.id,
+        form: page.form,
+        order: page.order,
+        title: page.title,
+        description: page.description,
+        fields: [],
+      }));
+    },
+    [],
+  );
 
   // Transform pages data
   const forms = useMemo(() => {
@@ -905,9 +932,20 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // API: Export form
   const exportForm = useCallback(
-    async (fileName: string) => {
+    async (id: string, fileName: string) => {
       try {
-        const { data: nodesData } = await fetchNodes();
+        let nodesData: NodeResponse[];
+
+        const form = await fetchFormById(id);
+        const formPages = await fetchFormPages(id);
+        const pageIds = formPages.map((p) => p.id);
+
+        if (pageIds.length == 0) {
+          nodesData = [];
+        } else {
+          nodesData = await fetchNodesByPageIds(pageIds);
+        }
+
         const { data: conditionGroupsData } = await fetchConditionGroups();
 
         if (!nodesData) return;
@@ -923,7 +961,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           conditions: cd.conditions,
         }));
 
-        const json = convertGraphToJSON(nodes, edges, conditionGroups, pages);
+        const json = convertGraphToJSON(
+          form,
+          nodes,
+          edges,
+          conditionGroups,
+          formPages,
+        );
 
         const addressResponse = await fetch(
           `${import.meta.env.BASE_URL}address.json`,
@@ -937,12 +981,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(err);
       }
     },
-    [pages, fetchNodes, fetchConditionGroups, parseEdges],
+    [
+      fetchFormById,
+      fetchFormPages,
+      fetchConditionGroups,
+      parseEdges,
+      fetchNodesByPageIds,
+    ],
   );
 
-  // API: Import form from JSON
+  // API:  from JSON
   const importForm = useCallback(
-    async (rawData: unknown) => {
+    async (id: string, rawData: unknown) => {
       try {
         const data = rawData as FormImportPayload;
 
@@ -971,7 +1021,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         // Create pages
         for (const page of layoutPages) {
           const pageRes = await createPageService({
-            form: '',
+            form: id,
             title: page.title,
             description: page.description,
             order: page.order,
@@ -1022,12 +1072,14 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         );
 
         for (const node of nonPageNodes) {
-          const oldPageId = nodePageMap.get(node.id);
-          const newPageId = oldPageIdToNew.get(oldPageId ?? '');
+          const oldPageId = nodePageMap.get(node.page);
+          const newPageId = oldPageIdToNew.get(oldPageId!);
+
+          if (!newPageId) continue;
 
           const nodeRes = await createNodeService({
             id: undefined,
-            page: newPageId ?? '',
+            page: newPageId,
             order: node.order,
             type: node.type as NodeType,
             label: node.label,
@@ -1132,14 +1184,17 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [refreshPages, replaceEdgeIdsInConditionString],
   );
 
-  const clearAllData = useCallback(async () => {
-    try {
-      await clearAllDataService();
-      await refreshPages();
-    } catch (error) {
-      handleError(error);
-    }
-  }, [refreshPages]);
+  const clearAllFormPages = useCallback(
+    async (pageIds: string[]) => {
+      try {
+        await Promise.all(pageIds.map((id) => deletePageService(id)));
+        await refreshPages();
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [refreshPages],
+  );
 
   const value: FormBuilderContextType = {
     forms,
@@ -1165,7 +1220,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     updatePageOrder,
     exportForm,
     importForm,
-    clearAllData,
+    clearAllFormPages,
   };
 
   return (
