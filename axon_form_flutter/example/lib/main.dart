@@ -59,7 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _loadJson() async {
     final String jsonString = await DefaultAssetBundle.of(
       context,
-    ).loadString('assets/gdi-online-sample.json');
+    ).loadString('assets/khmer-eid-form.json');
+    // ).loadString('assets/form.json');
 
     setState(() {
       formJson = jsonDecode(jsonString);
@@ -82,7 +83,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 String fullResult = JsonEncoder.withIndent(
                   '  ',
                 ).convert(result);
-                print("FORM RESULT OUTSIDE: $fullResult");
+                debugPrint(fullResult);
               },
             ),
     );
