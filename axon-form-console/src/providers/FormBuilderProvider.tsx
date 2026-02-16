@@ -204,7 +204,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         order: page.order,
         title: page.title,
         description: page.description,
-        fields: [],
+        fields:
+          page.expand?.fields && page.expand.fields.length > 0
+            ? page.expand.fields.map(parseNodeResponse)
+            : [],
       }));
     },
     [],
@@ -1127,11 +1130,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                   );
                 }
 
+                const valueNodeId = oldNodeIdToNew.get(condition.value);
+                if (!valueNodeId) {
+                  throw new Error(
+                    `Missing value node mapping for condition ${condition.id}`,
+                  );
+                }
+
                 return createCondition({
                   check_node_id: checkNodeId,
                   edge: edgeRes.id,
                   expr: condition.expr as ConditionExpression,
-                  value: condition.value?.toString() ?? '',
+                  value: valueNodeId,
                 });
               }),
             );

@@ -116,7 +116,6 @@ export const convertGraphToJSON = (
   conditionGroups: EdgeConditionGroup[],
   pages: Page[],
 ): Record<string, unknown> => {
-  console.log('form: ', form);
   //
   return {
     form: {
