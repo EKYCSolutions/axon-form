@@ -757,7 +757,7 @@ func (g Graph) ValidateRule(r node.ValidationRule, v string) (bool, error) {
 	case node.ValidationRuleTypePattern:
 		regex := r.Value
 		match, _ := regexp.MatchString(regex, v)
-		return match, errors.New("value does not pass regex validation")
+		return match, errors.New(r.Message)
 
 	case node.ValidationRuleTypeEmail:
 		emailRegex := `^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`
