@@ -21,10 +21,11 @@ import { Plus } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-import HelpTooltip from '../HelpToolTip';
+// import HelpTooltip from '../HelpToolTip';
 import ConditionFormField from './ConditionFormField';
 import OptionFormField from './OptionFormField';
 import ValidationRuleFormField from './ValidationRuleFormField';
+import HelpTooltip from '../HelpTooltip';
 
 interface IProps {
   fieldIndex: number;

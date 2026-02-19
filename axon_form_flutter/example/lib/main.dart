@@ -3,13 +3,16 @@ import 'dart:typed_data';
 
 import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter_example/app_theme.dart';
+import 'package:axon_form_flutter_example/model/document_requirement.dart';
 import 'package:axon_form_flutter_example/widgets/custom_date_time_picker.dart';
 import 'package:axon_form_flutter_example/widgets/custom_dropdown.dart';
+import 'package:axon_form_flutter_example/provider/passport_application_form_provider.dart';
 import 'package:axon_form_flutter_example/widgets/shared/base_card.dart';
 import 'package:axon_form_flutter_example/widgets/custom_bottom_sheet_dropdown.dart';
 import 'package:axon_form_flutter_example/widgets/custom_radio_group.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,33 +23,40 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      home: const MyHomePage(),
-      theme: ThemeData(
-        //  scaffoldBackgroundColor: colorScheme.surface,
-        scaffoldBackgroundColor: Colors.lightBlue.shade50,
-        textTheme: GoogleFonts.notoSansKhmerTextTheme(
-          Theme.of(context).textTheme,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => PassportApplicationFormProvider(),
         ),
-        extensions: [
-          AxonFormTextInputStyle(
-            decoration: InputDecoration(
-              prefixIcon: Icon(Icons.note_alt_outlined),
-              suffix: Icon(Icons.check_circle_outline),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        home: const MyHomePage(),
+        theme: ThemeData(
+          //  scaffoldBackgroundColor: colorScheme.surface,
+          scaffoldBackgroundColor: Colors.lightBlue.shade50,
+          textTheme: GoogleFonts.notoSansKhmerTextTheme(
+            Theme.of(context).textTheme,
+          ),
+          extensions: [
+            AxonFormTextInputStyle(
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.note_alt_outlined),
+                suffix: Icon(Icons.check_circle_outline),
+              ),
             ),
-          ),
-          AxonFormNumberInputStyle(
-            decoration: InputDecoration(prefixIcon: Icon(Icons.numbers)),
-          ),
-          AxonFormPasswordInputStyle(),
-          AxonFormFileInputStyle(),
-          AxonFormRadioInputStyle(),
-          AxonFormCheckboxInputStyle(),
-          AxonFormDateInputStyle(),
-          AxonFormMultiSelectInputStyle(),
-          AxonFormDropdownInputStyle(isExpanded: true),
-        ],
+            AxonFormNumberInputStyle(
+              decoration: InputDecoration(prefixIcon: Icon(Icons.numbers)),
+            ),
+            AxonFormPasswordInputStyle(),
+            AxonFormFileInputStyle(),
+            AxonFormRadioInputStyle(),
+            AxonFormCheckboxInputStyle(),
+            AxonFormDateInputStyle(),
+            AxonFormMultiSelectInputStyle(),
+            AxonFormDropdownInputStyle(isExpanded: true),
+          ],
+        ),
       ),
     );
   }
@@ -74,7 +84,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _loadJson() async {
     final String jsonString = await DefaultAssetBundle.of(
       context,
-    ).loadString('assets/gdi-online-sample-new.json');
+      // ).loadString('assets/form.json');
+    // ).loadString('assets/gdi-online-sample-latest.json');
+    ).loadString('assets/gdi-online-sample-latest-latest.json');
+    // ).loadString('assets/gdi-online-sample-new.json');
 
     setState(() {
       formJson = jsonDecode(jsonString);
@@ -133,6 +146,28 @@ class _MyHomePageState extends State<MyHomePage> {
                         ...nodes.map((n) {
                           return AxonFormFieldBuilder(node: n);
                         }),
+                      ],
+                    ),
+                  );
+                }
+                if (page.id == "dkttxeyxfa2fl7g") {
+                  final passportApplicationFormProvider = Provider.of<
+                      PassportApplicationFormProvider>(context, listen: true);
+                      print("passportApplicationFormProvider ::: ${passportApplicationFormProvider.documentRequirement}");
+                  return SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("page title ${page.title}"),
+                        Text("page desc ${page.description}"),
+                        ...nodes.map((n) {
+                          return AxonFormFieldBuilder(node: n);
+                        }),
+                        ...passportApplicationFormProvider.documentRequirement?.personal ?.documentGroups.map((entry) {
+                          return ListTile(
+                            title: Text("${entry.document.nameEng} - ${entry.group}"),
+                          );
+                        }).toList() ?? [],
                       ],
                     ),
                   );
@@ -247,7 +282,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 }
 
-                if (node.id == "n28xbxai65x46ln") {
+                if (node.id == "o9eix35hpavz744") {
                   return AxonRadioInput(
                     node: node,
                     builder:
@@ -264,7 +299,18 @@ class _MyHomePageState extends State<MyHomePage> {
                             field: field,
                             options: options,
                             selectedValue: selectedValue,
-                            onChanged: onChanged,
+                            onChanged: (value) {
+                              onChanged(value);
+                              if (value != null) {
+                                final passportApplicationFormProvider =
+                                    Provider.of<
+                                      PassportApplicationFormProvider
+                                    >(context, listen: false);
+                                passportApplicationFormProvider
+                                    .setSelectedSubServiceType(value, context);
+                              }
+                            },
+
                             errorText: errorText,
                           );
                         },
@@ -292,7 +338,6 @@ class _MyHomePageState extends State<MyHomePage> {
                             name: node.label,
                             sheetLabel: 'Select',
                             label: node.label,
-
                           );
                         },
                   );
@@ -301,7 +346,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (node.fieldType == FieldType.addressDropdown) {
                   return AxonAddressDropdownInput(
                     node: node,
-                    builder:(context, field, options, selectedValue, onChanged, onSearch, errorText) {
+                    builder:
+                        (
+                          context,
+                          field,
+                          options,
+                          selectedValue,
+                          onChanged,
+                          onSearch,
+                          errorText,
+                        ) {
                           return FormOptionSheet(
                             context: context,
                             field: field,
@@ -316,9 +370,6 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                   );
                 }
-
-
-
 
                 if (node.id == "f_born_in") {
                   return AxonRadioInput(

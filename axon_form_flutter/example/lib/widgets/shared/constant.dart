@@ -21,4 +21,9 @@ class Constants {
 
   static BorderRadius containerRadius = BorderRadius.circular(16);
   static BorderRadius baseCardRadius = BorderRadius.circular(24);
+
+  static const renewalReasonExpired = "1";
+  static const renewalReasonLost = "2";
+  static const renewalReasonDamaged = "3";
+  static const renewalReasonCorrectData = "4";
 }
