@@ -39,7 +39,7 @@ import {
   useState,
   type MouseEventHandler,
 } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import CustomAlertDialog from './CustomAlertDialog';
 import { Button } from './ui/button';
 import {
@@ -155,6 +155,8 @@ export function PageDataTable({
   onDelete,
 }: IProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  //
   const { pages } = useFormBuilder();
   //
   const [initialData, setInitialData] = useState(pages);
@@ -238,9 +240,11 @@ export function PageDataTable({
                   key={data.id}
                   idx={idx}
                   row={data}
-                  onRowClick={() => navigate(`/page/${data.id}`)}
+                  onRowClick={() =>
+                    navigate(`${location.pathname}/page/${data.id}`)
+                  }
                   onViewConditionClick={() =>
-                    navigate(`/page/${data.id}/condition`)
+                    navigate(`${location.pathname}/page/${data.id}/condition`)
                   }
                   onDelete={onDelete}
                 />

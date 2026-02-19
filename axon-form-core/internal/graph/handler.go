@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -402,9 +401,20 @@ func (g Graph) GetPageFormValue(pageID string) (bool, error, string) {
 func (g Graph) GetFormValue() (bool, error, string) {
 	result := make(map[string]any)
 
-	inputNodes := g.Nodes["inputs"]
+	// Only include input nodes referenced by page.field_ids.
+	fieldIDs := make(map[string]struct{})
+	for _, p := range g.Pages {
+		for _, id := range p.FieldIDs {
+			fieldIDs[id] = struct{}{}
+		}
+	}
 
-	for _, n := range inputNodes {
+	for id := range fieldIDs {
+		n, ok := g.Nodes["inputs"][id]
+		if !ok {
+			return false, fmt.Errorf("[GetFormValue] Field not found %s", id), ""
+		}
+
 		nValue, err := g.resolveNodeValue(n)
 		if err != nil {
 			return false, err, ""
@@ -415,7 +425,7 @@ func (g Graph) GetFormValue() (bool, error, string) {
 
 	jsonBytes, err := json.Marshal(result)
 	if err != nil {
-		log.Fatal(err)
+		return false, err, ""
 	}
 
 	return true, nil, string(jsonBytes)
@@ -747,7 +757,7 @@ func (g Graph) ValidateRule(r node.ValidationRule, v string) (bool, error) {
 	case node.ValidationRuleTypePattern:
 		regex := r.Value
 		match, _ := regexp.MatchString(regex, v)
-		return match, errors.New("value does not pass regex validation")
+		return match, errors.New(r.Message)
 
 	case node.ValidationRuleTypeEmail:
 		emailRegex := `^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$`

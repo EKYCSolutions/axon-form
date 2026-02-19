@@ -3,8 +3,10 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from './providers/ThemeProvider';
 
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import CreateForm from './pages/CreateForm.js';
 import CreatePageForm from './pages/CreatePageForm';
-import MainPage from './pages/MainPage';
+import FormDetail from './pages/FormDetail.js';
+import FormList from './pages/FormList.js';
 import PageConditionForm from './pages/PageConditionForm.js';
 import PageDetail from './pages/PageDetail';
 import { FormBuilderProvider } from './providers/FormBuilderProvider';
@@ -15,22 +17,30 @@ export default function App() {
 
   const router = createBrowserRouter([
     {
-      path: '/page',
-      element: <MainPage />,
+      path: '/',
+      element: <FormList />,
     },
     {
-      path: '/page/create',
+      path: '/form/create',
+      element: <CreateForm />,
+    },
+    {
+      path: '/form/:id',
+      element: <FormDetail />,
+    },
+    {
+      path: '/form/:id/page/create',
       element: <CreatePageForm />,
     },
     {
-      path: '/page/:id',
+      path: '/form/:id/page/:pageId',
       element: <PageDetail />,
     },
     {
-      path: '/page/:id/condition',
+      path: '/form/:id/page/:pageId/condition',
       element: <PageConditionForm />,
     },
-    { path: '*', element: <Navigate to='/page' replace /> },
+    { path: '*', element: <Navigate to='/' replace /> },
   ]);
 
   return (

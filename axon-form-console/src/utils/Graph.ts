@@ -4,6 +4,7 @@ import {
   NodeFieldType,
 } from '@/configs/graph';
 import type { Edge } from '@/types/Edge';
+import type { Form } from '@/types/Form';
 import type { EdgeConditionGroup, GraphEdge } from '@/types/Graph';
 import type { Node } from '@/types/Node';
 import type { Page } from '@/types/Page';
@@ -109,6 +110,7 @@ export const convertConditionStringToConditionGroupObject = (
 };
 
 export const convertGraphToJSON = (
+  form: Form,
   nodes: Node[],
   edges: Edge[],
   conditionGroups: EdgeConditionGroup[],
@@ -116,6 +118,11 @@ export const convertGraphToJSON = (
 ): Record<string, unknown> => {
   //
   return {
+    form: {
+      id: form.id,
+      title: form.title,
+      description: form.description,
+    },
     layout: {
       pages: pages.map((page) => ({
         id: page.id,
@@ -129,6 +136,7 @@ export const convertGraphToJSON = (
     },
     nodes: nodes.map((node) => ({
       id: node.id,
+      page: node.page,
       order: node.order,
       type: node.type,
       label: node.label,
@@ -144,6 +152,7 @@ export const convertGraphToJSON = (
       source_node: edge.sourceNode,
       target_node: edge.targetNode,
       type: edge.edgeType,
+      conditions: edge.conditions,
     })),
     condition_groups: conditionGroups,
   };

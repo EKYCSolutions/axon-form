@@ -10,30 +10,35 @@ import {
   type FormBuilderContextType,
 } from '@/contexts/FormBuilderContext';
 import {
-  clearAllData as clearAllDataService,
   createCondition,
   createConditionGroupFromString as createConditionGroupFromStringService,
   createEdge as createEdgeService,
+  createForm as createFormService,
   createNode as createNodeService,
   createPage as createPageService,
   deleteCondition as deleteConditionService,
+  deleteForm as deleteFormService,
   deleteNode as deleteNodeService,
   deletePage as deletePageService,
   getAllConditionGroups as getAllConditionGroupsService,
   getAllConditionsFromNode as getAllConditionsFromNodeService,
+  getAllForms as getAllFormsService,
   getAllInputFieldNodes as getAllInputFieldNodesService,
   getAllNodes as getAllNodesService,
   getAllPages as getAllPagesService,
+  getFormById as getFormByIdService,
   getPageById as getPageByIdService,
   getPageNode as getPageNodeService,
   getValueNodes as getValueNodesService,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
+  updateForm as updateFormService,
   updateNode as updateNodeService,
   updatePageOrder as updatePageOrderService,
   updatePage as updatePageService,
 } from '@/services/PocketBaseService';
 import type { Edge } from '@/types/Edge';
+import type { Form } from '@/types/Form';
 import type { EdgeConditionGroup } from '@/types/Graph';
 import { parseNodeResponse, type Node, type NodeBody } from '@/types/Node';
 import type { Page, PageBody } from '@/types/Page';
@@ -44,6 +49,7 @@ import { convertGraphToJSON } from '@/utils/Graph';
 import { handleError, handleSuccess } from '@/utils/Toast';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
+import type { FormSchemaData } from '@/validations/FormValidation';
 import { type NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageConditionFormSchemaData } from '@/validations/PageConditionValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
@@ -67,6 +73,7 @@ interface FormImportLayoutPage {
 
 interface FormImportNode {
   id: string;
+  page: string;
   order?: number;
   type?: string;
   label?: string;
@@ -88,8 +95,8 @@ interface FormImportEdge {
     id: string;
     check_node: string;
     edge: string;
-    expression: string;
-    expected_value: string;
+    expr: string;
+    value: string;
   }>;
 }
 
@@ -110,13 +117,28 @@ interface FormImportPayload {
 
 export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const [selectedPageId, setSelectedPageId] = useState<string>();
+  const [selectedFormId, setSelectedFormId] = useState<string>();
   const [fetchInputFieldNodes, setFetchInputFieldNodes] =
     useState<boolean>(false);
 
   // Query: Fetch all pages
+  const { data: formsData, refetch: refreshForms } = useQuery({
+    queryKey: ['forms'],
+    queryFn: () => getAllFormsService(),
+  });
+
+  // Query: Fetch single page details
+  const { data: singleFormData, refetch: refreshSingleForm } = useQuery({
+    queryKey: ['form', selectedFormId],
+    queryFn: () => getFormByIdService(selectedFormId!),
+    enabled: !!selectedFormId,
+  });
+
+  // Query: Fetch all pages
   const { data: pagesData, refetch: refreshPages } = useQuery({
-    queryKey: ['pages'],
-    queryFn: getAllPagesService,
+    queryKey: ['pages', selectedFormId],
+    queryFn: () => getAllPagesService(selectedFormId!),
+    enabled: !!selectedFormId,
   });
 
   // Query: Fetch single page details
@@ -131,13 +153,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     queryKey: ['fieldConditions', selectedPageId],
     queryFn: () => getAllConditionsFromNodeService(selectedPageId!),
     enabled: !!selectedPageId,
-  });
-
-  // Query: Fetch all nodes (lazy)
-  const { refetch: fetchNodes } = useQuery({
-    queryKey: ['nodes'],
-    queryFn: () => getAllNodesService(),
-    enabled: false,
   });
 
   // Query: Fetch page node by page id
@@ -161,6 +176,69 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     enabled: false,
   });
 
+  // Query: Fetch nodes by pageIds (lazy)
+  const fetchFormById = useCallback(async (id: string): Promise<Form> => {
+    const res = await getFormByIdService(id);
+    return {
+      id: res.id,
+      title: res.title,
+      description: res.description,
+      created_at: res.created,
+      updated_at: res.updated,
+    };
+  }, []);
+
+  // Query: Fetch nodes by pageIds (lazy)
+  const fetchNodesByPageIds = useCallback(async (pageIds: string[]) => {
+    return await getAllNodesService('', pageIds);
+  }, []);
+
+  // Query: Fetch nodes by pageIds (lazy)
+  const fetchFormPages = useCallback(
+    async (formId: string): Promise<Page[]> => {
+      const res = await getAllPagesService(formId);
+
+      return res.map((page) => ({
+        id: page.id,
+        form: page.form,
+        order: page.order,
+        title: page.title,
+        description: page.description,
+        fields:
+          page.expand?.fields && page.expand.fields.length > 0
+            ? page.expand.fields.map(parseNodeResponse)
+            : [],
+      }));
+    },
+    [],
+  );
+
+  // Transform pages data
+  const forms = useMemo(() => {
+    if (!formsData) return [];
+
+    return formsData
+      .map((form) => ({
+        ...form,
+        updated_at: form.updated,
+        created_at: form.created,
+      }))
+      .sort(
+        (a, b) =>
+          new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
+      );
+  }, [formsData]);
+
+  const selectedForm: Form | undefined = useMemo(() => {
+    if (!singleFormData) return undefined;
+
+    return {
+      ...singleFormData,
+      updated_at: singleFormData.updated,
+      created_at: singleFormData.created,
+    };
+  }, [singleFormData]);
+
   // Transform pages data
   const pages = useMemo(() => {
     if (!pagesData) return [];
@@ -168,6 +246,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     return pagesData
       .map((page) => ({
         id: page.id,
+        form: page.form,
         order: page.order,
         title: page.title,
         description: page.description,
@@ -185,6 +264,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
     return {
       id: singlePageData.id,
+      form: singlePageData.form,
       node_id: pageNodeData.id,
       order: singlePageData.order,
       title: singlePageData.title,
@@ -225,8 +305,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         id: cond.id,
         check_node: cond.check_node,
         edge: cond.edge,
-        expected_value: cond.expected_value,
-        expression: cond.expression,
+        value: cond.expected_value,
+        expr: cond.expression,
         target_node_id: cond.target_node_id,
       })),
       fields: (selectedPageData.fields ?? []).map((field) => {
@@ -237,8 +317,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             id: cond.id,
             edge: cond.edge,
             check_node: cond.check_node,
-            expected_value: cond.expected_value,
-            expression: cond.expression,
+            value: cond.expected_value,
+            expr: cond.expression,
             target_node_id: cond.target_node_id,
           }));
 
@@ -346,7 +426,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         const addValueNodeRes = await createNodeService(valueNodeData);
 
         const hasOptionEdgeData: EdgeFormSchemaData = {
-          label: '',
+          label: `select-${option.value}`,
           source_node: parentNodeId,
           target_node: addValueNodeRes.id,
           type: EdgeType.HasOption,
@@ -362,12 +442,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // Helper: Add condition
   const addCondition = useCallback(
-    async (targetNodeId: string, condition: ConditionFormSchemaData) => {
+    async (
+      targetNode: NodeFormSchemaData,
+      condition: ConditionFormSchemaData,
+    ) => {
       try {
         const showEdgeData: EdgeFormSchemaData = {
-          label: '',
+          label: `show-${targetNode.field_name}`,
           source_node: condition.check_node_id!,
-          target_node: targetNodeId,
+          target_node: targetNode.id!,
           type: EdgeType.Shows,
         };
 
@@ -442,8 +525,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             updated: updatedConditions,
           } = getFieldArrayChanges(initialData.conditions, data.conditions);
 
-          if (addedConditions.length > 0) {
-            addedConditions.forEach((cond) => addCondition(id, cond));
+          const nodeConditionData = {
+            ...initialData,
+            field_name: data.field_name,
+          };
+
+          if (data && addedConditions.length > 0) {
+            addedConditions.forEach((cond) =>
+              addCondition(nodeConditionData, cond),
+            );
           }
 
           if (deletedConditions.length > 0) {
@@ -519,21 +609,60 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       for (const field of fields) {
         if (!field.conditions) continue;
 
-        const fieldId = nodeIdMap[field.id as string];
-
         await Promise.all(
           field.conditions.map((cond) => {
             const conditionData = {
               ...cond,
               node_id: nodeIdMap[cond.check_node_id as string],
             };
-            return addCondition(fieldId, conditionData);
+            return addCondition(field, conditionData);
           }),
         );
       }
     },
     [addCondition],
   );
+
+  // API: Get form
+  const getForm = useCallback(async (id: string) => {
+    setSelectedFormId(id);
+  }, []);
+
+  // API: Add form
+  const addForm = useCallback(async (data: FormSchemaData) => {
+    try {
+      await createFormService(data);
+      await refreshForms();
+      handleSuccess('Add Form Success');
+    } catch (err) {
+      handleError(err);
+    }
+  }, []);
+
+  // API: Add form
+  const updateForm = useCallback(
+    async (id: string, data: Partial<FormSchemaData>) => {
+      try {
+        await updateFormService(id, data);
+        await refreshForms();
+        await refreshSingleForm();
+        handleSuccess('Update Form Success');
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [],
+  );
+
+  const deleteForm = useCallback(async (id: string) => {
+    try {
+      await deleteFormService(id);
+      await refreshForms();
+      handleSuccess('Delete Form Success');
+    } catch (err) {
+      handleError(err);
+    }
+  }, []);
 
   // API: Add page
   const addPage = useCallback(
@@ -704,7 +833,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
               ...cond,
               node_id: cond.check_node_id,
             };
-            return addCondition(pageNodeId, conditionData);
+
+            const nodeConditionData: NodeFormSchemaData = {
+              id: pageNodeId,
+              type: NodeType.Page,
+              label: '',
+              field_name: '',
+            };
+
+            return addCondition(nodeConditionData, conditionData);
           }),
         );
         handleSuccess('Add Page Conditions Success');
@@ -798,14 +935,26 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // API: Export form
   const exportForm = useCallback(
-    async (fileName: string) => {
+    async (id: string, fileName: string) => {
       try {
-        const { data: nodesData } = await fetchNodes();
+        let nodesData: NodeResponse[];
+
+        const form = await fetchFormById(id);
+        const formPages = await fetchFormPages(id);
+        const pageIds = formPages.map((p) => p.id);
+
+        if (pageIds.length == 0) {
+          nodesData = [];
+        } else {
+          nodesData = await fetchNodesByPageIds(pageIds);
+        }
+
         const { data: conditionGroupsData } = await fetchConditionGroups();
 
         if (!nodesData) return;
 
         const nodes = nodesData.map(parseNodeResponse);
+
         const edges = parseEdges(nodes);
         const conditionGroups: EdgeConditionGroup[] = (
           conditionGroupsData ?? []
@@ -815,7 +964,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           conditions: cd.conditions,
         }));
 
-        const json = convertGraphToJSON(nodes, edges, conditionGroups, pages);
+        const json = convertGraphToJSON(
+          form,
+          nodes,
+          edges,
+          conditionGroups,
+          formPages,
+        );
 
         const addressResponse = await fetch(
           `${import.meta.env.BASE_URL}address.json`,
@@ -829,12 +984,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(err);
       }
     },
-    [pages, fetchNodes, fetchConditionGroups, parseEdges],
+    [
+      fetchFormById,
+      fetchFormPages,
+      fetchConditionGroups,
+      parseEdges,
+      fetchNodesByPageIds,
+    ],
   );
 
-  // API: Import form from JSON
+  // API:  from JSON
   const importForm = useCallback(
-    async (rawData: unknown) => {
+    async (id: string, rawData: unknown) => {
       try {
         const data = rawData as FormImportPayload;
 
@@ -863,6 +1024,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         // Create pages
         for (const page of layoutPages) {
           const pageRes = await createPageService({
+            form: id,
             title: page.title,
             description: page.description,
             order: page.order,
@@ -913,12 +1075,14 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         );
 
         for (const node of nonPageNodes) {
-          const oldPageId = nodePageMap.get(node.id);
-          const newPageId = oldPageIdToNew.get(oldPageId ?? '');
+          const oldPageId = nodePageMap.get(node.page);
+          const newPageId = oldPageIdToNew.get(oldPageId!);
+
+          if (!newPageId) continue;
 
           const nodeRes = await createNodeService({
             id: undefined,
-            page: newPageId ?? '',
+            page: newPageId,
             order: node.order,
             type: node.type as NodeType,
             label: node.label,
@@ -966,11 +1130,18 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                   );
                 }
 
+                const valueNodeId = oldNodeIdToNew.get(condition.value);
+                if (!valueNodeId) {
+                  throw new Error(
+                    `Missing value node mapping for condition ${condition.id}`,
+                  );
+                }
+
                 return createCondition({
                   check_node_id: checkNodeId,
                   edge: edgeRes.id,
-                  expr: condition.expression as ConditionExpression,
-                  value: condition.expected_value?.toString() ?? '',
+                  expr: condition.expr as ConditionExpression,
+                  value: valueNodeId,
                 });
               }),
             );
@@ -1023,31 +1194,43 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [refreshPages, replaceEdgeIdsInConditionString],
   );
 
-  const clearAllData = useCallback(async () => {
-    try {
-      await clearAllDataService();
-      await refreshPages();
-    } catch (error) {
-      handleError(error);
-    }
-  }, [refreshPages]);
+  const clearAllFormPages = useCallback(
+    async (pageIds: string[]) => {
+      try {
+        await Promise.all(pageIds.map((id) => deletePageService(id)));
+        await refreshPages();
+      } catch (error) {
+        handleError(error);
+      }
+    },
+    [refreshPages],
+  );
 
   const value: FormBuilderContextType = {
+    forms,
+    selectedForm,
     pages,
     selectedPage,
     inputFieldNodes,
     refreshPages,
+    addForm,
+    getForm,
+    updateForm,
+    deleteForm,
+    //
     addPage,
     getPage,
     updatePage,
     deletePage,
+    //
     addPageConditions,
     updateCondition,
     deleteCondition,
+    //
     updatePageOrder,
     exportForm,
     importForm,
-    clearAllData,
+    clearAllFormPages,
   };
 
   return (

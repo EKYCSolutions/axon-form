@@ -1,6 +1,6 @@
 import PageForm from '@/components/form-builder-view/PageForm';
+import LoadingContainer from '@/components/LoadingContainer';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
-import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import {
   convertPageToPageFormSchema,
   PageFormSchema,
@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
 export default function PageDetail() {
-  const { id } = useParams();
+  const { pageId } = useParams();
   const { selectedPage, getPage, updatePage } = useFormBuilder();
   //
   const hasInitialized = useRef(false);
@@ -27,13 +27,13 @@ export default function PageDetail() {
   });
 
   useEffect(() => {
-    if (id) {
-      getPage(id);
+    if (pageId) {
+      getPage(pageId);
     }
   }, []);
 
   useEffect(() => {
-    if (selectedPage && selectedPage.id == id && !hasInitialized.current) {
+    if (selectedPage && selectedPage.id == pageId && !hasInitialized.current) {
       const pageFormSchema = convertPageToPageFormSchema(selectedPage);
       //
       setInitialPageSchema(pageFormSchema);
@@ -45,20 +45,19 @@ export default function PageDetail() {
   }, [selectedPage]);
 
   function onSubmit(data: PageFormSchemaData) {
-    if (!id || !initialPageSchema) {
+    if (!pageId || !initialPageSchema) {
       return;
     }
-    updatePage(id, initialPageSchema, data);
+    updatePage(pageId, initialPageSchema, data);
     form.reset(data);
   }
 
   if (loading) {
     return (
-      <FormBuilderViewLayout>
-        <div className='flex items-center justify-center h-full'>
-          <p>Loading Page...</p>
-        </div>
-      </FormBuilderViewLayout>
+      <LoadingContainer
+        title='Loading Page Details'
+        description='Please wait while we fetch the page information.'
+      />
     );
   }
 

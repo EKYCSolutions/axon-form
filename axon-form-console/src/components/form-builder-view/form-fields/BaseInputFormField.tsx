@@ -19,9 +19,10 @@ import { NodeFieldType, ValidationRuleType } from '@/configs/graph';
 import { Plus } from 'lucide-react';
 
 import { Label } from '@/components/ui/label';
+import { handleError } from '@/utils/Toast';
+import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import { useFieldArray, useFormContext } from 'react-hook-form';
-// import HelpTooltip from '../HelpToolTip';
 import ConditionFormField from './ConditionFormField';
 import OptionFormField from './OptionFormField';
 import ValidationRuleFormField from './ValidationRuleFormField';
@@ -98,7 +99,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
           return (
             <FormItem className='h-16'>
               <div className='flex items-center gap-2'>
-                <FormLabel>Field Name</FormLabel>
+                <FormLabel required>Field Name</FormLabel>
                 <HelpTooltip text='Unique key used in data and logic (e.g. first_name).' />
               </div>
               <FormControl>
@@ -116,7 +117,7 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
           return (
             <FormItem className='h-16'>
               <div className='flex items-center gap-2'>
-                <FormLabel>Field Label</FormLabel>
+                <FormLabel required>Field Label</FormLabel>
                 <HelpTooltip text='User-facing label shown on the form.' />
               </div>
               <FormControl>
@@ -259,6 +260,9 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
               const selectOptionLabel = watch(
                 `fields.${fieldIndex}.select_options.${index}.label`,
               );
+              const selectOptionId = getValues(
+                `fields.${fieldIndex}.select_options.${index}.id`,
+              );
 
               return (
                 <OptionFormField
@@ -268,7 +272,26 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
                   optionIndex={index}
                   label={selectOptionLabel}
                   //
-                  onRemoveOption={() => removeSelectOptionField(index)}
+                  onRemoveOption={() => {
+                    const fields = getValues('fields') ?? [];
+                    const hasLinkedCondition = fields.some(
+                      (formField: NodeFormSchemaData) =>
+                        (formField.conditions ?? []).some(
+                          (condition) => condition.value === selectOptionId,
+                        ),
+                    );
+
+                    if (hasLinkedCondition) {
+                      handleError(
+                        Error(
+                          `Cannot delete option ${selectOptionLabel ?? ''} because it is used in conditions`,
+                        ),
+                      );
+                      return;
+                    }
+
+                    removeSelectOptionField(index);
+                  }}
                 />
               );
             })}

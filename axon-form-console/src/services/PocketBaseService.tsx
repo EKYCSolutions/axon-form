@@ -6,12 +6,14 @@ import type {
   ConditionGroupResponse,
   ConditionResponse,
   EdgeResponse,
+  FormResponse,
   NodeResponse,
   PageResponse,
 } from '@/types/PocketBaseResponse';
 import type { ConditionGroupFormSchemaData } from '@/validations/ConditionGroupValidation';
 import type { ConditionFormSchemaData } from '@/validations/ConditionValidation';
 import type { EdgeFormSchemaData } from '@/validations/EdgeValidation';
+import type { FormSchemaData } from '@/validations/FormValidation';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import PocketBase from 'pocketbase';
@@ -26,9 +28,15 @@ client.autoCancellation(false);
 
 export const getAllNodes = async (
   searchString: string = '',
+  pageIds: string[] = [],
 ): Promise<NodeResponse[]> => {
+  let filter = `label ~ "${searchString}"`;
+  if (pageIds.length > 0) {
+    const pageFilter = pageIds.map((id) => `page="${id}"`).join('||');
+    filter += ` && (${pageFilter})`;
+  }
   return await client.collection(PocketBaseCollection.NODES).getFullList({
-    filter: `label ~ "${searchString}"`,
+    filter,
     expand:
       'edges_via_source_node.conditions_via_edge,edges_via_target_node.conditions_via_edge',
   });
@@ -230,13 +238,42 @@ export const clearAllData = async (): Promise<void> => {
   for (const collection of collections) {
     const records = await client.collection(collection).getFullList();
     if (!records.length) continue;
-    await Promise.all(records.map((record) => client.collection(collection).delete(record.id)));
+    await Promise.all(
+      records.map((record) => client.collection(collection).delete(record.id)),
+    );
   }
 };
 
-export const getAllPages = async (): Promise<PageResponse[]> => {
+export const getAllForms = async (): Promise<FormResponse[]> => {
+  return await client.collection(PocketBaseCollection.FORMS).getFullList();
+};
+
+export const getFormById = async (id: string): Promise<FormResponse> => {
+  return await client.collection(PocketBaseCollection.FORMS).getOne(id);
+};
+
+export const createForm = async (
+  data: FormSchemaData,
+): Promise<FormResponse> => {
+  return await client.collection(PocketBaseCollection.FORMS).create(data);
+};
+
+export const updateForm = async (
+  id: string,
+  data: Partial<FormSchemaData>,
+): Promise<PageResponse> => {
+  //
+  return await client.collection(PocketBaseCollection.FORMS).update(id, data);
+};
+
+export const deleteForm = async (id: string): Promise<boolean> => {
+  return await client.collection(PocketBaseCollection.FORMS).delete(id);
+};
+
+export const getAllPages = async (formId: string): Promise<PageResponse[]> => {
   return await client.collection(PocketBaseCollection.PAGES).getFullList({
     expand: 'fields',
+    filter: `form = "${formId}"`,
   });
 };
 
