@@ -5,6 +5,7 @@ import { convertNodeToNodeForm, NodeFormSchema } from './NodeValidation';
 
 // Main form schema
 export const PageFormSchema = z.object({
+  id: z.string().optional(),
   form: z.string(),
   title: z.string().min(1, 'Form title is required'),
   description: z.string().optional(),

@@ -1038,6 +1038,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         // Create pages
         for (const page of layoutPages) {
           const pageRes = await createPageService({
+            id: page.id,
             form: id,
             title: page.title,
             description: page.description,
@@ -1058,7 +1059,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           }
 
           const pageNodeRes = await createNodeService({
-            id: oldPageIdToNew.get(page.id),
+            id: page.id,
             page: newPageId,
             order: undefined,
             type: NodeType.Page,
@@ -1095,7 +1096,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           if (!newPageId) continue;
 
           const nodeRes = await createNodeService({
-            id: undefined,
+            id: node.id,
             page: newPageId,
             order: node.order,
             type: node.type as NodeType,
