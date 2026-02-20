@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/form.js';
 import { Input } from '@/components/ui/input.js';
 import { Separator } from '@/components/ui/separator.js';
+import { Textarea } from '@/components/ui/textarea.js';
 import { useFormBuilder } from '@/hooks/useFormBuilder.js';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout.js';
 import { cn } from '@/lib/utils.js';
@@ -127,7 +128,7 @@ export default function FormDetail() {
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder='Enter the description' {...field} />
+                    <Textarea placeholder='Enter the description' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

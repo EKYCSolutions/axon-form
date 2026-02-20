@@ -77,7 +77,7 @@ export default function FormList() {
           <Table>
             <TableHeader className='bg-muted sticky top-0 z-10'>
               <TableRow>
-                <TableHead className='pl-8'>Title</TableHead>
+                <TableHead className='pl-4'>Title</TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Modified</TableHead>
               </TableRow>
@@ -89,8 +89,10 @@ export default function FormList() {
                   className='relative z-0 h-12 cursor-pointer'
                   onClick={() => navigate(`/form/${data.id}`)}
                 >
-                  <TableCell className='pl-8'>{data.title}</TableCell>
-                  <TableCell>{data.description}</TableCell>
+                  <TableCell className='pl-4 align-top'>{data.title}</TableCell>
+                  <TableCell className='whitespace-normal'>
+                    {data.description}
+                  </TableCell>
                   <TableCell
                     className='flex items-center justify-between'
                     onClick={(e) => e.stopPropagation()}

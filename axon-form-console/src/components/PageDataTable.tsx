@@ -29,6 +29,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
+import {
+  getAllConditionsFromNode as getAllConditionsFromNodeService,
+  getPageNode as getPageNodeService,
+} from '@/services/PocketBaseService';
 import type { Page } from '@/types/Page';
 import { formatIndex } from '@/utils/String';
 import { GripVertical, MoreVertical } from 'lucide-react';
@@ -39,8 +43,10 @@ import {
   useState,
   type MouseEventHandler,
 } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router';
 import CustomAlertDialog from './CustomAlertDialog';
+import { Badge } from './ui/badge';
 import { Button } from './ui/button';
 import {
   DropdownMenu,
@@ -53,12 +59,14 @@ import {
 function DraggableRow({
   idx,
   row,
+  hiddenConditionsCount,
   onRowClick,
   onViewConditionClick,
   onDelete,
 }: {
   idx: number;
   row: Page;
+  hiddenConditionsCount: number;
   onRowClick: MouseEventHandler<HTMLTableRowElement>;
   onViewConditionClick: MouseEventHandler<HTMLDivElement>;
   onDelete: (id: string) => void;
@@ -95,7 +103,16 @@ function DraggableRow({
         </div>
       </TableCell>
       <TableCell>{formatIndex(idx + 1)}</TableCell>
-      <TableCell>{row.title}</TableCell>
+      <TableCell>
+        <div className='flex items-center gap-2'>
+          <span>{row.title}</span>
+          {hiddenConditionsCount > 0 && (
+            <Badge variant='destructive'>
+              Hidden: {hiddenConditionsCount} conditions
+            </Badge>
+          )}
+        </div>
+      </TableCell>
       <TableCell>{row.description}</TableCell>
       <TableCell
         className='flex items-center justify-between'
@@ -173,6 +190,27 @@ export function PageDataTable({
     setInitialData(pages);
   }, [pages]);
 
+  const pageConditionQueries = useQueries({
+    queries: pages.map((page) => ({
+      queryKey: ['pageHiddenConditionsCount', page.id],
+      queryFn: async () => {
+        const pageNode = await getPageNodeService(page.id);
+        const conditions = await getAllConditionsFromNodeService(page.id);
+        return conditions.filter((cond) => cond.target_node_id === pageNode.id)
+          .length;
+      },
+      enabled: !!page.id,
+    })),
+  });
+
+  const hiddenConditionsCountByPageId = useMemo(() => {
+    const byId = new Map<string, number>();
+    pages.forEach((page, index) => {
+      byId.set(page.id, pageConditionQueries[index]?.data ?? 0);
+    });
+    return byId;
+  }, [pageConditionQueries, pages]);
+
   const sortableId = useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -240,6 +278,9 @@ export function PageDataTable({
                   key={data.id}
                   idx={idx}
                   row={data}
+                  hiddenConditionsCount={
+                    hiddenConditionsCountByPageId.get(data.id) ?? 0
+                  }
                   onRowClick={() =>
                     navigate(`${location.pathname}/page/${data.id}`)
                   }

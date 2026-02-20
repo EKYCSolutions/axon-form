@@ -245,7 +245,9 @@ export const clearAllData = async (): Promise<void> => {
 };
 
 export const getAllForms = async (): Promise<FormResponse[]> => {
-  return await client.collection(PocketBaseCollection.FORMS).getFullList();
+  return await client.collection(PocketBaseCollection.FORMS).getFullList({
+    sort: '-updated',
+  });
 };
 
 export const getFormById = async (id: string): Promise<FormResponse> => {

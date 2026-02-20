@@ -149,11 +149,12 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   });
 
   // Query: Fetch field conditions
-  const { data: fieldConditionsData } = useQuery({
-    queryKey: ['fieldConditions', selectedPageId],
-    queryFn: () => getAllConditionsFromNodeService(selectedPageId!),
-    enabled: !!selectedPageId,
-  });
+  const { data: fieldConditionsData, refetch: refreshFieldConditions } =
+    useQuery({
+      queryKey: ['fieldConditions', selectedPageId],
+      queryFn: () => getAllConditionsFromNodeService(selectedPageId!),
+      enabled: !!selectedPageId,
+    });
 
   // Query: Fetch page node by page id
   const { data: pageNodeData } = useQuery({
@@ -217,16 +218,11 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const forms = useMemo(() => {
     if (!formsData) return [];
 
-    return formsData
-      .map((form) => ({
-        ...form,
-        updated_at: form.updated,
-        created_at: form.created,
-      }))
-      .sort(
-        (a, b) =>
-          new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
-      );
+    return formsData.map((form) => ({
+      ...form,
+      updated_at: form.updated,
+      created_at: form.created,
+    }));
   }, [formsData]);
 
   const selectedForm: Form | undefined = useMemo(() => {
@@ -531,17 +527,23 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           };
 
           if (data && addedConditions.length > 0) {
-            addedConditions.forEach((cond) =>
-              addCondition(nodeConditionData, cond),
+            await Promise.all(
+              addedConditions.map((cond) =>
+                addCondition(nodeConditionData, cond),
+              ),
             );
           }
 
           if (deletedConditions.length > 0) {
-            deletedConditions.forEach((cond) => deleteCondition(cond.id));
+            await Promise.all(
+              deletedConditions.map((cond) => deleteCondition(cond.id)),
+            );
           }
 
           if (updatedConditions.length > 0) {
-            updatedConditions.forEach((cond) => updateCondition(cond.id, cond));
+            await Promise.all(
+              updatedConditions.map((cond) => updateCondition(cond.id, cond)),
+            );
           }
         }
 
@@ -557,18 +559,22 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           );
 
           if (addedSelectOptions.length > 0) {
-            addedSelectOptions.forEach((node) =>
-              addValueNode(pageId, id, node),
+            await Promise.all(
+              addedSelectOptions.map((node) => addValueNode(pageId, id, node)),
             );
           }
 
           if (deletedSelectOptions.length > 0) {
-            deletedSelectOptions.forEach((node) => deleteNode(node.id));
+            await Promise.all(
+              deletedSelectOptions.map((node) => deleteNode(node.id)),
+            );
           }
 
           if (updatedSelectOptions.length > 0) {
-            updatedSelectOptions.forEach((node) =>
-              updateNodeService(node.id, node),
+            await Promise.all(
+              updatedSelectOptions.map((node) =>
+                updateNodeService(node.id, node),
+              ),
             );
           }
         }
@@ -794,6 +800,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         await updatePageService(id, updatePageBody);
         await refreshPages();
         await refreshSinglePage();
+        await refreshFieldConditions();
         handleSuccess('Update Page Success');
       } catch (err) {
         handleError(err);
@@ -806,6 +813,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       createFilterByEdges,
       refreshPages,
       refreshSinglePage,
+      refreshFieldConditions,
     ],
   );
 
@@ -844,12 +852,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
             return addCondition(nodeConditionData, conditionData);
           }),
         );
+        await refreshFieldConditions();
         handleSuccess('Add Page Conditions Success');
       } catch (err) {
         handleError(err);
       }
     },
-    [],
+    [refreshFieldConditions],
   );
 
   // API: Update condition
@@ -866,23 +875,28 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         });
 
         await updateConditionService(conditionId, data);
+        await refreshFieldConditions();
         handleSuccess('Update Page Conditions Success');
       } catch (err) {
         handleError(err);
       }
     },
-    [],
+    [refreshFieldConditions],
   );
 
   // API: Delete condition
-  const deleteCondition = useCallback(async (conditionId: string) => {
-    try {
-      await deleteConditionService(conditionId);
-      handleSuccess('Delete Page Conditions Success');
-    } catch (err) {
-      handleError(err);
-    }
-  }, []);
+  const deleteCondition = useCallback(
+    async (conditionId: string) => {
+      try {
+        await deleteConditionService(conditionId);
+        await refreshFieldConditions();
+        handleSuccess('Delete Page Conditions Success');
+      } catch (err) {
+        handleError(err);
+      }
+    },
+    [refreshFieldConditions],
+  );
 
   // API: Update page order
   const updatePageOrder = useCallback(
@@ -1130,8 +1144,10 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                   );
                 }
 
+                const isPocketBaseId = /^[a-z0-9]{15}$/.test(condition.value);
                 const valueNodeId = oldNodeIdToNew.get(condition.value);
-                if (!valueNodeId) {
+
+                if (isPocketBaseId && !valueNodeId) {
                   throw new Error(
                     `Missing value node mapping for condition ${condition.id}`,
                   );
@@ -1141,7 +1157,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
                   check_node_id: checkNodeId,
                   edge: edgeRes.id,
                   expr: condition.expr as ConditionExpression,
-                  value: valueNodeId,
+                  value: valueNodeId ?? condition.value,
                 });
               }),
             );

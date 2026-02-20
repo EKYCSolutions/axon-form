@@ -7,15 +7,14 @@ import {
   type PageFormSchemaData,
 } from '@/validations/PageFormValidation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router';
 
 export default function PageDetail() {
-  const { pageId } = useParams();
-  const { selectedPage, getPage, updatePage } = useFormBuilder();
+  const { id, pageId } = useParams();
+  const { selectedPage, getForm, getPage, updatePage } = useFormBuilder();
   //
-  const hasInitialized = useRef(false);
   const [initialPageSchema, setInitialPageSchema] =
     useState<PageFormSchemaData>();
   const [loading, setLoading] = useState<boolean>(true);
@@ -27,22 +26,27 @@ export default function PageDetail() {
   });
 
   useEffect(() => {
+    if (id) {
+      getForm(id);
+    }
     if (pageId) {
       getPage(pageId);
     }
-  }, []);
+  }, [id, pageId, getForm, getPage]);
 
   useEffect(() => {
-    if (selectedPage && selectedPage.id == pageId && !hasInitialized.current) {
-      const pageFormSchema = convertPageToPageFormSchema(selectedPage);
-      //
-      setInitialPageSchema(pageFormSchema);
-      form.reset(pageFormSchema);
-      //
-      setLoading(false);
-      hasInitialized.current = true;
+    if (!selectedPage || selectedPage.id !== pageId) {
+      return;
     }
-  }, [selectedPage]);
+
+    const pageFormSchema = convertPageToPageFormSchema(selectedPage);
+    setInitialPageSchema(pageFormSchema);
+    setLoading(false);
+
+    if (!form.formState.isDirty) {
+      form.reset(pageFormSchema);
+    }
+  }, [selectedPage, pageId, form]);
 
   function onSubmit(data: PageFormSchemaData) {
     if (!pageId || !initialPageSchema) {
