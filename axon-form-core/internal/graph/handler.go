@@ -404,6 +404,16 @@ func (g Graph) GetFormValue() (bool, error, string) {
 	// Only include input nodes referenced by page.field_ids.
 	fieldIDs := make(map[string]struct{})
 	for _, p := range g.Pages {
+		pageNode, ok := g.Nodes["pages"][p.ID]
+
+		if !ok {
+			return false, fmt.Errorf("[GetFormValue] Page node not found %s", p.ID), ""
+		}
+
+		if !pageNode.IsVisible {
+			continue
+		}
+
 		for _, id := range p.FieldIDs {
 			fieldIDs[id] = struct{}{}
 		}
