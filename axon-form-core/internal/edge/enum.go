@@ -63,18 +63,23 @@ const (
 	ConditionExpressionContains
 	ConditionExpressionStartsWith
 	ConditionExpressionEndsWith
+	//
+	ConditionExpressionDurationLessThan
+	ConditionExpressionDurationMoreThan
 )
 
 var conditionExpression = map[ConditionExpression]string{
-	ConditionExpressionEqual:           "equal",
-	ConditionExpressionMoreThan:        "more_than",
-	ConditionExpressionLessThan:        "less_than",
-	ConditionExpressionMoreThanOrEqual: "more_than_or_equal",
-	ConditionExpressionLessThanOrEqual: "less_than_or_equal",
-	ConditionExpressionNotEqual:        "not_equal",
-	ConditionExpressionContains:        "contains",
-	ConditionExpressionStartsWith:      "starts_with",
-	ConditionExpressionEndsWith:        "ends_with",
+	ConditionExpressionEqual:            "equal",
+	ConditionExpressionMoreThan:         "more_than",
+	ConditionExpressionLessThan:         "less_than",
+	ConditionExpressionMoreThanOrEqual:  "more_than_or_equal",
+	ConditionExpressionLessThanOrEqual:  "less_than_or_equal",
+	ConditionExpressionNotEqual:         "not_equal",
+	ConditionExpressionContains:         "contains",
+	ConditionExpressionStartsWith:       "starts_with",
+	ConditionExpressionEndsWith:         "ends_with",
+	ConditionExpressionDurationLessThan: "duration_less_than",
+	ConditionExpressionDurationMoreThan: "duration_more_than",
 }
 
 func (ce ConditionExpression) String() string {
@@ -106,6 +111,10 @@ func (ce *ConditionExpression) UnmarshalJSON(data []byte) error {
 		*ce = ConditionExpressionStartsWith
 	case "ends_with":
 		*ce = ConditionExpressionEndsWith
+	case "duration_less_than":
+		*ce = ConditionExpressionDurationLessThan
+	case "duration_more_than":
+		*ce = ConditionExpressionDurationMoreThan
 
 	default:
 		return fmt.Errorf("unknown ConditionExpression: %s", s)

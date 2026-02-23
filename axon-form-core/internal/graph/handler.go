@@ -807,8 +807,21 @@ func (g Graph) ValidateCondition(c edge.EdgeCondition, v string) (bool, error) {
 
 	case edge.ConditionExpressionEndsWith:
 		return strings.HasSuffix(v, c.ExpectedValue), errors.New("condition not met: ends with")
-	}
 
+	case edge.ConditionExpressionDurationLessThan:
+		cmp, err := util.CompareDateToDurationThreshold(v, c.ExpectedValue)
+		if err != nil {
+			return false, err
+		}
+		return cmp > 0, errors.New("condition not met: duration less than")
+
+	case edge.ConditionExpressionDurationMoreThan:
+		cmp, err := util.CompareDateToDurationThreshold(v, c.ExpectedValue)
+		if err != nil {
+			return false, err
+		}
+		return cmp < 0, errors.New("condition not met: duration more than")
+	}
 	return false, nil
 }
 
