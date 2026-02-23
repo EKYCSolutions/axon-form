@@ -89,7 +89,7 @@ export default function FormList() {
                   className='relative z-0 h-12 cursor-pointer'
                   onClick={() => navigate(`/form/${data.id}`)}
                 >
-                  <TableCell className='pl-4 align-top'>{data.title}</TableCell>
+                  <TableCell className='pl-4'>{data.title}</TableCell>
                   <TableCell className='whitespace-normal'>
                     {data.description}
                   </TableCell>

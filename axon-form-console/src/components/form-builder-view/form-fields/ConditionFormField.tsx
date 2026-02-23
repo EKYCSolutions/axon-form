@@ -66,7 +66,19 @@ export default function ConditionFormField({
   const selectedConditionValue = watch(
     `fields.${fieldIndex}.conditions.${conditionIndex}.value`,
   ) as string | undefined;
+  const selectedConditionExpr = watch(
+    `fields.${fieldIndex}.conditions.${conditionIndex}.expr`,
+  ) as ConditionExpression | undefined;
   const fields = watch('fields') as NodeFormSchemaData[] | undefined;
+  const durationUnits = [
+    { label: 'Years', value: 'Y' },
+    { label: 'Months', value: 'M' },
+    { label: 'Weeks', value: 'W' },
+    { label: 'Days', value: 'D' },
+  ] as const;
+  const isDurationExpression =
+    selectedConditionExpr === ConditionExpression.DurationLessThan ||
+    selectedConditionExpr === ConditionExpression.DurationMoreThan;
 
   const pageOptions = useMemo(() => {
     const seen = new Set<string>();
@@ -354,6 +366,58 @@ export default function ConditionFormField({
                 <FormItem className='col-span-2'>
                   <FormControl>
                     {(() => {
+                      if (isDurationExpression) {
+                        const matchedDuration = field.value
+                          ?.toString()
+                          .match(/^(\d+)([YMWD])$/i);
+                        const durationAmount = matchedDuration?.[1] ?? '';
+                        const durationUnit = (
+                          matchedDuration?.[2]?.toUpperCase() ?? 'Y'
+                        ) as 'Y' | 'M' | 'W' | 'D';
+
+                        return (
+                          <div className='grid grid-cols-2 gap-2'>
+                            <Input
+                              type='number'
+                              min={0}
+                              placeholder='Enter number'
+                              value={durationAmount}
+                              onChange={(event) => {
+                                const nextAmount = event.target.value;
+                                setValue(
+                                  `fields.${fieldIndex}.conditions.${conditionIndex}.value`,
+                                  nextAmount ? `${nextAmount}${durationUnit}` : '',
+                                );
+                              }}
+                            />
+                            <Select
+                              value={durationUnit}
+                              onValueChange={(nextUnit) => {
+                                setValue(
+                                  `fields.${fieldIndex}.conditions.${conditionIndex}.value`,
+                                  durationAmount
+                                    ? `${durationAmount}${nextUnit}`
+                                    : '',
+                                );
+                              }}
+                            >
+                              <FormControl className='w-full'>
+                                <SelectTrigger>
+                                  <SelectValue placeholder='Select unit' />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {durationUnits.map((unit) => (
+                                  <SelectItem key={unit.value} value={unit.value}>
+                                    {unit.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      }
+
                       if (selectedFieldSupportsOptions) {
                         return (
                           <Select

@@ -60,6 +60,8 @@ export enum ConditionExpression {
   Contains = 'contains',
   StartsWith = 'starts_with',
   EndsWith = 'ends_with',
+  DurationLessThan = 'duration_less_than',
+  DurationMoreThan = 'duration_more_than',
 }
 
 export enum ConditionGroupExpression {
