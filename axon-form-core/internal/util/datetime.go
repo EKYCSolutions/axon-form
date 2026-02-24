@@ -68,6 +68,7 @@ func CompareDateToDurationThreshold(dateStr, duration string) (int, error) {
 	}
 
 	threshold := GetCurrentTime().AddDate(-years, -months, -days)
+
 	return date.Compare(threshold), nil
 }
 
@@ -78,6 +79,9 @@ func parseFlexibleDateTime(raw string) (time.Time, error) {
 		"2006-01-02 15:04:05",
 		"2006-01-02 15:04",
 		"2006-01-02",
+		"2006-01-02T15:04:05.000",
+		"2006-01-02T15:04:05Z07:00",
+		"2006-01-02T15:04:05",
 	}
 
 	for _, layout := range layouts {
