@@ -22,6 +22,7 @@ class FormBuilder extends StatefulWidget {
     BuildContext context,
     AxonFormPage page,
     List<AxonFormNode> nodes,
+    Widget? Function(BuildContext context, AxonFormNode field)?,
   )?
   pageBuilder;
   final Widget? Function(
