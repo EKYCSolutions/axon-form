@@ -29,6 +29,7 @@ class _AxonRadioInputState extends State<AxonRadioInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
     final options = controller.getOptions(widget.node.id);
+    final nodeValue = controller.getNodeValue(widget.node.id);
 
     var style =
         widget.style ??
@@ -36,7 +37,8 @@ class _AxonRadioInputState extends State<AxonRadioInput> {
         AxonFormRadioInputStyle.fallback(context);
 
     return FormField<String?>(
-      initialValue: controller.getNodeValue(widget.node.id),
+      key: ValueKey('${widget.node.id}-$nodeValue'),
+      initialValue: nodeValue != null ? nodeValue["id"] : nodeValue,
       validator: (String? s) {
         var res = controller.validateNode(widget.node.id, s);
         return res.error;

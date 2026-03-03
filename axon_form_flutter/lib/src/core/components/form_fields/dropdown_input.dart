@@ -29,16 +29,16 @@ class _AxonDropdownInputState extends State<AxonDropdownInput> {
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
     final options = controller.getOptions(widget.node.id);
+    final nodeValue = controller.getNodeValue(widget.node.id);
 
     var style =
         widget.style ??
         Theme.of(context).extension<AxonFormDropdownInputStyle>() ??
         AxonFormDropdownInputStyle.fallback(context);
 
-    var value = controller.getNodeValue(widget.node.id);
-
     return FormField<String?>(
-      initialValue: value,
+      key: ValueKey('${widget.node.id}-$nodeValue'),
+      initialValue: nodeValue != null ? nodeValue["id"] : nodeValue,
       validator: (String? s) {
         var res = controller.validateNode(widget.node.id, s);
         return res.error;

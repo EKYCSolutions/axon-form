@@ -21,12 +21,14 @@ class FormBuilder extends StatefulWidget {
   final Widget? Function(
     BuildContext context,
     AxonFormPage page,
+
     List<AxonFormNode> nodes,
     Widget? Function(BuildContext context, AxonFormNode field)?,
   )?
   pageBuilder;
   final Widget? Function(
     BuildContext context,
+    List<AxonFormPage> pages,
     int currentPage,
     int pageCount,
     void Function() nextPage,
@@ -92,10 +94,9 @@ class _FormBuilderState extends State<FormBuilder> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
+    return Stack(
       children: [
-        Expanded(
+        Positioned.fill(
           child: PageView.builder(
             physics: const NeverScrollableScrollPhysics(),
             controller: _pageViewController,
@@ -112,12 +113,10 @@ class _FormBuilderState extends State<FormBuilder> {
                             ?.isVisible ??
                         false;
                   },
-
                   builder: (context, isVisible, child) {
                     if (!isVisible) {
                       return const SizedBox.shrink();
                     }
-
                     return PageBuilder(
                       page: widget.pages[index],
                       pageBuilder: widget.pageBuilder,
@@ -136,10 +135,10 @@ class _FormBuilderState extends State<FormBuilder> {
             void prev() =>
                 _onNavigate(controller.currentPageIndex - 1, controller);
 
-            //
             if (widget.pageNavigatorBuilder != null) {
               final customNavigator = widget.pageNavigatorBuilder!(
                 context,
+                controller.graph?.pagesToShow ?? [],
                 controller.currentPageIndex,
                 controller.pageCount,
                 next,

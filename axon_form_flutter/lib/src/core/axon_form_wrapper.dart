@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:axon_form_flutter/src/core/axon_form_controller.dart';
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/components/builders/form_builder.dart';
 import 'package:axon_form_flutter/src/core/models/node.dart';
@@ -21,6 +22,7 @@ class AxonForm extends StatefulWidget {
   pageBuilder;
   final Widget? Function(
     BuildContext context,
+    List<AxonFormPage> pages,
     int currentPage,
     int pageCount,
     void Function() nextPage,
@@ -80,43 +82,46 @@ class _AxonFormState extends State<AxonForm> {
     return ChangeNotifierProvider(
       lazy: false,
       create: (_) => AxonFormProvider(widget._loader),
-      child: Selector<AxonFormProvider, String>(
-        selector: (context, provider) {
-          if (provider.graph?.pagesToShow == null) return "";
-          var keys = provider.graph!.pagesToShow
-              .map((e) => e.id)
-              .toList()
-              .join(',');
-          return keys;
-        },
-        builder: (context, _, __) {
-          var provider = context.read<AxonFormProvider>();
-          if (provider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      child: ProxyProvider<AxonFormProvider, AxonFormController>(
+        update: (context, provider, previous) => AxonFormController(provider),
+        child: Selector<AxonFormProvider, String>(
+          selector: (context, provider) {
+            if (provider.graph?.pagesToShow == null) return "";
+            var keys = provider.graph!.pagesToShow
+                .map((e) => e.id)
+                .toList()
+                .join(',');
+            return keys;
+          },
+          builder: (context, _, __) {
+            var provider = context.read<AxonFormProvider>();
+            if (provider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          if (provider.errorMessage != null) {
-            return Center(
-              child: Text(
-                provider.errorMessage!,
-                style: TextStyle(color: Colors.redAccent),
-              ),
+            if (provider.errorMessage != null) {
+              return Center(
+                child: Text(
+                  provider.errorMessage!,
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              );
+            }
+
+            var pagesList = provider.graph?.pagesToShow;
+            if (pagesList == null || pagesList.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return FormBuilder(
+              pages: pagesList,
+              onSubmit: widget.onSubmit,
+              pageBuilder: widget.pageBuilder,
+              pageNavigatorBuilder: widget.pageNavigatorBuilder,
+              fieldBuilder: widget.fieldBuilder,
             );
-          }
-
-          var pagesList = provider.graph?.pagesToShow;
-          if (pagesList == null || pagesList.isEmpty) {
-            return const SizedBox.shrink();
-          }
-
-          return FormBuilder(
-            pages: pagesList,
-            onSubmit: widget.onSubmit,
-            pageBuilder: widget.pageBuilder,
-            pageNavigatorBuilder: widget.pageNavigatorBuilder,
-            fieldBuilder: widget.fieldBuilder,
-          );
-        },
+          },
+        ),
       ),
     );
   }
