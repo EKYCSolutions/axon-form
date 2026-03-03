@@ -248,6 +248,25 @@ func (g Graph) GetNodeValue(nodeID string) (any, error) {
 		return false, fmt.Errorf("[GetNodeValue] Node not found | ID: %s", nodeID)
 	}
 
+	if n.IsFieldTypeWithOptions() {
+		// Null check and empty string check
+		valStr, ok := n.Value.(string)
+		if !ok || len(valStr) == 0 {
+			return nil, nil
+		}
+		optNode, ok := g.Nodes["values"][valStr]
+		if !ok {
+			return false, fmt.Errorf("[GetNodeValue] Value Node not found | ID: %s", n.Value)
+		}
+
+		data := map[string]any{
+			"id":    optNode.ID,
+			"label": optNode.Label,
+			"value": optNode.Value,
+		}
+		return data, nil
+	}
+
 	return n.Value, nil
 }
 
