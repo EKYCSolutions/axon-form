@@ -251,11 +251,22 @@ func (g Graph) GetNodeValue(nodeID string) (any, error) {
 	if n.IsFieldTypeWithOptions() {
 		// Null check and empty string check
 		valStr, ok := n.Value.(string)
+
 		if !ok || len(valStr) == 0 {
 			return nil, nil
 		}
+
+		// Exception case for multi select, return the list of options id back
+		if n.FieldType == node.NodeFieldTypeMultiSelect {
+			return valStr, nil
+		}
+
 		optNode, ok := g.Nodes["values"][valStr]
 		if !ok {
+			if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+				return valStr, nil
+			}
+
 			return false, fmt.Errorf("[GetNodeValue] Value Node not found | ID: %s", n.Value)
 		}
 
@@ -473,12 +484,28 @@ func (g Graph) IsNodeVisible(nodeID string) (bool, error) {
 	return n.IsVisible, nil
 }
 
+func (g Graph) getOptionNodeByValue(parentNodeId string, value string) (*node.Node, error) {
+	optionNodes, err := g.GetOptionNodes(parentNodeId)
+
+	if err != nil {
+		return nil, fmt.Errorf("[getOptionNodeByValue] Options not found for node | ID: %s", parentNodeId)
+	}
+
+	for _, opt := range *optionNodes {
+		if opt.Value == value {
+			return &opt, nil
+		}
+	}
+
+	return nil, nil
+}
+
 func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*node.Node, error) {
 	// Check that the option node exists
 	optionNode, ok := g.Nodes["values"][optionNodeId]
 
 	if !ok {
-		return nil, fmt.Errorf("[validateOptionNode] Option node not found | ID: %s", optionNodeId)
+		return g.getOptionNodeByValue(parentNodeId, optionNodeId)
 	}
 
 	var foundEdge *edge.Edge
@@ -487,7 +514,7 @@ func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*no
 
 	// Verify that there is an edge from the current node to the selected option node
 	for _, e := range tEdges {
-		if e.TargetNode == optionNodeId {
+		if e.TargetNode == optionNode.ID {
 			foundEdge = e
 			break
 		}
@@ -521,9 +548,10 @@ func (g Graph) updateNodeValue(input ValidateNodeInput, n *node.Node) (bool, err
 }
 
 func (g Graph) updateMultiSelectValue(input ValidateNodeInput, n *node.Node) (bool, error) {
-	optionNodeIds := strings.Split(input.Value, ",")
+	inputOptionNodeIds := strings.Split(input.Value, ",")
+	var outputOptionNodeIds []string
 
-	for _, id := range optionNodeIds {
+	for _, id := range inputOptionNodeIds {
 		id = strings.TrimSpace(id)
 		if id == "" {
 			continue
@@ -533,31 +561,34 @@ func (g Graph) updateMultiSelectValue(input ValidateNodeInput, n *node.Node) (bo
 			continue
 		}
 
-		_, err := g.validateOptionNode(n.ID, id)
+		optionNode, err := g.validateOptionNode(n.ID, id)
 
 		if err != nil {
 			return false, err
 		}
+
+		outputOptionNodeIds = append(outputOptionNodeIds, optionNode.ID)
 	}
 
-	n.Value = input.Value
+	n.Value = strings.Join(outputOptionNodeIds, ",")
 	return true, nil
 }
 
 func (g Graph) updateSingleSelectOptionValue(input ValidateNodeInput, n *node.Node) (bool, error) {
 
-	if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+	optionNodeId := input.Value
+	optionNode, err := g.validateOptionNode(n.ID, optionNodeId)
+
+	if optionNode == nil && n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
 		n.Value = input.Value
 		return true, nil
 	}
 
-	optionNodeId := input.Value
-	_, err := g.validateOptionNode(n.ID, optionNodeId)
 	if err != nil {
 		return false, err
 	}
 
-	n.Value = optionNodeId
+	n.Value = optionNode.ID
 	return true, nil
 }
 
@@ -680,11 +711,15 @@ func (g Graph) ValidateAddressNode(input ValidateNodeInput) (bool, []error, []st
 
 	_, ok = g.Nodes["values"][input.Value]
 	if !ok {
-		if n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+		optionNode, _ := g.getOptionNodeByValue(input.NodeID, input.Value)
+
+		if optionNode == nil && n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
 			return true, nil, []string{}
 		}
 
-		return false, []error{fmt.Errorf("[ValidateAddressNode] Value node not found | ID: %s", input.Value)}, []string{}
+		if optionNode == nil {
+			return false, []error{fmt.Errorf("[ValidateAddressNode] Option node not found | ID: %s", input.Value)}, []string{}
+		}
 	}
 
 	_, err := g.updateAddressNodeOptions(*n)
