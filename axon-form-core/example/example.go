@@ -22,7 +22,7 @@ func main() {
 	var currentAddressVillageId = "x56861jour7h9o3"
 
 	// // Read the JSON file
-	jsonData, err := os.ReadFile("assets/khmereid-passport-self-request-form-not-required.json")
+	jsonData, err := os.ReadFile("assets/khmereid-passport-self-request-form.json")
 	if err != nil {
 		fmt.Printf("Error reading JSON file: %v", err)
 	}
@@ -38,8 +38,7 @@ func main() {
 		Value:  "phnom_penh",
 	}
 
-	succ, errs, childrenNodes := g.ValidateAddressNode(province_input)
-	fmt.Println("succ: ", succ, "| errs: ", errs, "| childrenNodes: ", childrenNodes)
+	g.ValidateAddressNode(province_input)
 	nValue, _ := g.GetNodeValue(currentAddressProvinceId)
 	fmt.Println("value received: ", nValue)
 
@@ -48,8 +47,7 @@ func main() {
 		Value:  "saensokh",
 	}
 
-	succ, errs, childrenNodes = g.ValidateAddressNode(district_input)
-	fmt.Println("succ: ", succ, "| errs: ", errs, "| childrenNodes: ", childrenNodes)
+	g.ValidateAddressNode(district_input)
 	nValue, _ = g.GetNodeValue(currentAddressDistrictId)
 	fmt.Println("value received: ", nValue)
 
@@ -58,8 +56,7 @@ func main() {
 		Value:  "ou_baek_k'am",
 	}
 
-	succ, errs, childrenNodes = g.ValidateAddressNode(commune_input)
-	fmt.Println("succ: ", succ, "| errs: ", errs, "| childrenNodes: ", childrenNodes)
+	g.ValidateAddressNode(commune_input)
 	nValue, _ = g.GetNodeValue(currentAddressCommuneId)
 	fmt.Println("value received: ", nValue)
 
@@ -68,8 +65,11 @@ func main() {
 		Value:  "orchide",
 	}
 
-	succ, errs, childrenNodes = g.ValidateAddressNode(village_input)
-	fmt.Println("succ: ", succ, "| errs: ", errs, "| childrenNodes: ", childrenNodes)
+	g.ValidateAddressNode(village_input)
 	nValue, _ = g.GetNodeValue(currentAddressVillageId)
 	fmt.Println("value received: ", nValue)
+
+	_, err, res := g.GetFormValue()
+
+	fmt.Println("err: ", err, "result: ", res)
 }

@@ -16,6 +16,7 @@ type Node struct {
 	Placeholder string         `json:"placeholder"`
 	Config      map[string]any `json:"config"`
 	IsVisible   bool           `json:"is_visible"`
+	IsRequired  bool           `json:"is_required"`
 	//
 	ValidationRules []ValidationRule `json:"validation_rules"`
 	// Type any is used here because Value could be of type "string", "int", "float", "boolean"

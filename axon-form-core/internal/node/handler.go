@@ -71,6 +71,8 @@ func NewNodeFromJSON(nodeJson map[string]any) (*Node, error) {
 		return nil, err
 	}
 
+	node.IsRequired = node.hasRequiredValidationRule()
+
 	return &node, nil
 }
 
@@ -97,7 +99,7 @@ func (n *Node) IsAddressNode() (bool, string) {
 	return true, level
 }
 
-func (n *Node) IsRequired() bool {
+func (n *Node) hasRequiredValidationRule() bool {
 	for _, rule := range n.ValidationRules {
 		if rule.Type == ValidationRuleTypeRequired {
 			return true

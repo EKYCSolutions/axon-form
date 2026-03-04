@@ -290,7 +290,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	// ---------------------------------------------------------
 	// 1. Required Validation
 	// ---------------------------------------------------------
-	isRequired := n.IsRequired()
+	isRequired := n.IsRequired
 	hasValue := n.Value != nil
 	isVisible := n.IsVisible
 	// If the value is a string, empty string "" should be considered as no value
