@@ -2,7 +2,7 @@ name: axon_form_flutter_example
 description: "Demonstrates how to use the axon_form_flutter plugin."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 environment:
   sdk: ^3.8.0
@@ -28,15 +28,6 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  google_fonts: ^6.2.1
-  liquid_glass_renderer: ^0.2.0-dev.4
-  flutter_svg: ^2.1.0
-  go_router: ^17.0.1
-  collection: ^1.18.0
-  modal_bottom_sheet: ^3.0.0
-  provider: ^6.1.5+1
-  ekyc_id_flutter: ^1.1.20
-  glowy_borders: ^1.0.2
 
 dev_dependencies:
   integration_test:
@@ -56,7 +47,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -78,7 +68,6 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
   #   - family: Schyler
   #     fonts:
   #       - asset: fonts/Schyler-Regular.ttf
