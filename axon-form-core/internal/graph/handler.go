@@ -523,6 +523,7 @@ func (g Graph) validateOptionNode(parentNodeId string, optionNodeId string) (*no
 	if foundEdge == nil {
 		return nil, errors.New("[validateOptionNode] Invalid option node")
 	}
+
 	return optionNode, nil
 }
 
@@ -588,6 +589,10 @@ func (g Graph) updateSingleSelectOptionValue(input ValidateNodeInput, n *node.No
 		return false, err
 	}
 
+	if optionNode == nil {
+		return false, errors.New("[updateSingleSelectOptionValue] Invalid option node")
+	}
+
 	n.Value = optionNode.ID
 	return true, nil
 }
@@ -634,6 +639,12 @@ func (g Graph) evaluateDependentLogic(input ValidateNodeInput) error {
 		n, ok := g.AllNodes[e.TargetNode]
 		if !ok {
 			return fmt.Errorf("[evaluateDependentLogic] Node not found | ID: %s", e.TargetNode)
+		}
+
+		//
+		optionNode, _ := g.getOptionNodeByValue(input.NodeID, input.Value)
+		if optionNode != nil {
+			input.Value = optionNode.ID
 		}
 
 		_, edgeErrors := g.ValidateEdgeConditions(*e, input)
