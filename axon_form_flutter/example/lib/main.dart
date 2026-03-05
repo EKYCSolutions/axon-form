@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
@@ -32,27 +31,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Uint8List? fileByte;
-  Map<String, dynamic> formJson = {};
-  final bool _isLoading = true;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _loadJson();
-  // }
-
-  // Future<void> _loadJson() async {
-  //   final String jsonString = await DefaultAssetBundle.of(
-  //     context,
-  //   ).loadString('assets/example.json');
-
-  //   setState(() {
-  //     formJson = jsonDecode(jsonString);
-  //     _isLoading = false;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
