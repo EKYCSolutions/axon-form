@@ -7,6 +7,7 @@ class AxonFormNode {
   final String label;
   final String? placeholder;
   final bool isVisible;
+  final bool isRequired;
   final int order;
   final List<ValidationRule> validationRules;
   final Map<String, dynamic>? configs;
@@ -19,6 +20,7 @@ class AxonFormNode {
     required this.validationRules,
     required this.order,
     required this.isVisible,
+    required this.isRequired,
     this.fieldType,
     this.value,
     this.placeholder,
@@ -36,6 +38,7 @@ class AxonFormNode {
       order: json['order'] ?? 0,
       placeholder: json['placeholder'] ?? "",
       isVisible: json['is_visible'],
+      isRequired: json['is_required'],
       value: json["value"],
       validationRules: json['validation_rules'] != null
           ? (json['validation_rules'] as List)
@@ -55,6 +58,7 @@ class AxonFormNode {
     String? label,
     String? placeholder,
     bool? isVisible,
+    bool? isRequired,
     int? order,
     List<ValidationRule>? validationRules,
     Map<String, dynamic>? configs,
@@ -67,6 +71,7 @@ class AxonFormNode {
       label: label ?? this.label,
       placeholder: placeholder ?? this.placeholder,
       isVisible: isVisible ?? this.isVisible,
+      isRequired: isRequired ?? this.isRequired,
       order: order ?? this.order,
       validationRules: validationRules ?? this.validationRules,
       configs: configs ?? this.configs,

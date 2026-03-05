@@ -13,7 +13,7 @@ class AxonFormController {
   }
 
   /// Validates a specific node with a new value.
-  CoreResponse updateField(String fieldNodeId, dynamic value) {
+  CoreResponse setFieldValue(String fieldNodeId, dynamic value) {
     return _provider.validateNode(fieldNodeId, value);
   }
 
