@@ -58,41 +58,50 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
         AxonFormAddressDropdownInputStyle.fallback(context);
 
     return FormField<String?>(
-      initialValue: nodeValue != null ? nodeValue["id"] : nodeValue,
+      initialValue: controller.getNodeValue(widget.node.id)?["id"],
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (val) {
         if (val != null && val.isNotEmpty) return null;
-        return controller.validateAddressNodeSilently(widget.node.id, val);
+        var res = controller.validateAddressNodeSilently(widget.node.id, val);
+        return res.error;
       },
       builder: (formFieldState) {
         return Selector<AxonFormProvider, int>(
           shouldRebuild: (prev, next) => prev != next,
-          selector: (_, pro) {
+          selector: (_, provider) {
             final isMe =
-                pro.addressNodeIdsToUpdate?.contains(widget.node.id) ?? false;
-            return isMe ? pro.pulse : -1;
+                provider.addressNodeIdsToUpdate?.contains(widget.node.id) ??
+                false;
+            return isMe ? provider.pulse : -1;
           },
           builder: (context, pulse, _) {
+            final nodeValue = controller.getNodeValue(widget.node.id);
+            //
+            String? currentIdFromProvider;
+            if (nodeValue is Map) {
+              currentIdFromProvider = nodeValue["id"]?.toString();
+            } else if (nodeValue is String) {
+              currentIdFromProvider = nodeValue;
+            }
+            //
+            if (formFieldState.value != currentIdFromProvider) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (formFieldState.mounted) {
+                  formFieldState.didChange(currentIdFromProvider);
+                }
+              });
+            }
+
             var options = controller.getOptions(widget.node.id);
             List<AxonFormNode> selectOptions = _searchQuery.isNotEmpty
                 ? onSearch(_searchQuery, options)
                 : options;
             final hasOptions = options.isNotEmpty;
-
-            // Check if the current form value is still valid in the new options list
             final bool valueIsValid = options.any(
-              (o) => o.id == formFieldState.value,
+              (o) => o.id == currentIdFromProvider,
             );
 
-            // If a parent changed and this field's value is now invalid, clear it
-            if (!valueIsValid && formFieldState.value != null) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                formFieldState.didChange(null);
-              });
-            }
-
-            final selectedValue = valueIsValid ? formFieldState.value : null;
-
+            final selectedValue = valueIsValid ? currentIdFromProvider : null;
             if (widget.builder != null) {
               return widget.builder!(
                 context,

@@ -163,13 +163,13 @@ class AxonFormProvider extends ChangeNotifier {
   }
 
   // A "Pure" check for the validator that DOES NOT notify listeners
-  String? validateAddressNodeSilently(String nodeId, String? value) {
-    final res = _controller.validateAddressNode(nodeId, value);
-    return res.error;
+  CoreResponse validateAddressNodeSilently(String nodeId, String? value) {
+    CoreResponse res = _controller.validateAddressNode(nodeId, value);
+    return res;
   }
 
   // The "Active" update for User Interaction
-  void validateAddressNode(String nodeId, String value) {
+  CoreResponse validateAddressNode(String nodeId, String value) {
     final res = _controller.validateAddressNode(nodeId, value);
 
     if (res.success) {
@@ -177,6 +177,8 @@ class AxonFormProvider extends ChangeNotifier {
       pulse++;
       notifyListeners();
     }
+
+    return res;
   }
 
   Map<String, dynamic> validatePage(String pageId) {

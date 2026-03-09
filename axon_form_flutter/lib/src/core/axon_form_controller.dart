@@ -1,6 +1,7 @@
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:axon_form_flutter/src/core/models/node.dart';
+import 'package:axon_form_flutter/src/models/models.dart';
 
 class AxonFormController {
   final AxonFormProvider _provider;
@@ -14,6 +15,18 @@ class AxonFormController {
 
   /// Validates a specific node with a new value.
   CoreResponse setFieldValue(String fieldNodeId, dynamic value) {
+    var node = _provider.graph?.nodes['inputs']?[fieldNodeId];
+
+    if (node == null) {
+      throw Exception(
+        "[AxonFormController] setFieldValue | Ffield id: $fieldNodeId not found",
+      );
+    }
+
+    if (node.fieldType == FieldType.addressDropdown) {
+      return _provider.validateAddressNode(fieldNodeId, value);
+    }
+
     return _provider.validateNode(fieldNodeId, value);
   }
 
