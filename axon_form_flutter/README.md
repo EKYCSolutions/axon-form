@@ -1,8 +1,84 @@
-# axon_form_flutter
+# Axon Form - Dynamic Form System for Flutter
 
-Flutter plugin for rendering multi-page dynamic forms from JSON configuration, with built-in validation, state management, and customizable UI builders.
+A powerful and flexible dynamic form generation system for Flutter that renders forms from Axon JSON using a native FFI core.
 
-## Getting Started
+## 🎨 Key Features
+
+- 📋 **Dynamic Form Generation** from JSON configuration
+- 🎯 **Provider-based State Management** with `AxonFormProvider`
+- ✅ **Built-in Validation** via native Axon engine
+- 🎨 **Customizable Rendering** with page/field/navigation builders
+- 🔧 **10 Input Field Types** out of the box
+- 📱 **Multi-page Forms** with default or custom navigation
+- 🚀 **Production-oriented FFI Architecture**
+
+## 🏗️ Architecture Overview
+
+### Core Components
+
+1. **JSON Configuration** - Defines pages, nodes, edges, and conditions
+2. **Native Core (FFI)** - Handles graph init, validation, visibility, and values
+3. **State Management** - `AxonFormProvider` + `ChangeNotifier`
+4. **Rendering Layer** - `AxonForm` + page/field builders
+5. **Field Widgets** - Modular widgets for each field type
+
+### Architecture Diagram
+
+```text
+JSON Config
+    ↓
+AxonFormFFI.initialize()
+    ↓
+AxonFormGraph + AxonFormProvider
+    ↓
+AxonForm / FormBuilder / PageBuilder
+    ↓
+AxonFormFieldBuilder
+    ↓
+Field Widgets (text, number, date, ...)
+```
+
+## 🎯 State Management Approach
+
+### AxonFormProvider (ChangeNotifier)
+
+`AxonFormProvider` is the form state orchestrator:
+
+- Stores graph/page state and current page index
+- Retrieves field values through native core
+- Triggers field/page validation through native core
+- Handles dynamic visibility updates through native event listeners
+- Notifies UI consumers reactively
+
+### AxonFormController
+
+`AxonFormController` is the public controller wrapper:
+
+```dart
+controller.getFieldValue('field_id');
+controller.setFieldValue('field_id', value);
+controller.validatePage('page_id');
+controller.getOptions('field_id');
+controller.nextPage();
+controller.prevPage();
+```
+
+## 📋 Supported Input Field Types
+
+| Field Type | Enum Value | JSON Value | Widget | Description |
+|------------|------------|------------|--------|-------------|
+| Text | `FieldType.text` | `"text"` | `AxonTextInput` | Single-line text input |
+| Number | `FieldType.number` | `"number"` | `AxonNumberInput` | Digits-only numeric input |
+| Date | `FieldType.date` | `"date"` | `AxonDateInput` | Date picker |
+| Password | `FieldType.password` | `"password"` | `AxonPasswordInput` | Obscured input with toggle |
+| Radio | `FieldType.radio` | `"radio"` | `AxonRadioInput` | Single selection from options |
+| Dropdown | `FieldType.dropdown` | `"dropdown"` | `AxonDropdownInput` | Dropdown selection |
+| Address Dropdown | `FieldType.addressDropdown` | `"address_dropdown"` | `AxonAddressDropdownInput` | Cascading address selection |
+| Checkbox | `FieldType.checkbox` | `"checkbox"` | `AxonCheckboxInput` | Boolean input |
+| Multi-select | `FieldType.multiSelect` | `"multi_select"` | `AxonMultiSelectInput` | Multiple option selection |
+| File | `FieldType.file` | `"file"` | `AxonFileInput` | File picker input |
+
+## 🚀 Getting Started
 
 ### Requirements
 
@@ -11,7 +87,7 @@ Flutter plugin for rendering multi-page dynamic forms from JSON configuration, w
 
 ### Installation
 
-Add the package to your app:
+Add to your app `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -25,171 +101,206 @@ Then run:
 flutter pub get
 ```
 
-## Basic Usage
+### Basic Usage
 
 ```dart
 import 'dart:convert';
-
 import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:flutter/material.dart';
 
-class FormScreen extends StatelessWidget {
-  const FormScreen({super.key});
+class MyFormScreen extends StatelessWidget {
+  const MyFormScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final config = FormConfig.fromJson(jsonDecode(_formJson));
+    return FutureBuilder<String>(
+      future: DefaultAssetBundle.of(context).loadString('assets/example.json'),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: Text('Error loading form JSON'));
+        }
 
-    return DynamicForm(
-      config: config,
-      title: 'Registration',
-      onSubmit: (data) {
-        debugPrint('Submitted: $data');
+        final formJson = jsonDecode(snapshot.data!) as Map<String, dynamic>;
+
+        return AxonForm.json(
+          formJson,
+          onSubmit: (result) {
+            debugPrint('Form submitted: $result');
+          },
+        );
       },
     );
   }
 }
+```
 
-const String _formJson = '''
+### Alternative Constructor
+
+```dart
+AxonForm.file(
+  'assets/example.json',
+  onSubmit: (result) => debugPrint('$result'),
+)
+```
+
+## 📝 JSON Configuration Structure
+
+### Expected Top-level Keys
+
+- `layout.pages`
+- `nodes`
+- `edges`
+- optional `condition_groups`
+- optional `address` (for `address_dropdown`)
+
+### Minimal Example
+
+```json
 {
   "layout": {
     "pages": [
       {
-        "id": "page_1",
-        "title": "Personal Information",
-        "description": "Enter your basic details",
-        "field_ids": ["first_name", "age", "gender"]
+        "id": "p1",
+        "order": 0,
+        "title": "Basic Info",
+        "description": "Enter your details",
+        "field_ids": ["f_name", "f_gender"]
       }
     ]
   },
   "nodes": [
     {
-      "id": "first_name",
+      "id": "p1",
+      "type": "page",
+      "field_name": "",
+      "field_type": "",
+      "label": ""
+    },
+    {
+      "id": "f_name",
       "type": "input",
       "field_type": "text",
-      "field_name": "firstName",
-      "label": "First Name",
-      "placeholder": "John",
+      "field_name": "name",
+      "label": "Full Name",
       "validation_rules": [
-        {
-          "type": "required",
-          "message": "First name is required"
-        }
+        {"type": "required", "message": "Name is required"}
       ]
     },
     {
-      "id": "age",
-      "type": "input",
-      "field_type": "number",
-      "field_name": "age",
-      "label": "Age",
-      "placeholder": "18",
-      "validation_rules": [
-        {
-          "type": "min",
-          "value": 1,
-          "message": "Age must be greater than 0"
-        }
-      ]
-    },
-    {
-      "id": "gender",
+      "id": "f_gender",
       "type": "input",
       "field_type": "radio",
       "field_name": "gender",
-      "label": "Gender",
-      "validation_rules": [
-        {
-          "type": "required",
-          "message": "Please select a gender"
-        }
-      ]
+      "label": "Gender"
     },
-    {
-      "id": "gender_male",
-      "type": "value",
-      "field_name": "",
-      "label": "Male",
-      "validation_rules": []
-    },
-    {
-      "id": "gender_female",
-      "type": "value",
-      "field_name": "",
-      "label": "Female",
-      "validation_rules": []
-    }
+    {"id": "opt_m", "type": "value", "label": "Male", "value": "m"},
+    {"id": "opt_f", "type": "value", "label": "Female", "value": "f"}
   ],
   "edges": [
     {
-      "id": "edge_1",
-      "label": "",
-      "source_node": "gender",
-      "target_node": "gender_male",
+      "id": "e1",
+      "source_node": "f_gender",
+      "target_node": "opt_m",
       "type": "has_options"
     },
     {
-      "id": "edge_2",
-      "label": "",
-      "source_node": "gender",
-      "target_node": "gender_female",
+      "id": "e2",
+      "source_node": "f_gender",
+      "target_node": "opt_f",
       "type": "has_options"
     }
   ]
 }
-''';
 ```
 
-## Supported Field Types
+Full example: `example/assets/example.json`.
 
-- `text`
-- `number`
-- `date`
-- `password`
-- `radio`
-- `dropdown`
-- `address_dropdown`
-- `checkbox`
-- `multi_select`
+## ✅ Validation Rules
 
-Note: `file` is defined in `FieldType` but is not currently wired in `FormFieldFactory`.
-
-## Validation Rules
-
-Current runtime validation in `FormStateNotifier` supports:
+Validation rule enums available in Flutter:
 
 - `required`
+- `email`
 - `minLength`
+- `maxLength`
+- `pattern`
 - `min`
 - `max`
 
-The enum also includes `email`, `maxLength`, and `pattern`, but they are not currently enforced by the default validator.
+Validation is executed by native Axon core during:
 
-## Customization
+- field updates
+- page transitions
+- submit
 
-You can customize UI via `FormTheme` and `FormBuilders`:
+## 🎨 Customization
+
+### Custom Field / Page / Navigation Builders
 
 ```dart
-DynamicForm(
-  config: config,
-  theme: FormTheme.defaultTheme().copyWith(
-    fieldSpacing: 20,
-    pagePadding: const EdgeInsets.all(20),
-  ),
-  builders: FormBuilders(
-    progressBuilder: (context, currentPage, totalPages) {
-      return LinearProgressIndicator(value: (currentPage + 1) / totalPages);
-    },
-  ),
+AxonForm.json(
+  formJson,
+  onSubmit: (result) {},
+  fieldBuilder: (context, node) {
+    if (node.id == 'f_name') {
+      return Text('Custom field for ${node.label}');
+    }
+    return null; // fallback to built-in field
+  },
+  pageBuilder: (context, page, nodes, defaultFieldBuilder) {
+    return null; // fallback to built-in page
+  },
+  pageNavigatorBuilder: (context, pages, currentPage, pageCount, next, prev) {
+    return null; // fallback to default navigator
+  },
 )
 ```
 
-## Main Exports
+### ThemeExtension-based Styling
 
-- `DynamicForm`
-- `FormConfig`, `FormPage`, `FormNode`, `FormEdge`
-- `FieldType`, `ValidationRuleType`
-- `FormStateNotifier`
-- `FormTheme`
-- `FormBuilders`
-- `axon_form_core.dart` exports for lower-level core UI/controller APIs
+```dart
+MaterialApp(
+  theme: ThemeData(
+    extensions: const [
+      AxonFormTextInputStyle(
+        decoration: InputDecoration(border: OutlineInputBorder()),
+      ),
+      AxonFormNumberInputStyle(
+        decoration: InputDecoration(border: OutlineInputBorder()),
+      ),
+      AxonFormDateInputStyle(
+        inputDecoration: InputDecoration(border: OutlineInputBorder()),
+      ),
+      AxonFormDropdownInputStyle(isExpanded: true),
+    ],
+  ),
+  home: AxonForm.json(formJson, onSubmit: (result) {}),
+)
+```
+
+## 📦 Package Exports
+
+Import once:
+
+```dart
+import 'package:axon_form_flutter/axon_form_flutter.dart';
+```
+
+This includes:
+
+- `AxonForm`, `AxonFormController`
+- models (`AxonFormNode`, `AxonFormPage`, `AxonFormGraph`)
+- enums (`FieldType`, `ValidationRuleType`)
+- built-in field widgets
+- style extensions
+
+## 🧪 Run the Example
+
+```bash
+cd example
+flutter pub get
+flutter run
+```
