@@ -40,7 +40,7 @@ export interface FormBuilderContextType {
   deleteCondition: (conditionId: string) => void;
   //
   exportForm: (id: string, fileName: string) => void;
-  importForm: (id: string, data: unknown) => void;
+  importForm: (data: unknown) => Promise<string | undefined>;
   clearAllFormPages: (pageIds: string[]) => void;
 }
 

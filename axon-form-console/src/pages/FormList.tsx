@@ -1,5 +1,9 @@
 import CustomAlertDialog from '@/components/CustomAlertDialog';
 import Header from '@/components/form-builder-view/Header';
+import {
+  AlertDialog,
+  AlertDialogContent,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
 import {
@@ -30,16 +34,20 @@ import {
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import FormBuilderViewLayout from '@/layouts/FormBuilderViewLayout';
 import { formatDateTime } from '@/utils/Datetime';
-import { MoreVertical } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { handleError } from '@/utils/Toast';
+import { Loader2, MoreVertical } from 'lucide-react';
+import { toast } from 'sonner';
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 
 export default function FormList() {
   const navigate = useNavigate();
-  const { forms, deleteForm, exportForm } = useFormBuilder();
+  const { forms, deleteForm, exportForm, importForm } = useFormBuilder();
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [exportFormId, setExportFormId] = useState<string | null>(null);
   const [exportFileName, setExportFileName] = useState('form');
+  const [isImportingForm, setIsImportingForm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   function onDelete(id: string) {
     deleteForm(id);
@@ -63,13 +71,56 @@ export default function FormList() {
     setExportFormId(null);
   }
 
+  function handleImportFormClick() {
+    if (isImportingForm) return;
+    fileInputRef.current?.click();
+  }
+
+  async function handleImportFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsImportingForm(true);
+      const text = await file.text();
+      const json = JSON.parse(text) as unknown;
+      const createdFormId = await importForm(json);
+      if (!createdFormId) {
+        toast.error('Could not import form');
+        return;
+      }
+      navigate(`/form/${createdFormId}`);
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setIsImportingForm(false);
+      event.target.value = '';
+    }
+  }
+
   return (
     <FormBuilderViewLayout>
       <div className='flex justify-between items-center my-8 gap-4'>
         <Header title='Forms' />
-        <Button variant='secondary' onClick={() => navigate('/form/create')}>
-          Create New
-        </Button>
+        <div className='flex gap-2'>
+          <Button
+            variant='outline'
+            onClick={handleImportFormClick}
+            disabled={isImportingForm}
+          >
+            {isImportingForm ? 'Importing...' : 'Import Form'}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type='file'
+            accept='application/json'
+            className='hidden'
+            onChange={handleImportFileChange}
+          />
+          <Button variant='secondary' onClick={() => navigate('/form/create')}>
+            Create New
+          </Button>
+        </div>
       </div>
       <Separator />
       {forms.length > 0 ? (
@@ -186,6 +237,20 @@ export default function FormList() {
           </form>
         </DialogContent>
       </Dialog>
+      <AlertDialog
+        open={isImportingForm}
+        onOpenChange={(open) => {
+          if (isImportingForm || open) return;
+          setIsImportingForm(false);
+        }}
+      >
+        <AlertDialogContent>
+          <div className='flex flex-col items-center justify-center py-6 gap-3'>
+            <Loader2 className='animate-spin size-6' />
+            <p className='text-sm text-muted-foreground'>Loading JSON...</p>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </FormBuilderViewLayout>
   );
 }

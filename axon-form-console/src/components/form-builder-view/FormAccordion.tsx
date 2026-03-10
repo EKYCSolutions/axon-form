@@ -6,6 +6,7 @@ import {
 } from '@/components/ui/accordion';
 import { NodeFieldType } from '@/configs/graph';
 import { cn } from '@/lib/utils';
+import { copyToClipboard } from '@/utils/Clipboard';
 import { convertSnakeCaseToTitleCase, formatIndex } from '@/utils/String';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -62,6 +63,10 @@ export default function FormAccordion({
     id: fieldId,
   });
 
+  const fieldRecordId = getValues(`fields.${fieldIndex}.id`) as
+    | string
+    | undefined;
+
   return (
     <Accordion ref={setNodeRef} type='single' collapsible>
       <AccordionItem value='item-1'>
@@ -90,6 +95,17 @@ export default function FormAccordion({
               <p className='font-light text-xs'>
                 {formatIndex(fieldIndex + 1)}
               </p>
+              <Badge
+                variant='outline'
+                className='cursor-pointer'
+                title='Click to copy record ID'
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void copyToClipboard(fieldRecordId);
+                }}
+              >
+                ID: {fieldRecordId}
+              </Badge>
               <Badge variant='secondary'>
                 {convertSnakeCaseToTitleCase(
                   getValues(`fields.${fieldIndex}.field_type`),

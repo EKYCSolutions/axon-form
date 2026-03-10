@@ -1,39 +1,22 @@
 import { PageDataTable } from '@/components/PageDataTable.js';
 import PageHeader from '@/components/form-builder-view/PageHeader';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useFormBuilder } from '@/hooks/useFormBuilder';
 import type { Page } from '@/types/Page';
-import { handleError, handleSuccess } from '@/utils/Toast';
-import { Loader2 } from 'lucide-react';
-import { useRef, useState, type ChangeEvent } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { handleSuccess } from '@/utils/Toast';
+import { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 
 export default function FormPageList() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   //
-  const { pages, updatePageOrder, deletePage, importForm, clearAllFormPages } =
-    useFormBuilder();
+  const { pages, updatePageOrder, deletePage } = useFormBuilder();
 
   const [reOrderedPage, setReOrderedPage] = useState<Page[]>([]);
   const [isReordering, setIsReordering] = useState<boolean>(false);
   const [shouldResetOrder, setShouldResetOrder] = useState<boolean>(false);
-  const [pendingImportData, setPendingImportData] = useState<unknown>(null);
-  const [isConfirmOpen, setIsConfirmOpen] = useState<boolean>(false);
-  const [isLoadingJson, setIsLoadingJson] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleReordering = (status: boolean, pages: Page[]) => {
     setIsReordering(status);
@@ -56,69 +39,6 @@ export default function FormPageList() {
     deletePage(id);
   };
 
-  const handleLoadJsonClick = () => {
-    if (isLoadingJson) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    try {
-      setIsConfirmOpen(true);
-      setIsLoadingJson(true);
-      const text = await file.text();
-      const json = JSON.parse(text) as unknown;
-      setPendingImportData(json);
-    } catch (error) {
-      handleError(error);
-      setPendingImportData(null);
-      setIsConfirmOpen(false);
-    } finally {
-      setIsLoadingJson(false);
-      event.target.value = '';
-    }
-  };
-
-  const handleLoadWithoutClearing = async () => {
-    if (!pendingImportData || !id) return;
-    try {
-      setIsLoadingJson(true);
-      await importForm(id, pendingImportData);
-      setPendingImportData(null);
-      setIsConfirmOpen(false);
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setIsLoadingJson(false);
-    }
-  };
-
-  const handleClearAndLoad = async () => {
-    if (!pendingImportData || !id) return;
-    try {
-      setIsLoadingJson(true);
-      const pageIds = pages.map((page) => page.id);
-      await clearAllFormPages(pageIds);
-      await importForm(id, pendingImportData);
-      setPendingImportData(null);
-      setIsConfirmOpen(false);
-    } catch (error) {
-      handleError(error);
-    } finally {
-      setIsLoadingJson(false);
-    }
-  };
-
-  const handleDialogOpenChange = (open: boolean) => {
-    if (isLoadingJson) return;
-    setIsConfirmOpen(open);
-    if (!open) {
-      setPendingImportData(null);
-    }
-  };
-
   return (
     <>
       <div className='flex justify-between items-center my-8 gap-4'>
@@ -136,20 +56,6 @@ export default function FormPageList() {
           ) : (
             <>
               <Button
-                variant='outline'
-                onClick={handleLoadJsonClick}
-                disabled={isLoadingJson}
-              >
-                Load JSON
-              </Button>
-              <input
-                ref={fileInputRef}
-                type='file'
-                accept='application/json'
-                className='hidden'
-                onChange={handleFileChange}
-              />
-              <Button
                 variant='secondary'
                 onClick={() => navigate(`${location.pathname}/page/create`)}
               >
@@ -160,44 +66,6 @@ export default function FormPageList() {
         </div>
       </div>
       <Separator />
-      <AlertDialog open={isConfirmOpen} onOpenChange={handleDialogOpenChange}>
-        <AlertDialogContent>
-          {isLoadingJson ? (
-            <div className='flex flex-col items-center justify-center py-6 gap-3'>
-              <Loader2 className='animate-spin size-6' />
-              <p className='text-sm text-muted-foreground'>Loading JSON...</p>
-            </div>
-          ) : (
-            <>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Load JSON</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Do you want to clear existing PocketBase data before loading
-                  this form?
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel
-                  onClick={(event) => {
-                    event.preventDefault();
-                    void handleLoadWithoutClearing();
-                  }}
-                >
-                  Keep Existing
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={(event) => {
-                    event.preventDefault();
-                    void handleClearAndLoad();
-                  }}
-                >
-                  Clear & Load
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </>
-          )}
-        </AlertDialogContent>
-      </AlertDialog>
       {pages.length > 0 ? (
         <PageDataTable
           shouldResetOrder={shouldResetOrder}

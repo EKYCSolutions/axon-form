@@ -107,6 +107,11 @@ interface FormImportConditionGroup {
 }
 
 interface FormImportPayload {
+  form?: {
+    id?: string;
+    title?: string;
+    description?: string;
+  };
   layout?: {
     pages?: FormImportLayoutPage[];
   };
@@ -1009,7 +1014,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
   // API:  from JSON
   const importForm = useCallback(
-    async (id: string, rawData: unknown) => {
+    async (rawData: unknown): Promise<string | undefined> => {
       try {
         const data = rawData as FormImportPayload;
 
@@ -1025,6 +1030,13 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           return;
         }
 
+        const importedTitle = data.form?.title?.trim() || 'Imported Form';
+        const importedDescription = data.form?.description?.trim();
+        const createdForm = await createFormService({
+          title: importedTitle,
+          description: importedDescription,
+        });
+
         const layoutPages = data.layout.pages;
         const nodes = data.nodes;
         const edges = data.edges;
@@ -1039,7 +1051,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         for (const page of layoutPages) {
           const pageRes = await createPageService({
             id: page.id,
-            form: id,
+            form: createdForm.id,
             title: page.title,
             description: page.description,
             order: page.order,
@@ -1202,13 +1214,15 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           });
         }
 
-        await refreshPages();
-        handleSuccess('Load JSON Success');
+        await refreshForms();
+        handleSuccess('Import Form Success');
+        return createdForm.id;
       } catch (error) {
         handleError(error);
+        return undefined;
       }
     },
-    [refreshPages, replaceEdgeIdsInConditionString],
+    [refreshForms, replaceEdgeIdsInConditionString],
   );
 
   const clearAllFormPages = useCallback(

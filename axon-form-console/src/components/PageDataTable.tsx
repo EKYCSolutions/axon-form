@@ -34,6 +34,7 @@ import {
   getPageNode as getPageNodeService,
 } from '@/services/PocketBaseService';
 import type { Page } from '@/types/Page';
+import { copyToClipboard } from '@/utils/Clipboard';
 import { formatIndex } from '@/utils/String';
 import { GripVertical, MoreVertical } from 'lucide-react';
 import {
@@ -114,6 +115,18 @@ function DraggableRow({
         </div>
       </TableCell>
       <TableCell>{row.description}</TableCell>
+      <TableCell onClick={(event) => event.stopPropagation()}>
+        <Badge
+          variant='outline'
+          className='cursor-pointer'
+          title='Click to copy record ID'
+          onClick={() => {
+            void copyToClipboard(row.id);
+          }}
+        >
+          {row.id}
+        </Badge>
+      </TableCell>
       <TableCell
         className='flex items-center justify-between'
         onClick={(e) => e.stopPropagation()}
@@ -265,6 +278,7 @@ export function PageDataTable({
               <TableHead>Order</TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead>Record ID</TableHead>
               <TableHead>No. of Fields</TableHead>
             </TableRow>
           </TableHeader>

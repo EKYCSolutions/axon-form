@@ -3,44 +3,96 @@ import { Toaster } from 'sonner';
 import { ThemeProvider } from './providers/ThemeProvider';
 
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import type { ReactNode } from 'react';
 import CreateForm from './pages/CreateForm.js';
 import CreatePageForm from './pages/CreatePageForm';
 import FormDetail from './pages/FormDetail.js';
 import FormList from './pages/FormList.js';
+import Login from './pages/Login';
 import PageConditionForm from './pages/PageConditionForm.js';
 import PageDetail from './pages/PageDetail';
 import { FormBuilderProvider } from './providers/FormBuilderProvider';
 import { GraphViewProvider } from './providers/GraphViewProvider';
+import { isSuperuserAuthenticated } from './services/PocketBaseService';
+
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  if (!isSuperuserAuthenticated()) {
+    return <Navigate to='/login' replace />;
+  }
+  return <>{children}</>;
+}
+
+function PublicOnlyRoute({ children }: { children: ReactNode }) {
+  if (isSuperuserAuthenticated()) {
+    return <Navigate to='/' replace />;
+  }
+  return <>{children}</>;
+}
 
 export default function App() {
   const queryClient = new QueryClient();
 
   const router = createBrowserRouter([
     {
+      path: '/login',
+      element: (
+        <PublicOnlyRoute>
+          <Login />
+        </PublicOnlyRoute>
+      ),
+    },
+    {
       path: '/',
-      element: <FormList />,
+      element: (
+        <ProtectedRoute>
+          <FormList />
+        </ProtectedRoute>
+      ),
     },
     {
       path: '/form/create',
-      element: <CreateForm />,
+      element: (
+        <ProtectedRoute>
+          <CreateForm />
+        </ProtectedRoute>
+      ),
     },
     {
       path: '/form/:id',
-      element: <FormDetail />,
+      element: (
+        <ProtectedRoute>
+          <FormDetail />
+        </ProtectedRoute>
+      ),
     },
     {
       path: '/form/:id/page/create',
-      element: <CreatePageForm />,
+      element: (
+        <ProtectedRoute>
+          <CreatePageForm />
+        </ProtectedRoute>
+      ),
     },
     {
       path: '/form/:id/page/:pageId',
-      element: <PageDetail />,
+      element: (
+        <ProtectedRoute>
+          <PageDetail />
+        </ProtectedRoute>
+      ),
     },
     {
       path: '/form/:id/page/:pageId/condition',
-      element: <PageConditionForm />,
+      element: (
+        <ProtectedRoute>
+          <PageConditionForm />
+        </ProtectedRoute>
+      ),
     },
-    { path: '*', element: <Navigate to='/' replace /> },
+    {
+      path: '*',
+      element: <Navigate to={isSuperuserAuthenticated() ? '/' : '/login'} replace />,
+    },
   ]);
 
   return (

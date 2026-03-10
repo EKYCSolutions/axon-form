@@ -26,6 +26,55 @@ export const client = new PocketBase(
 
 client.autoCancellation(false);
 
+type SuperuserAuthData = {
+  token: string;
+  record: Record<string, unknown>;
+};
+
+export type SuperuserProfile = {
+  id: string;
+  email: string | null;
+  username: string | null;
+  name: string | null;
+};
+
+export const loginSuperuser = async (
+  identity: string,
+  password: string,
+): Promise<SuperuserAuthData> => {
+  const authData = await client
+    .collection('_superusers')
+    .authWithPassword(identity, password);
+
+  client.authStore.save(authData.token, authData.record);
+  return authData as SuperuserAuthData;
+};
+
+export const logoutSuperuser = (): void => {
+  client.authStore.clear();
+};
+
+export const isSuperuserAuthenticated = (): boolean => {
+  return client.authStore.isValid;
+};
+
+export const getPocketBaseAuthToken = (): string => {
+  return client.authStore.token;
+};
+
+export const getCurrentSuperuserProfile = (): SuperuserProfile | null => {
+  const record = client.authStore.record as Record<string, unknown> | null;
+
+  if (!record) return null;
+
+  return {
+    id: String(record.id ?? ''),
+    email: typeof record.email === 'string' ? record.email : null,
+    username: typeof record.username === 'string' ? record.username : null,
+    name: typeof record.name === 'string' ? record.name : null,
+  };
+};
+
 export const getAllNodes = async (
   searchString: string = '',
   pageIds: string[] = [],

@@ -24,6 +24,7 @@ import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import HelpTooltip from '../HelpTooltip';
+import ReadonlyContainer from '@/components/ReadonlyContainer';
 import ConditionFormField from './ConditionFormField';
 import OptionFormField from './OptionFormField';
 import ValidationRuleFormField from './ValidationRuleFormField';
@@ -36,6 +37,9 @@ interface IProps {
 
 export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
   const { control, watch, getValues } = useFormContext();
+  const fieldRecordId = getValues(`fields.${fieldIndex}.id`) as
+    | string
+    | undefined;
   const fieldType = watch(`fields.${fieldIndex}.field_type`);
   const isAddressDropdown = fieldType === NodeFieldType.AddressDropdown;
   const addressLevel = watch(`fields.${fieldIndex}.config.level`);
@@ -92,6 +96,13 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
 
   return (
     <div className='space-y-2 grid grid-cols-2 gap-4'>
+      <div className='col-span-full'>
+        <ReadonlyContainer
+          title='Record ID'
+          text={fieldRecordId || '-'}
+          copyable={!!fieldRecordId}
+        />
+      </div>
       <FormField
         control={control}
         name={`fields.${fieldIndex}.field_name`}
