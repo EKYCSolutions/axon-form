@@ -1,7 +1,6 @@
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 import 'package:axon_form_flutter/src/core/axon_form_provider.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
-import 'package:axon_form_flutter/src/core/models/node.dart';
-import 'package:axon_form_flutter/src/models/models.dart';
 
 class AxonFormController {
   final AxonFormProvider _provider;

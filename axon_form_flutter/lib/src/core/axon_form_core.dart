@@ -32,6 +32,9 @@ export 'components/styles/password_input_style.dart';
 export 'components/styles/radio_input_style.dart';
 export 'components/styles/text_input_style.dart';
 // Models
+export 'models/field_type.dart';
 export 'models/graph.dart';
 export 'models/node.dart';
 export 'models/page.dart';
+export 'models/validation_rule.dart';
+export 'models/validation_rule_type.dart';

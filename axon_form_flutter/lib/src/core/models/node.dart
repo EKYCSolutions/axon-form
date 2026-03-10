@@ -1,4 +1,5 @@
 import 'package:axon_form_flutter/axon_form_flutter.dart';
+import 'package:axon_form_flutter/src/core/models/validation_rule.dart';
 
 class AxonFormNode {
   final String id;
