@@ -1,4 +1,4 @@
-import 'package:axon_form_flutter/src/core/models/validation_rule_type.dart';
+import 'package:axon_form_flutter/axon_form_flutter.dart';
 
 class ValidationRule {
   final ValidationRuleType? type;

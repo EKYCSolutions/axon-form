@@ -50,12 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
             bottom: false,
             child: AxonForm.json(
               formJson,
-              onSubmit: (result) {
-                String fullResult = JsonEncoder.withIndent(
-                  '  ',
-                ).convert(result);
-                print("Form result: $fullResult");
-              },
+              onSubmit: (result) {},
               pageBuilder: (context, page, nodes, fieldBuilder) {
                 return null;
               },
