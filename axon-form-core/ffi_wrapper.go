@@ -298,14 +298,14 @@ func ValidateNode(
 /* -------------------- form values -------------------- */
 
 //export GetFormValue
-func GetFormValue() C.int {
+func GetFormValue(ignoreErrors C.int) C.int {
 	if g == nil {
 		setResult([]byte(`null`))
 		return 0
 	}
 
 	var errOut any
-	success, err, result := g.GetFormValue()
+	success, err, result := g.GetFormValue(ignoreErrors != 0)
 	if err != nil {
 		errOut = err.Error()
 	}
@@ -327,7 +327,7 @@ func GetPageFormValue(pageIDPtr unsafe.Pointer, pageIDLen C.int) C.int {
 
 	var errOut any
 	pageID := goString(pageIDPtr, pageIDLen)
-	success, err, result := g.GetPageFormValue(pageID)
+	success, err, result := g.GetPageFormValue(pageID, false)
 	if err != nil {
 		errOut = err.Error()
 	}

@@ -20,8 +20,7 @@ class AxonAddressDropdownInput extends AxonBaseInput {
     void Function(String? value) onChanged,
     void Function(String value) onSearch,
     String? errorText,
-  )?
-  builder;
+  )? builder;
 
   @override
   State<AxonAddressDropdownInput> createState() =>
@@ -52,8 +51,7 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
     final controller = widget.getController(context);
     final nodeValue = controller.getNodeValue(widget.node.id);
 
-    var style =
-        widget.style ??
+    var style = widget.style ??
         Theme.of(context).extension<AxonFormAddressDropdownInputStyle>() ??
         AxonFormAddressDropdownInputStyle.fallback(context);
 
@@ -71,7 +69,7 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
           selector: (_, provider) {
             final isMe =
                 provider.addressNodeIdsToUpdate?.contains(widget.node.id) ??
-                false;
+                    false;
             return isMe ? provider.pulse : -1;
           },
           builder: (context, pulse, _) {
@@ -210,7 +208,6 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                           );
                   }).toList(),
                 ),
-
                 if (formFieldState.hasError)
                   Padding(
                     padding: const EdgeInsets.only(top: 4.0),

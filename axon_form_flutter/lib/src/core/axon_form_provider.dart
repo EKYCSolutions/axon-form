@@ -190,6 +190,15 @@ class AxonFormProvider extends ChangeNotifier {
     return resultJson;
   }
 
+  Map<String, dynamic> getCurrentFormValue() {
+    CoreResponse res = _controller.getCurrentFormValue();
+    if (!res.success || res.data == null) {
+      throw Exception(res.error);
+    }
+    Map<String, dynamic> resultJson = jsonDecode(res.data?["result"]);
+    return resultJson;
+  }
+
   Map<String, dynamic> submitForm() {
     CoreResponse res = _controller.getFormValue();
     if (!res.success || res.data == null) {

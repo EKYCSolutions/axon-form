@@ -248,6 +248,55 @@ func (g Graph) GetNodeValue(nodeID string) (any, error) {
 		return false, fmt.Errorf("[GetNodeValue] Node not found | ID: %s", nodeID)
 	}
 
+	isAddressNode, level := n.IsAddressNode()
+	if isAddressNode {
+		// Null check and empty string check
+		valStr, ok := n.Value.(string)
+
+		if !ok || len(valStr) == 0 {
+			return nil, nil
+		}
+
+		addrNode := node.GetNodeByID(valStr, g.Nodes["values"])
+
+		// Case A: Custom Option
+		// If the value doesn't match a known ID and custom options are allowed, return raw value.
+		if addrNode == nil && n.GetBoolConfig(ALLOW_CUSTOM_OPTION_KEY) {
+			return n.Value, nil
+		}
+
+		// Verify the selected ID exists in our known value nodes
+		optionValueNode, ok := g.Nodes["values"][valStr]
+		if !ok {
+			return nil, fmt.Errorf("[GetNodeValue] Option Id %s not found for field name %s", valStr, n.FieldName)
+		}
+
+		// Case B: Standard ID Lookup
+		// We need the parent node (e.g., Province) to filter the list of children (e.g., Districts).
+		parentNode, err := g.GetParentNode(n.ID)
+		if level != "province" && err != nil {
+			return nil, err
+		}
+
+		// Retrieve the list of valid addresses for this level
+		addressList, err := g.getAddressList(parentNode, level)
+		if err != nil {
+			return nil, err
+		}
+
+		// Find and return the matching Address object from the list
+		for _, addr := range addressList {
+			if addr.Key == optionValueNode.Value {
+				data := map[string]any{
+					"id":    addrNode.ID,
+					"label": addrNode.Label,
+					"value": addr,
+				}
+				return data, nil
+			}
+		}
+	}
+
 	if n.IsFieldTypeWithOptions() {
 		// Null check and empty string check
 		valStr, ok := n.Value.(string)
@@ -286,7 +335,7 @@ func (g Graph) GetNodeValue(nodeID string) (any, error) {
 // 1. Validates 'Required' constraints.
 // 2. Resolves Address IDs into full Address objects (e.g., getting proper structs for Province/District).
 // 3. Resolves Option IDs into their actual string values (for Select/MultiSelect inputs).
-func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
+func (g Graph) resolveNodeValue(n *node.Node, ignoreErrors bool) (any, error) {
 	// ---------------------------------------------------------
 	// 1. Required Validation
 	// ---------------------------------------------------------
@@ -303,6 +352,9 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	}
 
 	if isRequired && isVisible && !hasValue {
+		if ignoreErrors {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("[resolveNodeValue] field name: %s | value required", n.FieldName)
 	}
 
@@ -318,7 +370,15 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	// We need to look up the actual Address object (Code, Key, Name) to return in the form data.
 	isAddressNode, level := n.IsAddressNode()
 	if isAddressNode {
-		addrNode := node.GetNodeByID(n.Value.(string), g.Nodes["values"])
+		nodeValue, ok := n.Value.(string)
+		if !ok {
+			if ignoreErrors {
+				return n.Value, nil
+			}
+			return nil, fmt.Errorf("[resolveNodeValue] field name: %s | address value must be a string", n.FieldName)
+		}
+
+		addrNode := node.GetNodeByID(nodeValue, g.Nodes["values"])
 
 		// Case A: Custom Option
 		// If the value doesn't match a known ID and custom options are allowed, return raw value.
@@ -327,8 +387,11 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 		}
 
 		// Verify the selected ID exists in our known value nodes
-		optionValueNode, ok := g.Nodes["values"][n.Value.(string)]
+		optionValueNode, ok := g.Nodes["values"][nodeValue]
 		if !ok {
+			if ignoreErrors {
+				return n.Value, nil
+			}
 			return nil, fmt.Errorf("[resolveNodeValue] Option Id %s not found for field name %s", n.Value, n.FieldName)
 		}
 
@@ -336,12 +399,18 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 		// We need the parent node (e.g., Province) to filter the list of children (e.g., Districts).
 		parentNode, err := g.GetParentNode(n.ID)
 		if level != "province" && err != nil {
+			if ignoreErrors {
+				return n.Value, nil
+			}
 			return nil, err
 		}
 
 		// Retrieve the list of valid addresses for this level
 		addressList, err := g.getAddressList(parentNode, level)
 		if err != nil {
+			if ignoreErrors {
+				return n.Value, nil
+			}
 			return nil, err
 		}
 
@@ -350,6 +419,10 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 			if addr.Key == optionValueNode.Value {
 				return addr, nil
 			}
+		}
+
+		if ignoreErrors {
+			return n.Value, nil
 		}
 	}
 
@@ -361,10 +434,19 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 
 	if n.IsFieldTypeWithOptions() {
 		if n.Value == nil {
+			if ignoreErrors {
+				return nil, nil
+			}
 			return nil, fmt.Errorf("[resolveNodeValue] field name: %s | value required", n.FieldName)
 		}
 
-		nodeValueIdString := n.Value.(string)
+		nodeValueIdString, ok := n.Value.(string)
+		if !ok {
+			if ignoreErrors {
+				return n.Value, nil
+			}
+			return nil, fmt.Errorf("[resolveNodeValue] field name: %s | option value must be a string", n.FieldName)
+		}
 		nodeValueOptionIds := strings.Split(nodeValueIdString, ",")
 
 		nodeValues := make([]string, 0, len(nodeValueOptionIds))
@@ -379,6 +461,10 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 			// Look up the value node by ID
 			opt_node, exists := g.Nodes["values"][optionId]
 			if !exists {
+				if ignoreErrors {
+					nodeValues = append(nodeValues, optionId)
+					continue
+				}
 				return nil, fmt.Errorf("[resolveNodeValue] Option Id %s not found for field name %s", optionId, n.FieldName)
 			}
 
@@ -398,7 +484,7 @@ func (g Graph) resolveNodeValue(n *node.Node) (any, error) {
 	return n.Value, nil
 }
 
-func (g Graph) GetPageFormValue(pageID string) (bool, error, string) {
+func (g Graph) GetPageFormValue(pageID string, ignoreErrors bool) (bool, error, string) {
 	result := make(map[string]any)
 	foundPage, ok := g.Pages[pageID]
 
@@ -412,7 +498,7 @@ func (g Graph) GetPageFormValue(pageID string) (bool, error, string) {
 			return false, fmt.Errorf("[GetPageFormValue] Field not found %s", id), ""
 		}
 
-		nValue, err := g.resolveNodeValue(n)
+		nValue, err := g.resolveNodeValue(n, ignoreErrors)
 		if err != nil {
 			return false, err, ""
 		}
@@ -428,7 +514,7 @@ func (g Graph) GetPageFormValue(pageID string) (bool, error, string) {
 	return true, nil, string(jsonBytes)
 }
 
-func (g Graph) GetFormValue() (bool, error, string) {
+func (g Graph) GetFormValue(ignoreErrors bool) (bool, error, string) {
 	result := make(map[string]any)
 
 	// Only include input nodes referenced by page.field_ids.
@@ -455,7 +541,7 @@ func (g Graph) GetFormValue() (bool, error, string) {
 			return false, fmt.Errorf("[GetFormValue] Field not found %s", id), ""
 		}
 
-		nValue, err := g.resolveNodeValue(n)
+		nValue, err := g.resolveNodeValue(n, ignoreErrors)
 		if err != nil {
 			return false, err, ""
 		}

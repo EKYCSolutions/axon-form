@@ -34,6 +34,11 @@ class AxonFormController {
     return _provider.validatePage(pageId);
   }
 
+  /// Returns all value of the form
+  Map<String, dynamic> getCurrentFormValue() {
+    return _provider.getCurrentFormValue();
+  }
+
   /// Retrieves a list of option nodes for dropdowns or selection inputs.
   List<AxonFormNode> getOptions(String nodeId) {
     return _provider.getOptions(nodeId);

@@ -73,8 +73,8 @@ typedef GetOptionNodesC =
 typedef GetOptionNodesDart =
     Pointer<Utf8> Function(Pointer<Void> nodeIdPtr, int nodeIdLen);
 
-typedef GetFormValueC = Int32 Function();
-typedef GetFormValueDart = int Function();
+typedef GetFormValueC = Int32 Function(Int32 ignoreErrors);
+typedef GetFormValueDart = int Function(int ignoreErrors);
 
 typedef GetPageFormValueC =
     Int32 Function(Pointer<Void> nodeIdPtr, Int32 nodeIdLen);

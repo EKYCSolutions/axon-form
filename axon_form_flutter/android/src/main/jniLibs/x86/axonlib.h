@@ -105,7 +105,7 @@ extern int GetChildNode(void* nodeIDPtr, int nodeIDLen);
 extern int GetOptionNodes(void* nodeIDPtr, int nodeIDLen);
 extern int ValidateAddressNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);
 extern int ValidateNode(void* nodeIDPtr, int nodeIDLen, void* valuePtr, int valueLen);
-extern int GetFormValue();
+extern int GetFormValue(int ignoreErrors);
 extern int GetPageFormValue(void* pageIDPtr, int pageIDLen);
 extern void enforce_binding();
 

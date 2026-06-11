@@ -39,9 +39,8 @@ class AxonFormFFI {
 
   void _bindFunctions() {
     try {
-      _initGraphDart = _dylib
-          .lookup<NativeFunction<InitGraphC>>('InitGraph')
-          .asFunction();
+      _initGraphDart =
+          _dylib.lookup<NativeFunction<InitGraphC>>('InitGraph').asFunction();
 
       _addEventListenerDart = _dylib
           .lookup<NativeFunction<AddEventListenerC>>('AddEventListener')
@@ -71,9 +70,8 @@ class AxonFormFFI {
           .lookup<NativeFunction<GetOptionNodesC>>('GetOptionNodes')
           .asFunction();
 
-      _getResultDart = _dylib
-          .lookup<NativeFunction<GetResultC>>('GetResult')
-          .asFunction();
+      _getResultDart =
+          _dylib.lookup<NativeFunction<GetResultC>>('GetResult').asFunction();
 
       _getFormValueDart = _dylib
           .lookup<NativeFunction<GetFormValueC>>('GetFormValue')
@@ -83,9 +81,8 @@ class AxonFormFFI {
           .lookup<NativeFunction<GetPageFormValueC>>('GetPageFormValue')
           .asFunction();
 
-      _freeStringDart = _dylib
-          .lookup<NativeFunction<FreeStringC>>('FreeString')
-          .asFunction();
+      _freeStringDart =
+          _dylib.lookup<NativeFunction<FreeStringC>>('FreeString').asFunction();
     } catch (e) {
       throw Exception('Failed to bind functions: $e');
     }
@@ -233,10 +230,23 @@ class AxonFormFFI {
     }
   }
 
-  //
+  // For retreiving current values of the form, regardless of validation status
+  CoreResponse getCurrentFormValue() {
+    try {
+      // ignoreError set to True
+      _getFormValueDart(1);
+      return _getCoreResponse("getFormValue");
+    } catch (e) {
+      debugPrint("[getFormValue] Error : $e");
+      return CoreResponse(false, "[getFormValue] Error : $e", null);
+    }
+  }
+
+  // For form submission, throws error when form does not pass validation
   CoreResponse getFormValue() {
     try {
-      _getFormValueDart();
+      // ignoreError set to False
+      _getFormValueDart(0);
       return _getCoreResponse("getFormValue");
     } catch (e) {
       debugPrint("[getFormValue] Error : $e");

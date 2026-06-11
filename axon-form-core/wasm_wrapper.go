@@ -44,14 +44,14 @@ func validateNode(this js.Value, args []js.Value) interface{} {
 }
 
 func getFormValue(this js.Value, args []js.Value) interface{} {
-	_, _, result := g.GetFormValue()
+	_, _, result := g.GetFormValue(false)
 	return js.ValueOf([]interface{}{result, js.ValueOf(nil)})
 }
 
 func getPageFormValue(this js.Value, args []js.Value) interface{} {
 	pageId := args[0].String()
 
-	_, _, result := g.GetPageFormValue(pageId)
+	_, _, result := g.GetPageFormValue(pageId, false)
 	return js.ValueOf([]interface{}{result, js.ValueOf(nil)})
 }
 
