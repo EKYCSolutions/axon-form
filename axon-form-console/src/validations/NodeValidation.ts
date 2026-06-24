@@ -40,9 +40,9 @@ export function convertNodeToNodeForm(node: Node): NodeFormSchemaData {
       (config.level as string | undefined) ??
       (config.level as string | undefined);
   }
-  if (mergedConfig.allow_custom_value === undefined) {
-    mergedConfig.allow_custom_value =
-      (config.allow_custom_value as boolean | undefined) ??
+  if (mergedConfig.allow_custom_option === undefined) {
+    mergedConfig.allow_custom_option =
+      (config.allow_custom_option as boolean | undefined) ??
       (config.allow_custom_option as boolean | undefined);
   }
 

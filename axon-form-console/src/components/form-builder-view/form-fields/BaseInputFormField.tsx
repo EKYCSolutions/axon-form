@@ -18,13 +18,14 @@ import {
 import { NodeFieldType, ValidationRuleType } from '@/configs/graph';
 import { Plus } from 'lucide-react';
 
+import ReadonlyContainer from '@/components/ReadonlyContainer';
 import { Label } from '@/components/ui/label';
 import { handleError } from '@/utils/Toast';
 import type { NodeFormSchemaData } from '@/validations/NodeValidation';
 import type { PageFormSchemaData } from '@/validations/PageFormValidation';
+import { useEffect } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import HelpTooltip from '../HelpTooltip';
-import ReadonlyContainer from '@/components/ReadonlyContainer';
 import ConditionFormField from './ConditionFormField';
 import OptionFormField from './OptionFormField';
 import ValidationRuleFormField from './ValidationRuleFormField';
@@ -36,7 +37,7 @@ interface IProps {
 }
 
 export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
-  const { control, watch, getValues } = useFormContext();
+  const { control, watch, getValues, setValue } = useFormContext();
   const fieldRecordId = getValues(`fields.${fieldIndex}.id`) as
     | string
     | undefined;
@@ -93,6 +94,15 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
   } = useFieldArray<PageFormSchemaData>({
     name: `fields.${fieldIndex}.conditions`,
   });
+
+  useEffect(() => {
+    if (isAddressDropdown) {
+      setValue(`fields.${fieldIndex}.config.allow_custom_option`, true, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [isAddressDropdown, fieldIndex, setValue]);
 
   return (
     <div className='space-y-2 grid grid-cols-2 gap-4'>
@@ -197,16 +207,14 @@ export default function BaseInputFormField({ fieldIndex, hasOptions }: IProps) {
       {isAddressDropdown && (
         <FormField
           control={control}
-          name={`fields.${fieldIndex}.config.allow_custom_value`}
+          name={`fields.${fieldIndex}.config.allow_custom_option`}
           render={({ field }) => {
             return (
               <FormItem className='flex items-center gap-2 h-9'>
                 <FormControl>
                   <Checkbox
-                    checked={field.value ?? false}
-                    onCheckedChange={(checked) =>
-                      field.onChange(checked === true)
-                    }
+                    checked={field.value ?? true}
+                    onCheckedChange={() => field.onChange(true)}
                   />
                 </FormControl>
                 <div className='flex items-center gap-2'>

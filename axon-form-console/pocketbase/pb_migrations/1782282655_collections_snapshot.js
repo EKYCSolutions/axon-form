@@ -776,8 +776,8 @@ migrate((app) => {
       "viewRule": "id = @request.auth.id"
     },
     {
-      "createRule": "",
-      "deleteRule": "",
+      "createRule": null,
+      "deleteRule": null,
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -794,232 +794,31 @@ migrate((app) => {
           "type": "text"
         },
         {
-          "hidden": false,
-          "id": "select2363381545",
-          "maxSelect": 1,
-          "name": "type",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "select",
-          "values": [
-            "input",
-            "options",
-            "value",
-            "page"
-          ]
-        },
-        {
-          "hidden": false,
-          "id": "select2668773011",
-          "maxSelect": 1,
-          "name": "field_type",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "select",
-          "values": [
-            "text",
-            "datetime",
-            "number",
-            "multi-select",
-            "radio",
-            "dropdown",
-            "checkbox",
-            "file",
-            "password"
-          ]
-        },
-        {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "text245846248",
+          "id": "text3184953411",
           "max": 0,
           "min": 0,
-          "name": "label",
+          "name": "conditions",
           "pattern": "",
           "presentable": false,
           "primaryKey": false,
           "required": false,
           "system": false,
-          "type": "text"
-        },
-        {
-          "hidden": false,
-          "id": "json1114208307",
-          "maxSize": 0,
-          "name": "metadata",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "json"
-        },
-        {
-          "hidden": false,
-          "id": "json2970758927",
-          "maxSize": 0,
-          "name": "validation_rules",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "json"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text1307514812",
-          "max": 0,
-          "min": 0,
-          "name": "field_name",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text494360628",
-          "max": 0,
-          "min": 0,
-          "name": "value",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
-        },
-        {
-          "cascadeDelete": true,
-          "collectionId": "pbc_3945946014",
-          "hidden": false,
-          "id": "relation336246304",
-          "maxSelect": 1,
-          "minSelect": 0,
-          "name": "page",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "relation"
-        },
-        {
-          "hidden": false,
-          "id": "number4113142680",
-          "max": null,
-          "min": null,
-          "name": "order",
-          "onlyInt": false,
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "number"
-        },
-        {
-          "hidden": false,
-          "id": "autodate2990389176",
-          "name": "created",
-          "onCreate": true,
-          "onUpdate": false,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        },
-        {
-          "hidden": false,
-          "id": "autodate3332085495",
-          "name": "updated",
-          "onCreate": true,
-          "onUpdate": true,
-          "presentable": false,
-          "system": false,
-          "type": "autodate"
-        }
-      ],
-      "id": "pbc_3598433047",
-      "indexes": [],
-      "listRule": "",
-      "name": "nodes",
-      "system": false,
-      "type": "base",
-      "updateRule": "",
-      "viewRule": ""
-    },
-    {
-      "createRule": "",
-      "deleteRule": "",
-      "fields": [
-        {
-          "autogeneratePattern": "[a-z0-9]{15}",
-          "hidden": false,
-          "id": "text3208210256",
-          "max": 15,
-          "min": 15,
-          "name": "id",
-          "pattern": "^[a-z0-9]+$",
-          "presentable": false,
-          "primaryKey": true,
-          "required": true,
-          "system": true,
           "type": "text"
         },
         {
           "cascadeDelete": false,
           "collectionId": "pbc_3598433047",
           "hidden": false,
-          "id": "relation265430975",
+          "id": "relation2239752261",
           "maxSelect": 1,
           "minSelect": 0,
-          "name": "source_node",
+          "name": "node",
           "presentable": false,
           "required": false,
           "system": false,
           "type": "relation"
-        },
-        {
-          "hidden": false,
-          "id": "select2363381545",
-          "maxSelect": 1,
-          "name": "type",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "select",
-          "values": [
-            "validates",
-            "shows",
-            "has_options",
-            "has_field"
-          ]
-        },
-        {
-          "cascadeDelete": true,
-          "collectionId": "pbc_3598433047",
-          "hidden": false,
-          "id": "relation2372216508",
-          "maxSelect": 1,
-          "minSelect": 0,
-          "name": "target_node",
-          "presentable": false,
-          "required": false,
-          "system": false,
-          "type": "relation"
-        },
-        {
-          "autogeneratePattern": "",
-          "hidden": false,
-          "id": "text245846248",
-          "max": 0,
-          "min": 0,
-          "name": "label",
-          "pattern": "",
-          "presentable": false,
-          "primaryKey": false,
-          "required": false,
-          "system": false,
-          "type": "text"
         },
         {
           "hidden": false,
@@ -1042,18 +841,18 @@ migrate((app) => {
           "type": "autodate"
         }
       ],
-      "id": "pbc_1961669470",
+      "id": "pbc_2040300953",
       "indexes": [],
-      "listRule": "",
-      "name": "edges",
+      "listRule": null,
+      "name": "condition_groups",
       "system": false,
       "type": "base",
-      "updateRule": "",
-      "viewRule": ""
+      "updateRule": null,
+      "viewRule": null
     },
     {
-      "createRule": "",
-      "deleteRule": "",
+      "createRule": null,
+      "deleteRule": null,
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1142,16 +941,16 @@ migrate((app) => {
       ],
       "id": "pbc_181811513",
       "indexes": [],
-      "listRule": "",
+      "listRule": null,
       "name": "conditions",
       "system": false,
       "type": "base",
-      "updateRule": "",
-      "viewRule": ""
+      "updateRule": null,
+      "viewRule": null
     },
     {
-      "createRule": "",
-      "deleteRule": "",
+      "createRule": null,
+      "deleteRule": null,
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1170,10 +969,10 @@ migrate((app) => {
         {
           "autogeneratePattern": "",
           "hidden": false,
-          "id": "text3184953411",
+          "id": "text245846248",
           "max": 0,
           "min": 0,
-          "name": "conditions",
+          "name": "label",
           "pattern": "",
           "presentable": false,
           "primaryKey": false,
@@ -1182,13 +981,43 @@ migrate((app) => {
           "type": "text"
         },
         {
+          "hidden": false,
+          "id": "select2363381545",
+          "maxSelect": 1,
+          "name": "type",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "select",
+          "values": [
+            "validates",
+            "shows",
+            "has_options",
+            "has_field",
+            "filter_by"
+          ]
+        },
+        {
+          "cascadeDelete": true,
+          "collectionId": "pbc_3598433047",
+          "hidden": false,
+          "id": "relation2372216508",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "target_node",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
           "cascadeDelete": false,
           "collectionId": "pbc_3598433047",
           "hidden": false,
-          "id": "relation2239752261",
+          "id": "relation265430975",
           "maxSelect": 1,
           "minSelect": 0,
-          "name": "node",
+          "name": "source_node",
           "presentable": false,
           "required": false,
           "system": false,
@@ -1215,18 +1044,294 @@ migrate((app) => {
           "type": "autodate"
         }
       ],
-      "id": "pbc_2040300953",
+      "id": "pbc_1961669470",
       "indexes": [],
-      "listRule": "",
-      "name": "condition_groups",
+      "listRule": null,
+      "name": "edges",
       "system": false,
       "type": "base",
-      "updateRule": "",
-      "viewRule": ""
+      "updateRule": null,
+      "viewRule": null
     },
     {
-      "createRule": "",
-      "deleteRule": "",
+      "createRule": null,
+      "deleteRule": null,
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text724990059",
+          "max": 0,
+          "min": 0,
+          "name": "title",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text1843675174",
+          "max": 0,
+          "min": 0,
+          "name": "description",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": true,
+          "collectionId": "pbc_3945946014",
+          "hidden": false,
+          "id": "relation1542800728",
+          "maxSelect": 999,
+          "minSelect": 0,
+          "name": "pages",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_913941788",
+      "indexes": [],
+      "listRule": null,
+      "name": "forms",
+      "system": false,
+      "type": "base",
+      "updateRule": null,
+      "viewRule": null
+    },
+    {
+      "createRule": null,
+      "deleteRule": null,
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "select2363381545",
+          "maxSelect": 1,
+          "name": "type",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "select",
+          "values": [
+            "input",
+            "options",
+            "value",
+            "page"
+          ]
+        },
+        {
+          "hidden": false,
+          "id": "select2668773011",
+          "maxSelect": 1,
+          "name": "field_type",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "select",
+          "values": [
+            "text",
+            "datetime",
+            "number",
+            "multi-select",
+            "radio",
+            "dropdown",
+            "checkbox",
+            "file",
+            "password",
+            "address_dropdown"
+          ]
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text245846248",
+          "max": 0,
+          "min": 0,
+          "name": "label",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "json2970758927",
+          "maxSize": 0,
+          "name": "validation_rules",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text1307514812",
+          "max": 0,
+          "min": 0,
+          "name": "field_name",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text4125531906",
+          "max": 0,
+          "min": 0,
+          "name": "placeholder",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text494360628",
+          "max": 0,
+          "min": 0,
+          "name": "value",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": true,
+          "collectionId": "pbc_3945946014",
+          "hidden": false,
+          "id": "relation336246304",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "page",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "number4113142680",
+          "max": null,
+          "min": null,
+          "name": "order",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "json1114208307",
+          "maxSize": 0,
+          "name": "config",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "json"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_3598433047",
+      "indexes": [],
+      "listRule": null,
+      "name": "nodes",
+      "system": false,
+      "type": "base",
+      "updateRule": null,
+      "viewRule": null
+    },
+    {
+      "createRule": null,
+      "deleteRule": null,
       "fields": [
         {
           "autogeneratePattern": "[a-z0-9]{15}",
@@ -1296,6 +1401,19 @@ migrate((app) => {
           "type": "relation"
         },
         {
+          "cascadeDelete": true,
+          "collectionId": "pbc_913941788",
+          "hidden": false,
+          "id": "relation1384709455",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "form",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
           "hidden": false,
           "id": "autodate2990389176",
           "name": "created",
@@ -1318,12 +1436,171 @@ migrate((app) => {
       ],
       "id": "pbc_3945946014",
       "indexes": [],
-      "listRule": "",
+      "listRule": null,
       "name": "pages",
       "system": false,
       "type": "base",
-      "updateRule": "",
-      "viewRule": ""
+      "updateRule": null,
+      "viewRule": null
+    },
+    {
+      "createRule": null,
+      "deleteRule": null,
+      "fields": [
+        {
+          "autogeneratePattern": "[a-z0-9]{15}",
+          "hidden": false,
+          "id": "text3208210256",
+          "max": 15,
+          "min": 15,
+          "name": "id",
+          "pattern": "^[a-z0-9]+$",
+          "presentable": false,
+          "primaryKey": true,
+          "required": true,
+          "system": true,
+          "type": "text"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text245846248",
+          "max": 0,
+          "min": 0,
+          "name": "label",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": true,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "cascadeDelete": false,
+          "collectionId": "pbc_1961669470",
+          "hidden": false,
+          "id": "relation1768767806",
+          "maxSelect": 1,
+          "minSelect": 0,
+          "name": "edge_id",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "cascadeDelete": false,
+          "collectionId": "pbc_3598433047",
+          "hidden": false,
+          "id": "relation1175298007",
+          "maxSelect": 999,
+          "minSelect": 0,
+          "name": "node_id",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "relation"
+        },
+        {
+          "hidden": false,
+          "id": "bool3768296713",
+          "name": "required",
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "bool"
+        },
+        {
+          "autogeneratePattern": "",
+          "hidden": false,
+          "id": "text1107622090",
+          "max": 0,
+          "min": 0,
+          "name": "validation_pattern",
+          "pattern": "",
+          "presentable": false,
+          "primaryKey": false,
+          "required": false,
+          "system": false,
+          "type": "text"
+        },
+        {
+          "hidden": false,
+          "id": "number2534458511",
+          "max": null,
+          "min": null,
+          "name": "min_length",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number2518441531",
+          "max": null,
+          "min": null,
+          "name": "max_length",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number2709200336",
+          "max": null,
+          "min": null,
+          "name": "min",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "number2641765001",
+          "max": null,
+          "min": null,
+          "name": "max",
+          "onlyInt": false,
+          "presentable": false,
+          "required": false,
+          "system": false,
+          "type": "number"
+        },
+        {
+          "hidden": false,
+          "id": "autodate2990389176",
+          "name": "created",
+          "onCreate": true,
+          "onUpdate": false,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        },
+        {
+          "hidden": false,
+          "id": "autodate3332085495",
+          "name": "updated",
+          "onCreate": true,
+          "onUpdate": true,
+          "presentable": false,
+          "system": false,
+          "type": "autodate"
+        }
+      ],
+      "id": "pbc_1105398907",
+      "indexes": [],
+      "listRule": null,
+      "name": "validations",
+      "system": false,
+      "type": "base",
+      "updateRule": null,
+      "viewRule": null
     }
   ];
 
