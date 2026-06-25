@@ -1,58 +1,105 @@
 # Axon Form Console
 
-This project is the console application for managing Axon Forms. It provides a command-line interface for various operations related to form creation, management, and data handling within the Axon ecosystem.
+Axon Form Console is the web authoring application for Axon Form. It lets admins create and manage dynamic form definitions, pages, fields, options, validation rules, and conditional logic. The console stores data in PocketBase and can export form definitions as Axon JSON for use by the Flutter runtime.
 
 ## Features
 
-- **Form Definition Management**: Create, update, and delete form definitions.
-- **Form Instance Management**: View and manage instances of submitted forms.
-- **Data Export**: Export form data in various formats.
-- **User and Role Management**: (Planned) Manage users and their permissions within the console.
-- **Integration with Axon Core**: Seamlessly interacts with the core Axon Form services.
+- Create, update, and delete forms.
+- Create and order form pages.
+- Add and configure form fields.
+- Configure field options for dropdown, radio, multi-select, and address fields.
+- Configure validation rules.
+- Configure conditional show/hide logic.
+- Import and export Axon JSON.
+- Authenticate with a PocketBase superuser account.
 
-## Getting Started
+## Tech Stack
 
-### Prerequisites
+- React
+- TypeScript
+- Vite
+- PocketBase
+- TanStack Query
+- React Hook Form
+- Zod
+- Tailwind CSS
 
-Before you begin, ensure you have the following installed:
+## Prerequisites
 
-- **Node.js**: Version 14 or higher.
-- **npm** or **yarn**: Package manager for Node.js.
+For Docker setup:
 
-### Installation
+- Docker
+- Docker Compose
 
-1. **Clone the repository:**
+For local frontend development without Docker:
 
-   ```bash
-   git clone https://github.com/your-username/axon-form-console.git
-   cd axon-form-console
-   ```
+- Node.js
+- npm
+- A running PocketBase instance
 
-2. **Install dependencies:**
+## Run With Docker Compose
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-### Configuration
-
-The console application requires configuration to connect to the Axon Form backend services. Create a `.env` file in the root directory of the project and add the following environment variables:
-
-```
-AXON_API_BASE_URL=http://localhost:3000/api
-AXON_AUTH_TOKEN=your_secret_auth_token_if_required
-```
-
-Replace `http://localhost:3000/api` with the actual URL of your Axon Form API. The `AXON_AUTH_TOKEN` is optional and only required if your Axon API uses token-based authentication.
-
-### Running the Console
-
-To start the console application, run:
+From the console directory:
 
 ```bash
-npm start
-# or
-yarn start
+cd axon-form-console
+docker compose up
 ```
+
+This starts two services:
+
+- PocketBase backend: `http://localhost:8080`
+- Axon Form Console frontend: `http://localhost:5173`
+
+## First-Time PocketBase Setup
+
+When PocketBase starts for the first time, the terminal prints a setup link like this:
+
+```text
+http://0.0.0.0:8080/_/#/pbinstal/...
+```
+
+Open that link in your browser, or replace `0.0.0.0` with `localhost`:
+
+```text
+http://localhost:8080/_/#/pbinstal/...
+```
+
+Use the PocketBase setup page to create the first superuser account.
+
+After the superuser account is created:
+
+1. Open the frontend console at `http://localhost:5173`.
+2. Log in using the same superuser email and password.
+3. Start creating and managing forms.
+
+The frontend uses PocketBase superuser authentication, so the console cannot be used until this account exists.
+
+## Manual Frontend Setup
+
+If you want to run only the frontend locally, first create a `.env` file in `axon-form-console`:
+
+```env
+VITE_POCKETBASE_URL=http://127.0.0.1
+VITE_POCKETBASE_PORT=8080
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the Vite development server:
+
+```bash
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
+
+Make sure PocketBase is already running and that a superuser account has been created.
