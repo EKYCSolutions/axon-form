@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  core:
+    name: Go core
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: axon-form-core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.6'
+          cache-dependency-path: axon-form-core/go.sum
+      - run: go vet ./...
+      - run: go build ./...
+        env:
+          CGO_ENABLED: '1'
+      - run: go test ./...
+
+  flutter:
+    name: Flutter runtime
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: axon_form_flutter
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.5'
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+
+  console:
+    name: Web console
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: axon-form-console
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npx tsc -b
+      - run: npm run lint

@@ -224,9 +224,10 @@ class AxonFormFFI {
       debugPrint("[validateAddressNode] Error : $e");
       return CoreResponse(false, "[validateAddressNode] Error : $e", null);
     } finally {
-      //
       malloc.free(nodeIdPtr);
-      malloc.free(valuePtr);
+      if (valuePtr != nullptr) {
+        malloc.free(valuePtr);
+      }
     }
   }
 

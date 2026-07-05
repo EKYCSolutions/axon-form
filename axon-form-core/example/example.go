@@ -69,7 +69,7 @@ func main() {
 	nValue, _ = g.GetNodeValue(currentAddressVillageId)
 	fmt.Println("value received: ", nValue)
 
-	_, err, res := g.GetFormValue()
+	_, err, res := g.GetFormValue(false)
 
 	fmt.Println("err: ", err, "result: ", res)
 }

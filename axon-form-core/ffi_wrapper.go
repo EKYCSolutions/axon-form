@@ -24,6 +24,7 @@ import (
 	"axon-form/core/internal/graph"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"unsafe"
 )
 
@@ -55,6 +56,20 @@ func goString(ptr unsafe.Pointer, len C.int) string {
 		return ""
 	}
 	return string(C.GoBytes(ptr, len))
+}
+
+// joinErrs collapses a slice of validation errors into a single message so that
+// callers surface every failure instead of only the first one. Returns nil
+// (JSON null) when there are no errors.
+func joinErrs(errs []error) any {
+	if len(errs) == 0 {
+		return nil
+	}
+	msgs := make([]string, len(errs))
+	for i, e := range errs {
+		msgs[i] = e.Error()
+	}
+	return strings.Join(msgs, "; ")
 }
 
 /* -------------------- result access -------------------- */
@@ -223,7 +238,7 @@ func GetOptionNodes(nodeIDPtr unsafe.Pointer, nodeIDLen C.int) C.int {
 	nodes, err := g.GetOptionNodes(nodeID)
 
 	if err != nil {
-		setJSONResult([]byte(`["graph not initialized",null]`))
+		setJSONResult([]any{false, err.Error(), nil})
 		return 0
 	}
 
@@ -253,10 +268,7 @@ func ValidateAddressNode(
 
 	success, errs, nodeIds := g.ValidateAddressNode(input)
 
-	var errOut any
-	if errs != nil {
-		errOut = errs[0].Error()
-	}
+	errOut := joinErrs(errs)
 
 	data := map[string]any{
 		"isValid": success,
@@ -283,10 +295,7 @@ func ValidateNode(
 
 	success, errs := g.ValidateNode(input)
 
-	var errOut any
-	if errs != nil {
-		errOut = errs[0].Error()
-	}
+	errOut := joinErrs(errs)
 
 	data := map[string]bool{
 		"isValid": success,

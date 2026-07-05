@@ -18,7 +18,7 @@ class AxonFormController {
 
     if (node == null) {
       throw Exception(
-        "[AxonFormController] setFieldValue | Ffield id: $fieldNodeId not found",
+        "[AxonFormController] setFieldValue | field id: $fieldNodeId not found",
       );
     }
 

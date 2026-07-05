@@ -39,8 +39,8 @@ func TestNode_IsRequired(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.node.IsRequired; got != tt.want {
-				t.Errorf("Node.IsRequired() = %v, want %v", got, tt.want)
+			if got := tt.node.hasRequiredValidationRule(); got != tt.want {
+				t.Errorf("Node.hasRequiredValidationRule() = %v, want %v", got, tt.want)
 			}
 		})
 	}
