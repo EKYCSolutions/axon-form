@@ -1,13 +1,14 @@
 import 'dart:convert';
 
-import 'package:axon_form_flutter/src/core/axon_form_ffi.dart';
+import 'package:axon_form_flutter/src/core/controller/axon_form_controller.dart';
+import 'package:axon_form_flutter/src/core/controller/axon_form_controller_factory.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:axon_form_flutter/src/core/models/graph.dart';
 import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:flutter/foundation.dart';
 
 class AxonFormProvider extends ChangeNotifier {
-  late AxonFormFFI _controller;
+  late AxonFormController _controller;
 
   bool _isLoading = true;
   bool get isLoading => _isLoading;
@@ -40,10 +41,10 @@ class AxonFormProvider extends ChangeNotifier {
 
   Future<void> initialize(Future<Uint8List> Function() loader) async {
     try {
-      _controller = AxonFormFFI();
+      _controller = createAxonFormController();
       final jsonBytes = await loader();
       //
-      CoreResponse result = _controller.initialize(jsonBytes);
+      CoreResponse result = await _controller.initialize(jsonBytes);
       //
       if (!result.success || result.data == null) {
         throw Exception(result.error);

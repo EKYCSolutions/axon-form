@@ -36,3 +36,6 @@ flutter:
       web:
         pluginClass: AxonFormFlutterWeb
         fileName: axon_form_flutter_web.dart
+  assets:
+    - web/wasm_exec.js
+    - web/axonlib.wasm

@@ -2,12 +2,13 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:axon_form_flutter/src/core/controller/axon_form_controller.dart';
 import 'package:axon_form_flutter/src/core/ffi_types.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 
-class AxonFormFFI {
+class AxonFormFFI implements AxonFormController {
   late final DynamicLibrary _dylib;
   late final InitGraphDart _initGraphDart;
   late final AddEventListenerDart _addEventListenerDart;
@@ -89,7 +90,8 @@ class AxonFormFFI {
   }
 
   //
-  CoreResponse initialize(Uint8List fileBytes) {
+  @override
+  Future<CoreResponse> initialize(Uint8List fileBytes) async {
     final Pointer<Uint8> nativeData = malloc<Uint8>(fileBytes.length);
     final nativeBytes = nativeData.asTypedList(fileBytes.length);
     nativeBytes.setAll(0, fileBytes);
@@ -102,9 +104,10 @@ class AxonFormFFI {
   final List<NativeCallable> _activeListeners = [];
 
   //
+  @override
   void addEventListener(
     String eventName,
-    Function(Map<String, dynamic>) callback,
+    void Function(Map<String, dynamic>) callback,
   ) {
     final Pointer<Utf8> eventNamePtr = eventName.toNativeUtf8();
 
@@ -140,6 +143,7 @@ class AxonFormFFI {
     _getCoreResponse("addEventListener");
   }
 
+  @override
   CoreResponse isNodeVisible(String nodeId) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
 
@@ -154,6 +158,7 @@ class AxonFormFFI {
     return CoreResponse(false, null, null);
   }
 
+  @override
   CoreResponse getNodeValue(String nodeId) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
 
@@ -169,6 +174,7 @@ class AxonFormFFI {
   }
 
   //
+  @override
   CoreResponse validateNode(String nodeId, String? value) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
     Pointer<Utf8> valuePtr = nullptr;
@@ -201,6 +207,7 @@ class AxonFormFFI {
   }
 
   //
+  @override
   CoreResponse validateAddressNode(String nodeId, String? value) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
     Pointer<Utf8> valuePtr = nullptr;
@@ -231,6 +238,7 @@ class AxonFormFFI {
   }
 
   // For retreiving current values of the form, regardless of validation status
+  @override
   CoreResponse getCurrentFormValue() {
     try {
       // ignoreError set to True
@@ -243,6 +251,7 @@ class AxonFormFFI {
   }
 
   // For form submission, throws error when form does not pass validation
+  @override
   CoreResponse getFormValue() {
     try {
       // ignoreError set to False
@@ -255,6 +264,7 @@ class AxonFormFFI {
   }
 
   //
+  @override
   CoreResponse getOptionNodes(String nodeId) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
     try {
@@ -269,6 +279,7 @@ class AxonFormFFI {
   }
 
   //
+  @override
   CoreResponse getChildNode(String nodeId) {
     final Pointer<Utf8> nodeIdPtr = nodeId.toNativeUtf8();
     try {
@@ -283,6 +294,7 @@ class AxonFormFFI {
   }
 
   //
+  @override
   CoreResponse getPageFormValue(String pageId) {
     final pageIdPtr = pageId.toNativeUtf8();
     try {
