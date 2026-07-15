@@ -4,8 +4,12 @@ import 'package:flutter/foundation.dart';
 /// Platform-agnostic surface over the native graph engine. Implemented by
 /// [AxonFormFFI] (native platforms, via dart:ffi) and `AxonFormWasm` (web,
 /// via a WebAssembly build of the same Go core), selected at compile time
-/// through conditional export in `axon_form_controller_factory.dart`.
-abstract class AxonFormController {
+/// through conditional export in `axon_form_engine_factory.dart`.
+///
+/// Named `AxonFormEngine` (not `AxonFormController`) to avoid colliding with
+/// the public-facing `AxonFormController` in `axon_form_controller.dart`,
+/// which wraps [AxonFormProvider] for widget consumers.
+abstract class AxonFormEngine {
   Future<CoreResponse> initialize(Uint8List fileBytes);
 
   void addEventListener(

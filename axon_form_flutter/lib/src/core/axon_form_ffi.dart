@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:ffi';
 import 'dart:io';
 
-import 'package:axon_form_flutter/src/core/controller/axon_form_controller.dart';
+import 'package:axon_form_flutter/src/core/controller/axon_form_engine.dart';
 import 'package:axon_form_flutter/src/core/ffi_types.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/foundation.dart';
 
-class AxonFormFFI implements AxonFormController {
+class AxonFormFFI implements AxonFormEngine {
   late final DynamicLibrary _dylib;
   late final InitGraphDart _initGraphDart;
   late final AddEventListenerDart _addEventListenerDart;

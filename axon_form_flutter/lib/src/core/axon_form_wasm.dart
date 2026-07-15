@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_interop';
 
-import 'package:axon_form_flutter/src/core/controller/axon_form_controller.dart';
+import 'package:axon_form_flutter/src/core/controller/axon_form_engine.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -70,14 +70,14 @@ external JSString _getFormValue(JSBoolean ignoreErrors);
 @JS('AxonForm.getPageFormValue')
 external JSString _getPageFormValue(JSString pageId);
 
-/// Web implementation of [AxonFormController], backed by a WebAssembly
+/// Web implementation of [AxonFormEngine], backed by a WebAssembly
 /// build of the same Go graph engine used natively (see
 /// axon-form-core/wasm_wrapper.go). The wasm binary and its `wasm_exec.js`
 /// loader ship as package assets (see pubspec.yaml `flutter: assets:`) and
 /// are fetched and instantiated by [_ensureLoaded] the first time a form is
 /// created, so consumers don't need to copy any files into their own
 /// `web/index.html` (mirrors how the Android/iOS native libs are bundled).
-class AxonFormWasm implements AxonFormController {
+class AxonFormWasm implements AxonFormEngine {
   static const _readyPollInterval = Duration(milliseconds: 20);
   static const _readyTimeout = Duration(seconds: 15);
 
