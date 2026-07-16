@@ -34,6 +34,10 @@ class AxonFormController {
     return _provider.validatePage(pageId);
   }
 
+  void loadForm(Map<String, dynamic> formValue) {
+    _provider.loadForm(formValue);
+  }
+
   /// Returns all value of the form
   Map<String, dynamic> getCurrentFormValue() {
     return _provider.getCurrentFormValue();
@@ -42,6 +46,11 @@ class AxonFormController {
   /// Retrieves a list of option nodes for dropdowns or selection inputs.
   List<AxonFormNode> getOptions(String nodeId) {
     return _provider.getOptions(nodeId);
+  }
+
+  /// Navigates to the previous page in the form.
+  void navigateToPage(String pageId) {
+    _provider.navigateToPage(pageId);
   }
 
   /// Navigates to the previous page in the form.

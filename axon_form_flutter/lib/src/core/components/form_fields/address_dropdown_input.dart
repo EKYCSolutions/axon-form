@@ -20,7 +20,8 @@ class AxonAddressDropdownInput extends AxonBaseInput {
     void Function(String? value) onChanged,
     void Function(String value) onSearch,
     String? errorText,
-  )? builder;
+  )?
+  builder;
 
   @override
   State<AxonAddressDropdownInput> createState() =>
@@ -46,17 +47,31 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
 
   String _searchQuery = '';
 
+  /// A Map (`{id, label, value}`) means the core resolved this to a known
+  /// address entry; a raw String means it fell back to a custom, freely
+  /// typed option (see "Case A: Custom Option" in axon-form-core's
+  /// GetNodeValue) - the value itself *is* the selection in that case.
+  /// Note: `nodeValue?["id"]` is NOT safe here - String defines
+  /// `operator [](int index)` for single-character access, so indexing it
+  /// with "id" throws a TypeError instead of returning null.
+  String? _resolveId(dynamic nodeValue) {
+    if (nodeValue is Map) return nodeValue["id"]?.toString();
+    if (nodeValue is String) return nodeValue;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final controller = widget.getController(context);
     final nodeValue = controller.getNodeValue(widget.node.id);
 
-    var style = widget.style ??
+    var style =
+        widget.style ??
         Theme.of(context).extension<AxonFormAddressDropdownInputStyle>() ??
         AxonFormAddressDropdownInputStyle.fallback(context);
 
     return FormField<String?>(
-      initialValue: nodeValue?["id"],
+      initialValue: _resolveId(nodeValue),
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (val) {
         if (val != null && val.isNotEmpty) return null;
@@ -69,18 +84,13 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
           selector: (_, provider) {
             final isMe =
                 provider.addressNodeIdsToUpdate?.contains(widget.node.id) ??
-                    false;
+                false;
             return isMe ? provider.pulse : -1;
           },
           builder: (context, pulse, _) {
             final nodeValue = controller.getNodeValue(widget.node.id);
             //
-            String? currentIdFromProvider;
-            if (nodeValue is Map) {
-              currentIdFromProvider = nodeValue["id"]?.toString();
-            } else if (nodeValue is String) {
-              currentIdFromProvider = nodeValue;
-            }
+            String? currentIdFromProvider = _resolveId(nodeValue);
             //
             if (formFieldState.value != currentIdFromProvider) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -95,11 +105,43 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                 ? onSearch(_searchQuery, options)
                 : options;
             final hasOptions = options.isNotEmpty;
+
+            // A raw String nodeValue (as opposed to the {id, label, value}
+            // map returned for a known address entry) means the core
+            // resolved this to a custom, freely-typed option - see
+            // "Case A: Custom Option" in axon-form-core's GetNodeValue.
+            // In that case the value itself *is* the selection, it won't
+            // match any known option id.
+            final bool isCustomValue = nodeValue is String;
             final bool valueIsValid = options.any(
               (o) => o.id == currentIdFromProvider,
             );
 
-            final selectedValue = valueIsValid ? currentIdFromProvider : null;
+            final selectedValue = isCustomValue
+                ? currentIdFromProvider
+                : (valueIsValid ? currentIdFromProvider : null);
+
+            // DropdownButton can only display a `value` that's present in
+            // its `items`, so a custom value needs a synthetic item added
+            // alongside the real options.
+            final List<AxonFormNode> displayOptions =
+                isCustomValue &&
+                    selectedValue != null &&
+                    selectedValue.isNotEmpty &&
+                    !options.any((o) => o.id == selectedValue)
+                ? [
+                    AxonFormNode(
+                      id: selectedValue,
+                      fieldName: widget.node.fieldName,
+                      label: selectedValue,
+                      validationRules: const [],
+                      order: -1,
+                      isVisible: true,
+                      isRequired: false,
+                    ),
+                    ...options,
+                  ]
+                : options;
             if (widget.builder != null) {
               return widget.builder!(
                 context,
@@ -161,7 +203,7 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                           }
                         }
                       : null,
-                  items: options.map((option) {
+                  items: displayOptions.map((option) {
                     final (labelKh, labelEn) = _parseLabel(option.label);
                     return DropdownMenuItem<String>(
                       value: option.id,
@@ -189,24 +231,25 @@ class _AxonAddressDropdownInputState extends State<AxonAddressDropdownInput> {
                             ),
                     );
                   }).toList(),
-                  selectedItemBuilder: (context) => options.map((option) {
-                    final (labelKh, labelEn) = _parseLabel(option.label);
-                    return style.addressSelectedItemBuilder != null
-                        ? style.addressSelectedItemBuilder!(
-                            context,
-                            labelKh,
-                            labelEn,
-                          )
-                        : Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              labelKh,
-                              style: const TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          );
-                  }).toList(),
+                  selectedItemBuilder: (context) =>
+                      displayOptions.map((option) {
+                        final (labelKh, labelEn) = _parseLabel(option.label);
+                        return style.addressSelectedItemBuilder != null
+                            ? style.addressSelectedItemBuilder!(
+                                context,
+                                labelKh,
+                                labelEn,
+                              )
+                            : Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  labelKh,
+                                  style: const TextStyle(
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              );
+                      }).toList(),
                 ),
                 if (formFieldState.hasError)
                   Padding(

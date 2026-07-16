@@ -1,10 +1,9 @@
 import 'dart:convert';
 
+import 'package:axon_form_flutter/axon_form.dart';
 import 'package:axon_form_flutter/src/core/controller/axon_form_engine.dart';
 import 'package:axon_form_flutter/src/core/controller/axon_form_engine_factory.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
-import 'package:axon_form_flutter/src/core/models/graph.dart';
-import 'package:axon_form_flutter/src/core/models/node.dart';
 import 'package:flutter/foundation.dart';
 
 class AxonFormProvider extends ChangeNotifier {
@@ -18,6 +17,9 @@ class AxonFormProvider extends ChangeNotifier {
 
   AxonFormGraph? _graph;
   AxonFormGraph? get graph => _graph;
+
+  Map<String, String> _fieldNameToNodeId = {};
+  Map<String, String> get fieldNameToNodeId => _fieldNameToNodeId;
 
   late List<String> _pageIds;
 
@@ -34,6 +36,13 @@ class AxonFormProvider extends ChangeNotifier {
   List<String>? get addressNodeIdsToUpdate => _addressNodeIdsToUpdate;
   //
   int pulse = 0;
+
+  // Pages that failed engine-side validation during navigateToPage (e.g. a
+  // required field left empty). FormBuilder watches this to force those
+  // pages' Form to (re-)validate, so the failing field(s) show their error
+  // on screen instead of the failure only surfacing as a thrown exception.
+  final Set<String> _invalidPageIds = {};
+  bool isPageInvalid(String pageId) => _invalidPageIds.contains(pageId);
 
   AxonFormProvider(Future<Uint8List> Function() loader) {
     initialize(loader);
@@ -57,6 +66,11 @@ class AxonFormProvider extends ChangeNotifier {
           "[AxonFormProvider: initialize] There was a problem initializing the form",
         );
       }
+
+      _fieldNameToNodeId = {
+        for (var node in _graph!.nodes['inputs']!.values)
+          node.fieldName: node.id,
+      };
 
       var pagesToShow = _graph?.nodes["pages"]?.entries
           .where((entry) => entry.value.isVisible)
@@ -159,8 +173,16 @@ class AxonFormProvider extends ChangeNotifier {
   }
 
   CoreResponse validateNode(String nodeId, dynamic value) {
-    CoreResponse res = _controller.validateNode(nodeId, value?.toString());
-    return res;
+    var node = _graph?.nodes['inputs']?[nodeId];
+
+    if (node?.fieldType == FieldType.addressDropdown) {
+      if (value is Map) {
+        value = value["key"];
+      }
+      return validateAddressNode(nodeId, value);
+    }
+
+    return _controller.validateNode(nodeId, value?.toString());
   }
 
   // A "Pure" check for the validator that DOES NOT notify listeners
@@ -189,6 +211,17 @@ class AxonFormProvider extends ChangeNotifier {
     }
     Map<String, dynamic> resultJson = jsonDecode(res.data?["result"]);
     return resultJson;
+  }
+
+  void loadForm(Map<String, dynamic> formValue) {
+    formValue.forEach((key, value) {
+      var nodeId = _fieldNameToNodeId[key];
+      if (nodeId == null) {
+        throw Exception("Node ID not found for field name [$key]");
+      }
+
+      validateNode(nodeId, value);
+    });
   }
 
   Map<String, dynamic> getCurrentFormValue() {
@@ -232,6 +265,30 @@ class AxonFormProvider extends ChangeNotifier {
     nodes.sort((a, b) => a.order.compareTo(b.order));
 
     return nodes;
+  }
+
+  void navigateToPage(String pageId) {
+    final targetIndex = _pageIds.indexWhere((id) => id == pageId);
+    if (targetIndex == -1) return;
+
+    final pagesToValidate = _pageIds.sublist(0, targetIndex);
+    // Defaults to the requested page - only overridden below if an earlier
+    // page fails validation, in which case we stop there instead.
+    var landingIndex = targetIndex;
+
+    for (final (index, id) in pagesToValidate.indexed) {
+      try {
+        validatePage(id);
+        _invalidPageIds.remove(id);
+      } catch (_) {
+        _invalidPageIds.add(id);
+        landingIndex = index;
+        break;
+      }
+    }
+
+    _currentPageIndex = landingIndex;
+    notifyListeners();
   }
 
   void prevPage() {

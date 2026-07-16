@@ -96,37 +96,62 @@ class _FormBuilderState extends State<FormBuilder> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(
-          child: PageView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            controller: _pageViewController,
-            itemCount: widget.pages.length,
-            itemBuilder: (context, index) {
-              var currentPage = widget.pages[index];
-              return Form(
-                key: _getPageKey(currentPage.id),
-                child: Selector<AxonFormProvider, bool>(
-                  selector: (context, provider) {
-                    return provider
-                            .graph
-                            ?.nodes["pages"]?[currentPage.id]
-                            ?.isVisible ??
-                        false;
-                  },
-                  builder: (context, isVisible, child) {
-                    if (!isVisible) {
-                      return const SizedBox.shrink();
-                    }
-                    return PageBuilder(
-                      page: widget.pages[index],
-                      pageBuilder: widget.pageBuilder,
-                      fieldBuilder: widget.fieldBuilder,
-                    );
-                  },
-                ),
+        Consumer<AxonFormProvider>(
+          builder: (context, controller, _) {
+            if (controller.currentPageIndex > 0) {
+              _pageViewController.animateToPage(
+                controller.currentPageIndex,
+                duration: const Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
               );
-            },
-          ),
+            }
+
+            return Positioned.fill(
+              child: PageView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                controller: _pageViewController,
+                itemCount: widget.pages.length,
+                itemBuilder: (context, index) {
+                  var currentPage = widget.pages[index];
+
+                  // navigateToPage validates ahead-of-time via the engine
+                  // (not through this Form), so a failing page's fields
+                  // never got their errorText set. Forcing a validate()
+                  // here runs each FormField's own validator (which calls
+                  // back into the engine) so the failure shows up on the
+                  // actual field on screen.
+                  if (controller.isPageInvalid(currentPage.id)) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _getPageKey(currentPage.id).currentState?.validate();
+                    });
+                  }
+
+                  return Form(
+                    key: _getPageKey(currentPage.id),
+                    child: Selector<AxonFormProvider, bool>(
+                      selector: (context, provider) {
+                        return provider
+                                .graph
+                                ?.nodes["pages"]?[currentPage.id]
+                                ?.isVisible ??
+                            false;
+                      },
+                      builder: (context, isVisible, child) {
+                        if (!isVisible) {
+                          return const SizedBox.shrink();
+                        }
+                        return PageBuilder(
+                          page: widget.pages[index],
+                          pageBuilder: widget.pageBuilder,
+                          fieldBuilder: widget.fieldBuilder,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         ),
         Consumer<AxonFormProvider>(
           builder: (context, controller, _) {

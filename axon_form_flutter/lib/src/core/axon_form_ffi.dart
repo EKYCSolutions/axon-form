@@ -40,8 +40,9 @@ class AxonFormFFI implements AxonFormEngine {
 
   void _bindFunctions() {
     try {
-      _initGraphDart =
-          _dylib.lookup<NativeFunction<InitGraphC>>('InitGraph').asFunction();
+      _initGraphDart = _dylib
+          .lookup<NativeFunction<InitGraphC>>('InitGraph')
+          .asFunction();
 
       _addEventListenerDart = _dylib
           .lookup<NativeFunction<AddEventListenerC>>('AddEventListener')
@@ -71,8 +72,9 @@ class AxonFormFFI implements AxonFormEngine {
           .lookup<NativeFunction<GetOptionNodesC>>('GetOptionNodes')
           .asFunction();
 
-      _getResultDart =
-          _dylib.lookup<NativeFunction<GetResultC>>('GetResult').asFunction();
+      _getResultDart = _dylib
+          .lookup<NativeFunction<GetResultC>>('GetResult')
+          .asFunction();
 
       _getFormValueDart = _dylib
           .lookup<NativeFunction<GetFormValueC>>('GetFormValue')
@@ -82,8 +84,9 @@ class AxonFormFFI implements AxonFormEngine {
           .lookup<NativeFunction<GetPageFormValueC>>('GetPageFormValue')
           .asFunction();
 
-      _freeStringDart =
-          _dylib.lookup<NativeFunction<FreeStringC>>('FreeString').asFunction();
+      _freeStringDart = _dylib
+          .lookup<NativeFunction<FreeStringC>>('FreeString')
+          .asFunction();
     } catch (e) {
       throw Exception('Failed to bind functions: $e');
     }
@@ -112,7 +115,8 @@ class AxonFormFFI implements AxonFormEngine {
     final Pointer<Utf8> eventNamePtr = eventName.toNativeUtf8();
 
     // Create a native-callable listener. This is thread-safe and can be called from Go/C.
-    final listener = NativeCallable<NativeStringCallback>.listener((
+    // final listener = NativeCallable<NativeStringCallback>.listener((
+    final listener = NativeCallable<NativeStringCallback>.isolateLocal((
       Pointer<Utf8> strPtr,
     ) {
       final str = strPtr.toDartString();
