@@ -101,6 +101,24 @@ Then run:
 flutter pub get
 ```
 
+### iOS Setup
+
+The native Axon core ships as a compiled `.xcframework` and is only referenced
+through Dart FFI (`dart:ffi` symbol lookups) rather than any Swift/Objective-C
+import. Xcode's linker has no static reference to those symbols, so its default
+dead code stripping will strip them out of the release binary and FFI calls will
+fail to resolve at runtime unless it's disabled.
+
+In Xcode, open the iOS project (`ios/Runner.xcworkspace`) and for the **Runner**
+target:
+
+1. Go to **Build Settings** → switch to the **Combined** tab → search for `strip`.
+2. Under **Linking - General**, set **Dead Code Stripping** to **No** for all
+   configurations (Debug, Profile, Release).
+
+Without this, the app may build and run fine in Debug but fail to find the native
+Axon symbols in Release/Profile builds (e.g. App Store or TestFlight builds).
+
 ### Basic Usage
 
 ```dart
