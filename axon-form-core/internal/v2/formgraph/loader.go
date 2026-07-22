@@ -85,7 +85,7 @@ func (g *FormGraph) loadFieldValidations(fieldId string, validationRules interfa
 		validationMessage, _ := rule["message"].(string)
 		validationValue := rule["value"]
 
-		g.AddValidation(fieldId, FieldValidation{
+		g.AddFieldValidation(fieldId, FieldValidation{
 			Rule:    ValidationRuleType(validationType),
 			Param:   validationValue,
 			Message: validationMessage,
