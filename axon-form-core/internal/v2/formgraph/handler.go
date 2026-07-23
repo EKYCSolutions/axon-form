@@ -80,9 +80,6 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
 	}
 
 	// Writing to g.Values
-	if g.Values == nil {
-		g.Values = make(map[string]any)
-	}
 	g.Values[fieldId] = value
 
 	// Update form value

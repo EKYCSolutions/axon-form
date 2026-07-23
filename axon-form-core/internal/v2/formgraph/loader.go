@@ -17,6 +17,42 @@ func (g *FormGraph) InitGraphFromJSON(jsonBytes []byte) (bool, error) {
 	return true, nil
 }
 
+func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
+	// Schema
+	// check if conditions != nil then handle the dependencies
+	// if there is not conditions or conditions == nil --> put it nil
+	depJson := graphJson["edges"].([]interface{})
+
+	for _, d := range depJson {
+		dep := d.(map[string]interface{})
+
+		id := dep["id"].(string)
+		source_node := dep["source_node"].(string)
+		target_node := dep["target_node"].(string)
+		edge_type := dep["type"].(string)
+		conditions := dep["conditions"].([]interface{})
+
+		// Handling the ones that contains the condition
+		var condition []Condition
+		if edge_type == "shows" && conditions != nil {
+			for _, c := range conditions {
+				temp := c.(map[string]interface{})
+				condition = append(condition, Condition{
+					DependsOn: temp["check_node"].(string),
+					Operator:  ConditionOperator(temp["expr"].(string)),
+					Value:     temp["value"],
+				})
+			}
+
+			// Setting the value for condition
+			g.Dependencies[target_node] = condition
+
+		}
+	}
+
+	return true, nil
+}
+
 func (g *FormGraph) loadPages(graphJson map[string]interface{}) (bool, error) {
 	layoutsJson := graphJson["layout"].(map[string]interface{})
 	pagesJson := layoutsJson["pages"].([]interface{})
