@@ -44,5 +44,4 @@ const (
 	RuleMinValue  ValidationRuleType = "min"
 	RuleMaxValue  ValidationRuleType = "max"
 	RulePattern   ValidationRuleType = "pattern"
-	RuleType      ValidationRuleType = "type"
 )
