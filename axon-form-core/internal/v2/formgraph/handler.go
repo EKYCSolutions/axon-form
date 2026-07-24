@@ -155,3 +155,48 @@ func (g *FormGraph) GetFormValue() (string, error) {
 
 	return string(jsonData), nil
 }
+
+func (g *FormGraph) listenDep(source_node string, value any) (bool, error) {
+	// Check if the fieldId exists as a key in the dependents
+	if g.Dependents[source_node] == nil {
+		return false, errors.New("source_node has no dependents")
+	}
+	// Getting the target_node and the curr state of the node
+	var target_node string
+	var curr bool
+	for k, v := range g.Dependents[source_node] {
+		target_node = k
+		curr = v
+		break
+	}
+	// Continue to checking the value
+	ok, err := g.validateDep(target_node, source_node, value)
+	if err != nil {
+		panic(err)
+	}
+	if !ok {
+		return false, errors.New("Incorrect value")
+	}
+	// Set the bool to opposite state which then triggers the Visibility
+	g.Dependents[source_node][target_node] = !curr
+	return true, nil
+}
+
+func (g *FormGraph) validateDep(target_node string, source_node string, value any) (bool, error) {
+	// Checking the condition of the dependencies
+	conDeps := g.Dependencies[target_node]
+	if conDeps == nil {
+		return false, errors.New("Error, no dependencies found")
+	}
+
+	// Sanity check
+	for _, cd := range conDeps {
+		if cd.DependsOn == source_node {
+			// TODO: verify the condition from cd and the value that is provided
+			// TODO: change the cd.Operator to the onees specified in the enums
+			// TODO: refactor the function into smaller maintainable function
+		}
+	}
+
+	return true, nil
+}
