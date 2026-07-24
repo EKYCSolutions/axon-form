@@ -62,7 +62,7 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
 	// Checking whether the fieldId exists
 	_, exist := g.Fields[fieldId]
 	if exist != true {
-		return false, errors.New("fieldId is unknown")
+		return false, fieldUnknown
 	}
 
 	// Checking if there is no validation
@@ -145,12 +145,12 @@ func ValidateField(fVal FieldValidation, value any) (bool, error) {
 func (g *FormGraph) GetFormValue() (string, error) {
 	// Check if the current form contains any value
 	if len(g.Values) == 0 {
-		return "", errors.New("No data")
+		return "", dataUnknown
 	}
 
 	jsonData, err := json.Marshal(g.Values)
 	if err != nil {
-		return "", errors.New("Error while marshaling")
+		return "", internalError
 	}
 
 	return string(jsonData), nil
@@ -159,26 +159,32 @@ func (g *FormGraph) GetFormValue() (string, error) {
 func (g *FormGraph) listenDep(source_node string, value any) (bool, error) {
 	// Check if the fieldId exists as a key in the dependents
 	if g.Dependents[source_node] == nil {
-		return false, errors.New("source_node has no dependents")
+		return false, noDepedents
 	}
 	// Getting the target_node and the curr state of the node
-	var target_node string
-	var curr bool
-	for k, v := range g.Dependents[source_node] {
-		target_node = k
-		curr = v
-		break
+	var target_node []string
+	var curr []bool
+	for _, dict := range g.Dependents[source_node] {
+		// Nesting the for loop to interate through the list
+		// of conditions and the curr status of it
+		for k, v := range dict {
+			target_node = append(target_node, k)
+			curr = append(curr, v)
+			break
+		}
 	}
 	// Continue to checking the value
-	ok, err := g.validateDep(target_node, source_node, value)
-	if err != nil {
-		panic(err)
-	}
-	if !ok {
-		return false, errors.New("Incorrect value")
+	for idx, target := range target_node {
+		ok, err := g.validateDep(target, source_node, value)
+		if err != nil {
+			panic(err)
+		}
+		if !ok {
+			return false, incorrectValue
+		}
+		g.Dependents[source_node][idx][target] = !curr[idx]
 	}
 	// Set the bool to opposite state which then triggers the Visibility
-	g.Dependents[source_node][target_node] = !curr
 	return true, nil
 }
 
@@ -186,7 +192,7 @@ func (g *FormGraph) validateDep(target_node string, source_node string, value an
 	// Checking the condition of the dependencies
 	conDeps := g.Dependencies[target_node]
 	if conDeps == nil {
-		return false, errors.New("Error, no dependencies found")
+		return false, noDepedents
 	}
 
 	// Sanity check

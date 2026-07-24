@@ -45,9 +45,12 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 			g.Dependencies[target_node] = condition
 			// Building the dependents
 			for _, depOn := range dependsOn {
-				g.Dependents[depOn] = map[string]bool{
-					target_node: false, // defaulting to false automatically
-				}
+				g.Dependents[depOn] = append(
+					g.Dependents[depOn],
+					map[string]bool{
+						target_node: false, // defaulting to false automatically
+					},
+				)
 			}
 		}
 	}

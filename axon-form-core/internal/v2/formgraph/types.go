@@ -51,8 +51,8 @@ type FormGraph struct {
 	// TODO: add VisibilityPage and VisibilityField
 	// Type : map[string]bool
 
-	Dependencies map[string][]Condition     // field_id -> conditions it depends on
-	Dependents   map[string]map[string]bool // depends_on -> set of dependent field_ids
+	Dependencies map[string][]Condition       // field_id -> conditions it depends on
+	Dependents   map[string][]map[string]bool // depends_on -> set of dependent field_ids
 
 	Pages            map[string]*Page
 	PageOrder        []string // explicit sequence of page_ids
@@ -71,7 +71,7 @@ func (g *FormGraph) initMaps() {
 	g.Fields = make(map[string]*Field)
 	g.Validations = make(map[string][]FieldValidation)
 	g.Dependencies = make(map[string][]Condition)
-	g.Dependents = make(map[string]map[string]bool)
+	g.Dependents = make(map[string][]map[string]bool)
 	g.Pages = make(map[string]*Page)
 	g.PageFields = make(map[string][]string)
 	g.FieldPage = make(map[string]string)
