@@ -121,7 +121,7 @@ func ValidateField(fVal FieldValidation, value any) (bool, error) {
 			return false, errors.New(fVal.Message)
 		}
 	case RulePattern:
-		ok, err := regexp.MatchString(fVal.Param.(string), fVal.Message)
+		ok, err := regexp.MatchString(fVal.Param.(string), value.(string))
 		if err != nil {
 			panic(err)
 		}
