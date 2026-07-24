@@ -98,12 +98,23 @@ class _FormBuilderState extends State<FormBuilder> {
       children: [
         Consumer<AxonFormProvider>(
           builder: (context, controller, _) {
-            if (controller.currentPageIndex > 0) {
-              _pageViewController.animateToPage(
-                controller.currentPageIndex,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
-              );
+            if (_pageViewController.hasClients) {
+              final targetIndex = controller.currentPageIndex;
+              final shownIndex = _pageViewController.page?.round() ?? 0;
+              final distance = (targetIndex - shownIndex).abs();
+
+              if (distance > 1) {
+                // A direct jump (e.g. controller.navigateToPage skipping
+                // several pages) - go straight there instead of animating
+                // the scroll position through every page in between.
+                _pageViewController.jumpToPage(targetIndex);
+              } else if (distance == 1) {
+                _pageViewController.animateToPage(
+                  targetIndex,
+                  duration: const Duration(milliseconds: 400),
+                  curve: Curves.easeInOut,
+                );
+              }
             }
 
             return Positioned.fill(

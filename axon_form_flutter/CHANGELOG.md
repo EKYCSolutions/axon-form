@@ -1,3 +1,7 @@
+## 0.0.5
+
+- Fixed `navigateToPage` animation issue
+
 ## 0.0.4
 
 - Added `navigateToPage` to `AxonFormController` for jumping directly to a page by ID, validating each preceding page a
