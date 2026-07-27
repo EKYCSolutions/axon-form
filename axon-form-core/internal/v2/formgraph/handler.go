@@ -2,9 +2,6 @@ package formgraph
 
 import (
 	"encoding/json"
-	"errors"
-	"regexp"
-	"strconv"
 )
 
 // ==========================================
@@ -62,7 +59,7 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
 	// Checking whether the fieldId exists
 	_, exist := g.Fields[fieldId]
 	if exist != true {
-		return false, fieldUnknown
+		return false, handleError("SetFieldValue", fieldUnknown)
 	}
 
 	// Checking if there is no validation
@@ -82,54 +79,11 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
 	// Writing to g.Values
 	g.Values[fieldId] = value
 
+	// TODO: add the condition to change the visibility of the field
+	// Use the listenDep function to check whether it is true and then
+	// change the visibility to be true.
+
 	// Update form value
-	return true, nil
-}
-
-func ConvertToInt(param string) int {
-	p, err := strconv.Atoi(param)
-	if err != nil {
-		panic(err)
-	}
-	return p
-}
-
-func ValidateField(fVal FieldValidation, value any) (bool, error) {
-	switch ValidationRuleType(fVal.Rule) {
-	case RuleRequired:
-		if value == nil {
-			return false, errors.New(fVal.Message)
-		}
-	case RuleMinLength:
-		p := ConvertToInt(fVal.Param.(string))
-		if len(value.(string)) < p {
-			return false, errors.New(fVal.Message)
-		}
-	case RuleMaxLength:
-		p := ConvertToInt(fVal.Param.(string))
-		if len(value.(string)) > p {
-			return false, errors.New(fVal.Message)
-		}
-	case RuleMinValue:
-		p := ConvertToInt(fVal.Param.(string))
-		if value.(int) < p {
-			return false, errors.New(fVal.Message)
-		}
-	case RuleMaxValue:
-		p := ConvertToInt(fVal.Param.(string))
-		if value.(int) > p {
-			return false, errors.New(fVal.Message)
-		}
-	case RulePattern:
-		ok, err := regexp.MatchString(fVal.Param.(string), value.(string))
-		if err != nil {
-			panic(err)
-		}
-		if !ok {
-			return false, errors.New(fVal.Message)
-		}
-	}
-
 	return true, nil
 }
 
@@ -145,21 +99,21 @@ func ValidateField(fVal FieldValidation, value any) (bool, error) {
 func (g *FormGraph) GetFormValue() (string, error) {
 	// Check if the current form contains any value
 	if len(g.Values) == 0 {
-		return "", dataUnknown
+		return "", handleError("GetFormValue", dataUnknown)
 	}
 
 	jsonData, err := json.Marshal(g.Values)
 	if err != nil {
-		return "", internalError
+		return "", handleError("GetFormValue", internalError)
 	}
 
 	return string(jsonData), nil
 }
 
-func (g *FormGraph) listenDep(source_node string, value any) (bool, error) {
+func (g *FormGraph) listenDep(source_node string) (bool, error) {
 	// Check if the fieldId exists as a key in the dependents
 	if g.Dependents[source_node] == nil {
-		return false, noDepedents
+		return false, handleError("listenDep", noDependents)
 	}
 	// Getting the target_node and the curr state of the node
 	var target_node []string
@@ -175,12 +129,12 @@ func (g *FormGraph) listenDep(source_node string, value any) (bool, error) {
 	}
 	// Continue to checking the value
 	for idx, target := range target_node {
-		ok, err := g.validateDep(target, source_node, value)
+		ok, err := g.validateDep(target, source_node)
 		if err != nil {
 			panic(err)
 		}
 		if !ok {
-			return false, incorrectValue
+			return false, handleError("listenDep", incorrectValue)
 		}
 		g.Dependents[source_node][idx][target] = !curr[idx]
 	}
@@ -188,19 +142,25 @@ func (g *FormGraph) listenDep(source_node string, value any) (bool, error) {
 	return true, nil
 }
 
-func (g *FormGraph) validateDep(target_node string, source_node string, value any) (bool, error) {
+func (g *FormGraph) validateDep(target_node string, source_node string) (bool, error) {
 	// Checking the condition of the dependencies
 	conDeps := g.Dependencies[target_node]
 	if conDeps == nil {
-		return false, noDepedents
+		return false, handleError("validateDep", noDependents)
 	}
 
 	// Sanity check
 	for _, cd := range conDeps {
 		if cd.DependsOn == source_node {
-			// TODO: verify the condition from cd and the value that is provided
-			// TODO: change the cd.Operator to the onees specified in the enums
-			// TODO: refactor the function into smaller maintainable function
+			// Checking the value of source_node with the condition value
+			// Parsing it to the function to get bool and error
+			ok, err := parseOperator(g.Values[source_node], cd.Value, cd.Operator)
+			if err != nil {
+				return false, handleError("validateDep", incorrectOprt)
+			}
+			if !ok {
+				return false, nil
+			}
 		}
 	}
 

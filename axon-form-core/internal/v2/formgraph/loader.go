@@ -32,14 +32,19 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 		var dependsOn []string
 		if edge_type == "shows" {
 			cons := dep["conditions"].([]interface{})
-			for _, c := range cons {
-				temp := c.(map[string]interface{})
+			for _, _c := range cons {
+				c := _c.(map[string]interface{})
+				// Handling the operator
+				oprt, err := assignOperator(c["expr"].(string))
+				if err != nil {
+					panic(err)
+				}
 				condition = append(condition, Condition{
-					DependsOn: temp["check_node"].(string),
-					Operator:  ConditionOperator(temp["expr"].(string)),
-					Value:     temp["value"],
+					DependsOn: c["check_node"].(string),
+					Operator:  oprt,
+					Value:     c["value"],
 				})
-				dependsOn = append(dependsOn, temp["check_node"].(string))
+				dependsOn = append(dependsOn, c["check_node"].(string))
 			}
 			// Setting the value for condition
 			g.Dependencies[target_node] = condition
