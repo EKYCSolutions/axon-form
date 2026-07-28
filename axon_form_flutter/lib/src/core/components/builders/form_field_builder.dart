@@ -52,6 +52,8 @@ class AxonFormFieldBuilder extends StatelessWidget {
       //
       case FieldType.file:
         return AxonFileInput(node: node);
+      case FieldType.phoneNumber:
+        return AxonPhoneNumberInput(node: node);
       default:
         return AxonTextInput(node: node);
     }

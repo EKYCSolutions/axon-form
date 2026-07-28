@@ -18,6 +18,7 @@ export 'components/form_fields/file_input.dart';
 export 'components/form_fields/multi_select_input.dart';
 export 'components/form_fields/number_input.dart';
 export 'components/form_fields/password_input.dart';
+export 'components/form_fields/phone_number_input.dart';
 export 'components/form_fields/radio_input.dart';
 export 'components/form_fields/text_input.dart';
 // Styles

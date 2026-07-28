@@ -10,6 +10,7 @@ enum FieldType {
   checkbox,
   multiSelect,
   file,
+  phoneNumber,
   unknown;
 
   /// Convert string to FieldType enum
@@ -37,6 +38,8 @@ enum FieldType {
         return FieldType.multiSelect;
       case 'file':
         return FieldType.file;
+      case 'phone_number':
+        return FieldType.phoneNumber;
       default:
         return FieldType.unknown;
     }
@@ -66,6 +69,8 @@ enum FieldType {
       case 9:
         return FieldType.addressDropdown;
       case 10:
+        return FieldType.phoneNumber;
+      case 11:
         return FieldType.unknown;
       default:
         return FieldType.unknown;
@@ -95,6 +100,8 @@ enum FieldType {
         return 'multi_select';
       case FieldType.file:
         return 'file';
+      case FieldType.phoneNumber:
+        return 'phone_number';
       case FieldType.unknown:
         return 'unknown';
     }

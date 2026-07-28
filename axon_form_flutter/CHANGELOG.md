@@ -1,3 +1,11 @@
+## 0.0.7
+
+- Added `min_length` and `max_length` params to `AxonPhoneNumberInput`
+
+## 0.0.6
+
+- Added `phone_number` field type and `AxonPhoneNumberInput`
+
 ## 0.0.5
 
 - Fixed `navigateToPage` animation issue
