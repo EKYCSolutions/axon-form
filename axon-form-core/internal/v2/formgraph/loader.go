@@ -56,6 +56,8 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 						target_node: false, // defaulting to false automatically
 					},
 				)
+				// Setting the visibility field to be false as default
+				g.VisibilityField[target_node] = false
 			}
 		}
 	}

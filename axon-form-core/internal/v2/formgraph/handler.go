@@ -65,7 +65,6 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
 	// Checking if there is no validation
 	if g.Validations[fieldId] == nil {
 		g.Values[fieldId] = value
-		return true, nil
 	}
 
 	fVal := g.Validations[fieldId]
@@ -81,8 +80,20 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
 
 	// TODO: add the condition to change the visibility of the field
 	// Use the listenDep function to check whether it is true and then
-	// change the visibility to be true.
-
+	// change the visibility to be true.=
+	if g.Dependents[fieldId] != nil {
+		ok, err := g.listenDep(fieldId)
+		if err != nil {
+			panic(err)
+		}
+		if !ok {
+			return false, nil // Continue editing this
+		}
+		ok, err = g.handleVisibilityField(fieldId)
+		if !ok || err != nil {
+			panic("Cannot change the visibility")
+		}
+	}
 	// Update form value
 	return true, nil
 }
@@ -136,9 +147,9 @@ func (g *FormGraph) listenDep(source_node string) (bool, error) {
 		if !ok {
 			return false, handleError("listenDep", incorrectValue)
 		}
+		// Set the bool to opposite state which then triggers the Visibility
 		g.Dependents[source_node][idx][target] = !curr[idx]
 	}
-	// Set the bool to opposite state which then triggers the Visibility
 	return true, nil
 }
 
@@ -163,6 +174,25 @@ func (g *FormGraph) validateDep(target_node string, source_node string) (bool, e
 			}
 		}
 	}
+
+	return true, nil
+}
+
+func (g *FormGraph) handleVisibilityField(source_node string) (bool, error) {
+	// Checking whether the value is true or not
+	for _, target := range g.Dependents[source_node] {
+		for k, v := range target {
+			if v != true {
+				return false, nil
+			}
+			// Defaulting to v
+			g.VisibilityField[k] = v
+		}
+	}
+	return true, nil
+}
+
+func (g *FormGraph) handleVisibilityPage(page_id string) (bool, error) {
 
 	return true, nil
 }
