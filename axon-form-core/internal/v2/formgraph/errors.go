@@ -15,5 +15,5 @@ var incorrectOprt = errors.New("Error: operator is not listed")
 
 // Customized error return
 func handleError(funcName string, errorMsg error) error {
-	return fmt.Errorf("At %s:, %v", funcName, errorMsg)
+	return fmt.Errorf("At %s: %v", funcName, errorMsg)
 }

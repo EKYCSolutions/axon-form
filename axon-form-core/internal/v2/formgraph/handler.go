@@ -21,7 +21,10 @@ func (g *FormGraph) AddFieldValidation(fieldId string, rule FieldValidation) {
 	g.Validations[fieldId] = append(g.Validations[fieldId], rule)
 }
 
-func (g *FormGraph) AddCondition(fieldId, dependsOn string, operator ConditionOperator, value any) {
+// AddCondition and AddDependencies are the same since they both mutate g.Dependencies
+// in this case we use AddCondition for readability
+func (g *FormGraph) AddCondition(fieldId, dependsOnFieldId string, operator ConditionOperator, value any) {
+	// Assign and append to g.Dependencies and g.Dependents
 }
 
 // ==========================================
@@ -35,14 +38,93 @@ func (g *FormGraph) AddPage(id, title string) {
 	}
 }
 
+func (g *FormGraph) AddPageCondition(pageId, dependsOnFieldId string, operator ConditionOperator, value any) {
+	// Assign and append to g.PageDependencies
+}
+
 func (g *FormGraph) AssignFieldToPage(fieldId, pageId string) {
 	g.PageFields[pageId] = append(g.PageFields[pageId], fieldId)
 	g.FieldPage[fieldId] = pageId
 }
 
 // ==========================================
+// Validations
+// ==========================================
+
+// TODO:
+func (g *FormGraph) ValidateField(fieldId, value string) (errs []error) {
+	// check if field has any validation
+	// if has validations, loop through each validation rule
+	// run each validation (append error if there are multiple)
+	// return array of errors back
+
+	return nil
+}
+
+// ==========================================
+// Visibility
+// ==========================================
+
+// TODO:
+func (g *FormGraph) evaluateFieldVisibility(fieldId string) (errs []error) {
+	// check if field has any dependencies via g.Dependent[fieldId]
+	// if has dependencies, loop through each of the dependencies
+	// retrieve the condition of each dependency via g.Dependencies[id]
+	// run the condition check, if true, update the field's visibility to true via g.FieldVisibility
+
+	return nil
+}
+
+// TODO:
+func (g *FormGraph) evaluatePageVisibility(fieldId string) (errs []error) {
+	// loop through each of g.PageDependencies
+	// retrieve the condition of each dependency via g.Dependencies[id]
+	// run the condition check, if true, update the page's visibility to true via g.PageVisibility
+
+	return nil
+}
+
+// TODO:
+func (g *FormGraph) initializeVisibility() (errs []error) {
+	// run once, right after InitGraphFromJSON finishes loading pages/fields/dependencies
+	// for every field_id in g.Dependencies, call g.evaluateFieldVisibility(field_id) using
+	// each field's loaded default value so g.FieldVisibility reflects the loaded snapshot
+	// before any SetFieldValue call happens
+	// for every page_id in g.Pages, call g.evaluatePageVisibility so g.PageVisibility
+	// is correct from the start too
+
+	return nil
+}
+
+// ==========================================
 // State management
 // ==========================================
+
+// TODO:
+// GetPageFormValue returns only the values belonging to one page, scoped by
+// g.PageFields[pageId] - mirrors v1's GetPageFormValue
+// (internal/graph/handler.go:487). Needed for "save/validate just this
+// page" in a multi-step form flow.
+// should only include fields that are both visible (g.FieldVisibility) and
+// whose page is visible (g.PageVisibility) - same rule as GetFormValue
+func (g *FormGraph) GetPageFormValue(pageId string) (string, error) {
+	return "", nil
+}
+
+// TODO:
+// SetFormValue bulk-loads an entire form's values at once
+// for each field_id/value pair in formValue,
+// run the same validate -> save -> evaluate visibility
+// sample input would be a map of field_name: value
+//
+//	e.g. {
+//			"field_name_1": "value",
+//			"field_name_2": "value",
+//			"field_name_3": "value",
+//	}
+func (g *FormGraph) SetFormValue(formValue map[string]any) (success bool, errs []error) {
+	return false, nil
+}
 
 // SetFieldValue updates fieldId's value in the graph's live form-value
 // snapshot (g.Values).
@@ -52,59 +134,65 @@ func (g *FormGraph) AssignFieldToPage(fieldId, pageId string) {
 // either way. (false, nil) if fieldId exists but validation failed - use
 // ValidateField(fieldId, value) separately to get the actual failure
 // messages. (false, err) if fieldId is unknown.
-func (g *FormGraph) SetFieldValue(fieldId string, value any) (bool, error) {
-	// Check if field contain validation
-	// 		if have validation, perform validation
-
+func (g *FormGraph) SetFieldValue(fieldId string, value any) (success bool, err error) {
 	// Checking whether the fieldId exists
 	_, exist := g.Fields[fieldId]
-	if exist != true {
+	if exist != true { // TODO: change to !exist
 		return false, handleError("SetFieldValue", fieldUnknown)
 	}
 
-	// Checking if there is no validation
-	if g.Validations[fieldId] == nil {
-		g.Values[fieldId] = value
-	}
+	/*
+		TODO: move this into g.ValidateField and call it here
 
-	fVal := g.Validations[fieldId]
-	for _, val := range fVal {
-		ok, err := ValidateField(val, value)
-		if !ok && err != nil {
-			return ok, err
+		if g.Validations[fieldId] == nil {
+			g.Values[fieldId] = value
 		}
-	}
+
+		fVal := g.Validations[fieldId]
+		for _, val := range fVal {
+			ok, err := ValidateField(val, value)
+			if !ok && err != nil {
+				return ok, err
+			}
+		}
+	*/
 
 	// Writing to g.Values
 	g.Values[fieldId] = value
 
-	// TODO: add the condition to change the visibility of the field
-	// Use the listenDep function to check whether it is true and then
-	// change the visibility to be true.=
-	if g.Dependents[fieldId] != nil {
-		ok, err := g.listenDep(fieldId)
-		if err != nil {
-			panic(err)
-		}
-		if !ok {
-			return false, nil // Continue editing this
-		}
-		ok, err = g.handleVisibilityField(fieldId)
-		if !ok || err != nil {
-			panic("Cannot change the visibility")
-		}
-	}
+	/*
+		TODO:
+
+		call g.evaluateFieldVisibility
+		call g.evaluatePageVisibility
+	*/
+
+	// // TODO: add the condition to change the visibility of the field
+	// // Use the listenDep function to check whether it is true and then
+	// // change the visibility to be true.2
+	// if g.Dependents[fieldId] != nil {
+	// 	ok, err := g.listenDep(fieldId)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	if !ok {
+	// 		return false, nil // Continue editing this
+	// 	}
+	// 	ok, err = g.handleFieldVisibility(fieldId)
+	// 	if !ok || err != nil {
+	// 		panic("Cannot change the visibility")
+	// 	}
+	// }
 	// Update form value
 	return true, nil
 }
 
-// GetFormResult returns the entire form's current values, resolved and
-// marshaled to a JSON string - mirrors v1's GetFormValue. Only fields that
-// are both currently visible and on a currently-visible page are
-// included; result format:
+// GetFormResult returns the entire form's current values
+//
+// e.g.
 //
 //	{
-//			"field_name": "field_value",
+//			"field_name": "value",
 //			....
 //	}
 func (g *FormGraph) GetFormValue() (string, error) {
@@ -113,86 +201,12 @@ func (g *FormGraph) GetFormValue() (string, error) {
 		return "", handleError("GetFormValue", dataUnknown)
 	}
 
+	// TODO: filter out hidden fields. so the form values
+	// should only include the fields that are visible
 	jsonData, err := json.Marshal(g.Values)
 	if err != nil {
 		return "", handleError("GetFormValue", internalError)
 	}
 
 	return string(jsonData), nil
-}
-
-func (g *FormGraph) listenDep(source_node string) (bool, error) {
-	// Check if the fieldId exists as a key in the dependents
-	if g.Dependents[source_node] == nil {
-		return false, handleError("listenDep", noDependents)
-	}
-	// Getting the target_node and the curr state of the node
-	var target_node []string
-	var curr []bool
-	for _, dict := range g.Dependents[source_node] {
-		// Nesting the for loop to interate through the list
-		// of conditions and the curr status of it
-		for k, v := range dict {
-			target_node = append(target_node, k)
-			curr = append(curr, v)
-			break
-		}
-	}
-	// Continue to checking the value
-	for idx, target := range target_node {
-		ok, err := g.validateDep(target, source_node)
-		if err != nil {
-			panic(err)
-		}
-		if !ok {
-			return false, handleError("listenDep", incorrectValue)
-		}
-		// Set the bool to opposite state which then triggers the Visibility
-		g.Dependents[source_node][idx][target] = !curr[idx]
-	}
-	return true, nil
-}
-
-func (g *FormGraph) validateDep(target_node string, source_node string) (bool, error) {
-	// Checking the condition of the dependencies
-	conDeps := g.Dependencies[target_node]
-	if conDeps == nil {
-		return false, handleError("validateDep", noDependents)
-	}
-
-	// Sanity check
-	for _, cd := range conDeps {
-		if cd.DependsOn == source_node {
-			// Checking the value of source_node with the condition value
-			// Parsing it to the function to get bool and error
-			ok, err := parseOperator(g.Values[source_node], cd.Value, cd.Operator)
-			if err != nil {
-				return false, handleError("validateDep", incorrectOprt)
-			}
-			if !ok {
-				return false, nil
-			}
-		}
-	}
-
-	return true, nil
-}
-
-func (g *FormGraph) handleVisibilityField(source_node string) (bool, error) {
-	// Checking whether the value is true or not
-	for _, target := range g.Dependents[source_node] {
-		for k, v := range target {
-			if v != true {
-				return false, nil
-			}
-			// Defaulting to v
-			g.VisibilityField[k] = v
-		}
-	}
-	return true, nil
-}
-
-func (g *FormGraph) handleVisibilityPage(page_id string) (bool, error) {
-
-	return true, nil
 }

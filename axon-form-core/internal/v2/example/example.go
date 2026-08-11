@@ -10,7 +10,7 @@ func main() {
 	g := formgraph.NewFormGraph()
 
 	// Read the JSON file
-	jsonData, err := os.ReadFile("../../../example/assets/example-no-address.json")
+	jsonData, err := os.ReadFile("example.json")
 	if err != nil {
 		fmt.Printf("Error reading JSON file: %v", err)
 	}

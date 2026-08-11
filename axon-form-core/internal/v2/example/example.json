@@ -1,0 +1,304 @@
+{
+  "layout": {
+    "pages": [
+      {
+        "id": "page_account",
+        "order": 0,
+        "title": "Account & Profile",
+        "description": "Basic account details.",
+        "field_ids": [
+          "account_type",
+          "email",
+          "password",
+          "age",
+          "marital_status",
+          "spouse_name",
+          "newsletter"
+        ]
+      },
+      {
+        "id": "page_business",
+        "order": 1,
+        "title": "Business Info",
+        "description": "Only shown for business accounts.",
+        "field_ids": [
+          "company_name"
+        ]
+      },
+      {
+        "id": "page_address",
+        "order": 2,
+        "title": "Address",
+        "description": "Cascading province/district pickers.",
+        "field_ids": [
+          "province",
+          "district"
+        ]
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "page_account",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
+    {
+      "id": "page_business",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
+    {
+      "id": "page_address",
+      "type": "page",
+      "label": "",
+      "field_type": "",
+      "field_name": ""
+    },
+    {
+      "id": "account_type",
+      "type": "input",
+      "field_type": "dropdown",
+      "field_name": "account_type",
+      "label": "Account Type",
+      "value": "opt_personal",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Account type is required"
+        }
+      ]
+    },
+    {
+      "id": "opt_personal",
+      "type": "value",
+      "label": "Personal",
+      "value": "personal"
+    },
+    {
+      "id": "opt_business",
+      "type": "value",
+      "label": "Business",
+      "value": "business"
+    },
+    {
+      "id": "email",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "email",
+      "label": "Email",
+      "value": "jane@example.com",
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Email is required"
+        },
+        {
+          "type": "pattern",
+          "value": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+          "message": "Invalid email format"
+        }
+      ]
+    },
+    {
+      "id": "password",
+      "type": "input",
+      "field_type": "password",
+      "field_name": "password",
+      "label": "Password",
+      "value": null,
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Password is required"
+        },
+        {
+          "type": "min_length",
+          "value": "8",
+          "message": "Too short"
+        }
+      ]
+    },
+    {
+      "id": "age",
+      "type": "input",
+      "field_type": "number",
+      "field_name": "age",
+      "label": "Age",
+      "value": 24,
+      "validation_rules": [
+        {
+          "type": "min",
+          "value": "18",
+          "message": "Must be 18+"
+        },
+        {
+          "type": "max",
+          "value": "120",
+          "message": "Must be realistic"
+        }
+      ]
+    },
+    {
+      "id": "marital_status",
+      "type": "input",
+      "field_type": "radio",
+      "field_name": "marital_status",
+      "label": "Marital Status",
+      "value": "opt_single"
+    },
+    {
+      "id": "opt_single",
+      "type": "value",
+      "label": "Single",
+      "value": "single"
+    },
+    {
+      "id": "opt_married",
+      "type": "value",
+      "label": "Married",
+      "value": "married"
+    },
+    {
+      "id": "spouse_name",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "spouse_name",
+      "label": "Spouse Name",
+      "value": null,
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Spouse name is required"
+        }
+      ]
+    },
+    {
+      "id": "newsletter",
+      "type": "input",
+      "field_type": "checkbox",
+      "field_name": "newsletter",
+      "label": "Subscribe to newsletter",
+      "value": false
+    },
+    {
+      "id": "company_name",
+      "type": "input",
+      "field_type": "text",
+      "field_name": "company_name",
+      "label": "Company Name",
+      "value": null,
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Company name is required"
+        }
+      ]
+    },
+    {
+      "id": "province",
+      "type": "input",
+      "field_type": "address_dropdown",
+      "field_name": "province",
+      "label": "Province",
+      "value": null,
+      "config": {
+        "level": "province",
+        "allow_custom_option": true
+      },
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select a province"
+        }
+      ]
+    },
+    {
+      "id": "district",
+      "type": "input",
+      "field_type": "address_dropdown",
+      "field_name": "district",
+      "label": "District",
+      "value": null,
+      "config": {
+        "level": "district",
+        "allow_custom_option": true
+      },
+      "validation_rules": [
+        {
+          "type": "required",
+          "message": "Please select a district"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_acct_1",
+      "source_node": "account_type",
+      "target_node": "opt_personal",
+      "type": "has_options"
+    },
+    {
+      "id": "e_acct_2",
+      "source_node": "account_type",
+      "target_node": "opt_business",
+      "type": "has_options"
+    },
+    {
+      "id": "e_marital_1",
+      "source_node": "marital_status",
+      "target_node": "opt_single",
+      "type": "has_options"
+    },
+    {
+      "id": "e_marital_2",
+      "source_node": "marital_status",
+      "target_node": "opt_married",
+      "type": "has_options"
+    },
+    {
+      "id": "e_addr_filter",
+      "source_node": "district",
+      "target_node": "province",
+      "type": "filter_by"
+    },
+    {
+      "id": "cond_show_spouse_name",
+      "label": "show-spouse-name",
+      "source_node": "marital_status",
+      "target_node": "spouse_name",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cond_1",
+          "check_node": "marital_status",
+          "edge": "cond_show_spouse_name",
+          "expr": "equal",
+          "value": "opt_married"
+        }
+      ]
+    },
+    {
+      "id": "cond_show_business_page",
+      "label": "show-business-page",
+      "source_node": "account_type",
+      "target_node": "page_business",
+      "type": "shows",
+      "conditions": [
+        {
+          "id": "cond_2",
+          "check_node": "account_type",
+          "edge": "cond_show_business_page",
+          "expr": "equal",
+          "value": "opt_business"
+        }
+      ]
+    }
+  ],
+  "condition_groups": []
+}

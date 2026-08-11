@@ -16,33 +16,34 @@ func ConvertToInt(param string) int {
 	return p
 }
 
+// TODO: Update this naming so it doesn't overlap with g.ValidateField
 func ValidateField(fVal FieldValidation, value any) (bool, error) {
 	switch ValidationRuleType(fVal.Rule) {
-	case RuleRequired:
+	case ValidationRuleRequired:
 		if value == nil {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
-	case RuleMinLength:
+	case ValidationRuleMinLength:
 		p := ConvertToInt(fVal.Param.(string))
 		if len(value.(string)) < p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
-	case RuleMaxLength:
+	case ValidationRuleMaxLength:
 		p := ConvertToInt(fVal.Param.(string))
 		if len(value.(string)) > p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
-	case RuleMinValue:
+	case ValidationRuleMinValue:
 		p := ConvertToInt(fVal.Param.(string))
 		if value.(int) < p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
-	case RuleMaxValue:
+	case ValidationRuleMaxValue:
 		p := ConvertToInt(fVal.Param.(string))
 		if value.(int) > p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
-	case RulePattern:
+	case ValidationRulePattern:
 		ok, err := regexp.MatchString(fVal.Param.(string), value.(string))
 		if err != nil {
 			panic(err)
@@ -58,17 +59,17 @@ func ValidateField(fVal FieldValidation, value any) (bool, error) {
 func assignOperator(expr string) (ConditionOperator, error) {
 	switch expr {
 	case "equal":
-		return OpEquals, nil
+		return ConditionEquals, nil
 	case "not_equal":
-		return OpNotEquals, nil
+		return ConditionNotEquals, nil
 	case "greater_than":
-		return OpGreaterThan, nil
+		return ConditionGreaterThan, nil
 	case "contains":
-		return OpContains, nil
+		return ConditionContains, nil
 	case "is_empty":
-		return OpIsEmpty, nil
+		return ConditionIsEmpty, nil
 	case "not_empty":
-		return OpNotEmpty, nil
+		return ConditionNotEmpty, nil
 	default:
 		return "", fmt.Errorf("unknown operator: %s", expr)
 	}
@@ -76,24 +77,24 @@ func assignOperator(expr string) (ConditionOperator, error) {
 
 func parseOperator(value any, con_value any, oprt ConditionOperator) (bool, error) {
 	switch oprt {
-	case OpEquals:
+	case ConditionEquals:
 		return value == con_value, nil
-	case OpNotEquals:
+	case ConditionNotEquals:
 		return !(value == con_value), nil
-	case OpGreaterThan:
+	case ConditionGreaterThan:
 		tv, sv := ConvertToInt(value.(string)), ConvertToInt(con_value.(string))
 		return tv > sv, nil
-	case OpContains:
+	case ConditionContains:
 		if strings.Contains(value.(string), con_value.(string)) {
 			return true, nil
 		}
 		return false, nil
-	case OpIsEmpty:
+	case ConditionIsEmpty:
 		if value == "" || value == nil {
 			return true, nil
 		}
 		return false, nil
-	case OpNotEmpty:
+	case ConditionNotEmpty:
 		if value != "" || value != nil {
 			return true, nil
 		}

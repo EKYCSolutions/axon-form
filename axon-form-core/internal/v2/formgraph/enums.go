@@ -27,21 +27,21 @@ const (
 type ConditionOperator string
 
 const (
-	OpEquals      ConditionOperator = "equals"
-	OpNotEquals   ConditionOperator = "not_equals"
-	OpGreaterThan ConditionOperator = "greater_than"
-	OpContains    ConditionOperator = "contains"
-	OpIsEmpty     ConditionOperator = "is_empty"
-	OpNotEmpty    ConditionOperator = "not_empty"
+	ConditionEquals      ConditionOperator = "equals"
+	ConditionNotEquals   ConditionOperator = "not_equals"
+	ConditionGreaterThan ConditionOperator = "greater_than"
+	ConditionContains    ConditionOperator = "contains"
+	ConditionIsEmpty     ConditionOperator = "is_empty"
+	ConditionNotEmpty    ConditionOperator = "not_empty"
 )
 
 type ValidationRuleType string
 
 const (
-	RuleRequired  ValidationRuleType = "required"
-	RuleMinLength ValidationRuleType = "min_length"
-	RuleMaxLength ValidationRuleType = "max_length"
-	RuleMinValue  ValidationRuleType = "min"
-	RuleMaxValue  ValidationRuleType = "max"
-	RulePattern   ValidationRuleType = "pattern"
+	ValidationRuleRequired  ValidationRuleType = "required"
+	ValidationRuleMinLength ValidationRuleType = "min_length"
+	ValidationRuleMaxLength ValidationRuleType = "max_length"
+	ValidationRuleMinValue  ValidationRuleType = "min"
+	ValidationRuleMaxValue  ValidationRuleType = "max"
+	ValidationRulePattern   ValidationRuleType = "pattern"
 )

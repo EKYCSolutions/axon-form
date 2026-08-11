@@ -23,15 +23,32 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 
 	for _, d := range depJson {
 		dep := d.(map[string]interface{})
+
+		// TODO:  Move edge_type == "shows" up here
+		// if edge_type is not "shows", return
+
 		// Parsing the conditions
 		target_node := dep["target_node"].(string)
 		edge_type := dep["type"].(string)
 
 		// Handling the ones that contains the condition
+		// "conditions": [
+		//     {
+		//       "id": "tfd6a0jlpdddlg7",
+		//       "check_node": "pol37fda60n0p87",
+		//       "edge": "rwjt2fz7sqpapnk",
+		//       "expr": "equal",
+		//       "value": "71q2ij6mfnfqo6e"
+		//     }
+		//   ]
+
 		var condition []Condition
 		var dependsOn []string
 		if edge_type == "shows" {
 			cons := dep["conditions"].([]interface{})
+
+			// TODO: if conditions length is 0, return
+
 			for _, _c := range cons {
 				c := _c.(map[string]interface{})
 				// Handling the operator
@@ -43,22 +60,17 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 					DependsOn: c["check_node"].(string),
 					Operator:  oprt,
 					Value:     c["value"],
-				})
-				dependsOn = append(dependsOn, c["check_node"].(string))
+				}) // TODO: use g.AddCondition instead
+				dependsOn = append(dependsOn, c["check_node"].(string)) // TODO: move this logic into g.AddDependents instead
 			}
 			// Setting the value for condition
-			g.Dependencies[target_node] = condition
+			g.Dependencies[target_node] = condition // TODO: move this logic into g.AddCondition instead
 			// Building the dependents
 			for _, depOn := range dependsOn {
-				g.Dependents[depOn] = append(
-					g.Dependents[depOn],
-					map[string]bool{
-						target_node: false, // defaulting to false automatically
-					},
-				)
+				g.Dependents[depOn] = append(g.Dependents[depOn], target_node)
 				// Setting the visibility field to be false as default
 				g.VisibilityField[target_node] = false
-			}
+			} // TODO: can remove this loop
 		}
 	}
 	return true, nil
