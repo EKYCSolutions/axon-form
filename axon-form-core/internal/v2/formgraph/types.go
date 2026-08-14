@@ -48,8 +48,8 @@ type FormGraph struct {
 	Validations map[string][]FieldValidation
 	Values      map[string]any // form values
 
-	VisibilityField map[string]bool
-	VisibilityPage  map[string]bool
+	FieldVisibility map[string]bool
+	PageVisibility  map[string]bool
 
 	Dependencies map[string][]Condition // field_id -> conditions it depends on
 	Dependents   map[string][]string    // depends_on -> list of dependent field_ids
@@ -73,8 +73,8 @@ func (g *FormGraph) initMaps() {
 	//
 
 	// TODO: rename to FieldVisibility and PageVisibility
-	g.VisibilityField = make(map[string]bool)
-	g.VisibilityPage = make(map[string]bool)
+	g.FieldVisibility = make(map[string]bool)
+	g.PageVisibility = make(map[string]bool)
 	//
 	g.Dependencies = make(map[string][]Condition)
 	g.Dependents = make(map[string][]string)

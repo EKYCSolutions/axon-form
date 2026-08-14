@@ -17,34 +17,54 @@ func ConvertToInt(param string) int {
 }
 
 // TODO: Update this naming so it doesn't overlap with g.ValidateField
-func ValidateField(fVal FieldValidation, value any) (bool, error) {
+func ValidateField(fVal FieldValidation, value string) (bool, error) {
 	switch ValidationRuleType(fVal.Rule) {
 	case ValidationRuleRequired:
-		if value == nil {
+		if value == "" {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
 	case ValidationRuleMinLength:
-		p := ConvertToInt(fVal.Param.(string))
-		if len(value.(string)) < p {
+		p, err := strconv.Atoi(fVal.Param.(string))
+		if err != nil {
+			return false, err
+		}
+		if len(value) < p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
 	case ValidationRuleMaxLength:
-		p := ConvertToInt(fVal.Param.(string))
-		if len(value.(string)) > p {
+		p, err := strconv.Atoi(fVal.Param.(string))
+		if err != nil {
+			return false, err
+		}
+		if len(value) > p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
 	case ValidationRuleMinValue:
-		p := ConvertToInt(fVal.Param.(string))
-		if value.(int) < p {
+		v, err := strconv.Atoi(value)
+		if err != nil {
+			return false, err
+		}
+		p, err := strconv.Atoi(fVal.Param.(string))
+		if err != nil {
+			return false, err
+		}
+		if v < p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
 	case ValidationRuleMaxValue:
-		p := ConvertToInt(fVal.Param.(string))
-		if value.(int) > p {
+		v, err := strconv.Atoi(value)
+		if err != nil {
+			return false, err
+		}
+		p, err := strconv.Atoi(fVal.Param.(string))
+		if err != nil {
+			return false, err
+		}
+		if v > p {
 			return false, fmt.Errorf("%s", fVal.Message)
 		}
 	case ValidationRulePattern:
-		ok, err := regexp.MatchString(fVal.Param.(string), value.(string))
+		ok, err := regexp.MatchString(fVal.Param.(string), value)
 		if err != nil {
 			panic(err)
 		}
@@ -58,7 +78,7 @@ func ValidateField(fVal FieldValidation, value any) (bool, error) {
 
 func assignOperator(expr string) (ConditionOperator, error) {
 	switch expr {
-	case "equal":
+	case "equals":
 		return ConditionEquals, nil
 	case "not_equal":
 		return ConditionNotEquals, nil
@@ -75,6 +95,7 @@ func assignOperator(expr string) (ConditionOperator, error) {
 	}
 }
 
+// TODO: update the error for each Oprt cases
 func parseOperator(value any, con_value any, oprt ConditionOperator) (bool, error) {
 	switch oprt {
 	case ConditionEquals:
@@ -102,4 +123,16 @@ func parseOperator(value any, con_value any, oprt ConditionOperator) (bool, erro
 	}
 
 	return false, fmt.Errorf("unknown operator: %s", oprt)
+}
+
+func ValidateCondition(condition Condition, value any) (bool, error) {
+	oprt, err := assignOperator(string(condition.Operator))
+	if err != nil {
+		return false, err
+	}
+	ok, err := parseOperator(value, condition.Value, oprt)
+	if !ok || err != nil {
+		return false, err
+	}
+	return true, nil
 }

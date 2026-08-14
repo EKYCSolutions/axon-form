@@ -26,6 +26,7 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 
 		// TODO:  Move edge_type == "shows" up here
 		// if edge_type is not "shows", return
+		// Cannot handle since we are iterating through the ones that contain instead
 
 		// Parsing the conditions
 		target_node := dep["target_node"].(string)
@@ -41,13 +42,14 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 		//       "value": "71q2ij6mfnfqo6e"
 		//     }
 		//   ]
-
-		var condition []Condition
-		var dependsOn []string
 		if edge_type == "shows" {
 			cons := dep["conditions"].([]interface{})
 
 			// TODO: if conditions length is 0, return
+			// Status: DONE
+			if len(cons) == 0 {
+				return true, nil
+			}
 
 			for _, _c := range cons {
 				c := _c.(map[string]interface{})
@@ -56,21 +58,26 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 				if err != nil {
 					panic(err)
 				}
-				condition = append(condition, Condition{
-					DependsOn: c["check_node"].(string),
-					Operator:  oprt,
-					Value:     c["value"],
-				}) // TODO: use g.AddCondition instead
-				dependsOn = append(dependsOn, c["check_node"].(string)) // TODO: move this logic into g.AddDependents instead
+				// condition = append(condition, Condition{
+				// 	DependsOn: c["check_node"].(string),
+				// 	Operator:  oprt,
+				// 	Value:     c["value"],
+				// }) // TODO: use g.AddCondition instead
+				// dependsOn = append(dependsOn, c["check_node"].(string)) // TODO: move this logic into g.AddDependents instead
+				// Status: DONE
+				g.AddCondition(target_node, c["check_node"].(string), oprt, c["value"])
 			}
 			// Setting the value for condition
-			g.Dependencies[target_node] = condition // TODO: move this logic into g.AddCondition instead
+			// g.Dependencies[target_node] = condition // TODO: move this logic into g.AddCondition instead
+			// Status: DONE
+
 			// Building the dependents
-			for _, depOn := range dependsOn {
-				g.Dependents[depOn] = append(g.Dependents[depOn], target_node)
-				// Setting the visibility field to be false as default
-				g.VisibilityField[target_node] = false
-			} // TODO: can remove this loop
+			// for _, depOn := range dependsOn {
+			// 	g.Dependents[depOn] = append(g.Dependents[depOn], target_node)
+			// 	// Setting the visibility field to be false as default
+			// 	g.FieldVisibility[target_node] = false
+			// } // TODO: can remove this loop
+			// Status: DONE
 		}
 	}
 	return true, nil

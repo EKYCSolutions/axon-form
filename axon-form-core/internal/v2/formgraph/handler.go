@@ -25,6 +25,13 @@ func (g *FormGraph) AddFieldValidation(fieldId string, rule FieldValidation) {
 // in this case we use AddCondition for readability
 func (g *FormGraph) AddCondition(fieldId, dependsOnFieldId string, operator ConditionOperator, value any) {
 	// Assign and append to g.Dependencies and g.Dependents
+	g.Dependencies[fieldId] = append(g.Dependencies[fieldId], Condition{
+		DependsOn: dependsOnFieldId,
+		Operator:  operator,
+		Value:     value,
+	})
+	//
+	g.Dependents[dependsOnFieldId] = append(g.Dependents[dependsOnFieldId], fieldId)
 }
 
 // ==========================================
@@ -39,7 +46,13 @@ func (g *FormGraph) AddPage(id, title string) {
 }
 
 func (g *FormGraph) AddPageCondition(pageId, dependsOnFieldId string, operator ConditionOperator, value any) {
-	// Assign and append to g.PageDependencies
+	// TODO: Assign and append to g.PageDependencies
+	// Status: DONE
+	g.PageDependencies[pageId] = append(g.PageDependencies[pageId], Condition{
+		DependsOn: dependsOnFieldId,
+		Operator:  operator,
+		Value:     value,
+	})
 }
 
 func (g *FormGraph) AssignFieldToPage(fieldId, pageId string) {
@@ -52,12 +65,24 @@ func (g *FormGraph) AssignFieldToPage(fieldId, pageId string) {
 // ==========================================
 
 // TODO:
+// Status: DONE
 func (g *FormGraph) ValidateField(fieldId, value string) (errs []error) {
 	// check if field has any validation
 	// if has validations, loop through each validation rule
 	// run each validation (append error if there are multiple)
 	// return array of errors back
-
+	if g.Validations[fieldId] == nil {
+		return nil
+	}
+	for _, validation := range g.Validations[fieldId] {
+		ok, err := ValidateField(validation, value)
+		if !ok || err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
 
@@ -66,12 +91,32 @@ func (g *FormGraph) ValidateField(fieldId, value string) (errs []error) {
 // ==========================================
 
 // TODO:
+// Status: DONE
 func (g *FormGraph) evaluateFieldVisibility(fieldId string) (errs []error) {
 	// check if field has any dependencies via g.Dependent[fieldId]
 	// if has dependencies, loop through each of the dependencies
 	// retrieve the condition of each dependency via g.Dependencies[id]
 	// run the condition check, if true, update the field's visibility to true via g.FieldVisibility
+	if g.Dependents[fieldId] == nil {
+		return nil
+	}
+	for _, dependsOnFieldId := range g.Dependents[fieldId] {
+		conditions := g.Dependencies[dependsOnFieldId]
 
+		for _, condition := range conditions {
+			ok, err := ValidateCondition(condition, g.Values[fieldId])
+			if !ok || err != nil {
+				errs = append(errs, err)
+				g.FieldVisibility[fieldId] = false
+			} // if the condition is not met
+			if ok {
+				g.FieldVisibility[fieldId] = true
+			} // if the condition is met
+		}
+	}
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
 
@@ -137,7 +182,7 @@ func (g *FormGraph) SetFormValue(formValue map[string]any) (success bool, errs [
 func (g *FormGraph) SetFieldValue(fieldId string, value any) (success bool, err error) {
 	// Checking whether the fieldId exists
 	_, exist := g.Fields[fieldId]
-	if exist != true { // TODO: change to !exist
+	if !exist { // TODO: change to !exist // Status: DONE
 		return false, handleError("SetFieldValue", fieldUnknown)
 	}
 
