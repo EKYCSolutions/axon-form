@@ -78,7 +78,7 @@ func ValidateField(fVal FieldValidation, value string) (bool, error) {
 
 func assignOperator(expr string) (ConditionOperator, error) {
 	switch expr {
-	case "equals":
+	case "equal":
 		return ConditionEquals, nil
 	case "not_equal":
 		return ConditionNotEquals, nil

@@ -58,6 +58,8 @@ func (g *FormGraph) AddPageCondition(pageId, dependsOnFieldId string, operator C
 func (g *FormGraph) AssignFieldToPage(fieldId, pageId string) {
 	g.PageFields[pageId] = append(g.PageFields[pageId], fieldId)
 	g.FieldPage[fieldId] = pageId
+
+	// Handle the PageCondition through the FieldConditions
 }
 
 // ==========================================
@@ -97,21 +99,13 @@ func (g *FormGraph) evaluateFieldVisibility(fieldId string) (errs []error) {
 	// if has dependencies, loop through each of the dependencies
 	// retrieve the condition of each dependency via g.Dependencies[id]
 	// run the condition check, if true, update the field's visibility to true via g.FieldVisibility
-	if g.Dependents[fieldId] == nil {
+	if g.Dependencies[fieldId] == nil {
 		return nil
 	}
-	for _, dependsOnFieldId := range g.Dependents[fieldId] {
-		conditions := g.Dependencies[dependsOnFieldId]
-
-		for _, condition := range conditions {
-			ok, err := ValidateCondition(condition, g.Values[fieldId])
-			if !ok || err != nil {
-				errs = append(errs, err)
-				g.FieldVisibility[fieldId] = false
-			} // if the condition is not met
-			if ok {
-				g.FieldVisibility[fieldId] = true
-			} // if the condition is met
+	for _, condition := range g.Dependencies[fieldId] {
+		ok, err := ValidateCondition(condition, g.Values[fieldId])
+		if !ok || err != nil {
+			errs = append(errs, err)
 		}
 	}
 	if len(errs) > 0 {
@@ -121,15 +115,28 @@ func (g *FormGraph) evaluateFieldVisibility(fieldId string) (errs []error) {
 }
 
 // TODO:
+// Status : Done
 func (g *FormGraph) evaluatePageVisibility(fieldId string) (errs []error) {
 	// loop through each of g.PageDependencies
 	// retrieve the condition of each dependency via g.Dependencies[id]
 	// run the condition check, if true, update the page's visibility to true via g.PageVisibility
-
+	if g.PageDependencies[fieldId] == nil {
+		return nil
+	}
+	for _, condition := range g.PageDependencies[fieldId] {
+		ok, err := ValidateCondition(condition, g.Values[fieldId])
+		if !ok || err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
 
 // TODO:
+// Status : Done
 func (g *FormGraph) initializeVisibility() (errs []error) {
 	// run once, right after InitGraphFromJSON finishes loading pages/fields/dependencies
 	// for every field_id in g.Dependencies, call g.evaluateFieldVisibility(field_id) using
@@ -138,6 +145,27 @@ func (g *FormGraph) initializeVisibility() (errs []error) {
 	// for every page_id in g.Pages, call g.evaluatePageVisibility so g.PageVisibility
 	// is correct from the start too
 
+	// Handling the FieldVisibility
+	for fieldId := range g.Dependencies {
+		g.FieldVisibility[fieldId] = true
+		if err := g.evaluateFieldVisibility(fieldId); err != nil {
+			g.FieldVisibility[fieldId] = false
+			errs = append(errs, err...)
+		}
+	}
+
+	// Handling the PageVisibility
+	for pageId := range g.PageDependencies {
+		g.PageVisibility[pageId] = true
+		if err := g.evaluatePageVisibility(pageId); err != nil {
+			g.PageVisibility[pageId] = false
+			errs = append(errs, err...)
+		}
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
 	return nil
 }
 
