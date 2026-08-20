@@ -1,6 +1,6 @@
 name: axon_form_flutter
 description: "A cross-platform Flutter plugin for building and rendering dynamic forms with configurable fields, validation, and file uploads."
-version: 0.0.7
+version: 0.0.8
 homepage: https://ekycsolutions.com
 repository: https://github.com/EKYCSolutions/axon_form_flutter
 

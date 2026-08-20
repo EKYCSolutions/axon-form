@@ -19,7 +19,8 @@
           "ur69ra938x75y52",
           "wcrs72pkppjvv00",
           "e55awcrvbf3nxsd",
-          "tyfij7yunkmligt"
+          "tyfij7yunkmligt",
+          "08557b5jhqive1d"
         ]
       },
       {
@@ -122,6 +123,18 @@
           "value": "18"
         }
       ],
+      "config": {}
+    },
+    {
+      "id": "08557b5jhqive1d",
+      "page": "e1dap60sezrqsl2",
+      "order": 10,
+      "type": "input",
+      "label": "Phone number",
+      "value": "",
+      "field_type": "phone_number",
+      "field_name": "phone_number",
+      "validation_rules": [],
       "config": {}
     },
     {

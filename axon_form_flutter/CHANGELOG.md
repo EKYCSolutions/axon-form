@@ -1,3 +1,7 @@
+## 0.0.8
+
+- Bug fixes
+
 ## 0.0.7
 
 - Added `min_length` and `max_length` params to `AxonPhoneNumberInput`

@@ -5,6 +5,7 @@ import 'package:axon_form_flutter/src/core/controller/axon_form_engine.dart';
 import 'package:axon_form_flutter/src/core/controller/axon_form_engine_factory.dart';
 import 'package:axon_form_flutter/src/core/models/core_response.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class AxonFormProvider extends ChangeNotifier {
   late AxonFormEngine _controller;
@@ -142,7 +143,7 @@ class AxonFormProvider extends ChangeNotifier {
           updateVisibility(hideNodeIds, false);
         }
 
-        notifyListeners();
+        WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
       });
     } catch (e) {
       _errorMessage = "[AxonFormProvider: initialize] ${e.toString()}";
