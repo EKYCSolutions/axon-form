@@ -67,6 +67,15 @@ func (g *FormGraph) loadDependencies(graphJson map[string]any) (bool, error) {
 				// Status: DONE
 				g.AddCondition(target_node, c["check_node"].(string), oprt, c["value"])
 			}
+
+			// TODO: loop through the dependencies in the pagefields and
+			// then append it inside of the pagedependencies
+			for page := range g.PageFields {
+				if g.Dependencies[page] != nil {
+					g.PageDependencies[page] = g.Dependencies[page]
+				}
+			}
+
 			// Setting the value for condition
 			// g.Dependencies[target_node] = condition // TODO: move this logic into g.AddCondition instead
 			// Status: DONE

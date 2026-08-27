@@ -114,8 +114,7 @@ func (g *FormGraph) evaluateFieldVisibility(fieldId string) (errs []error) {
 	return nil
 }
 
-// TODO:
-// Status : Done
+// TODO: edit again bruh
 func (g *FormGraph) evaluatePageVisibility(fieldId string) (errs []error) {
 	// loop through each of g.PageDependencies
 	// retrieve the condition of each dependency via g.Dependencies[id]
@@ -180,8 +179,32 @@ func (g *FormGraph) initializeVisibility() (errs []error) {
 // page" in a multi-step form flow.
 // should only include fields that are both visible (g.FieldVisibility) and
 // whose page is visible (g.PageVisibility) - same rule as GetFormValue
+// Status: DONE
 func (g *FormGraph) GetPageFormValue(pageId string) (string, error) {
-	return "", nil
+	result := make(map[string]any)
+	// Check if page exists
+	exists := g.PageFields[pageId]
+	if exists == nil {
+		return "", pageUnknown
+	}
+	// Check if the page is displayable first
+	pageVisibilityErrs := g.evaluatePageVisibility(pageId)
+	if pageVisibilityErrs != nil {
+		return "", errPageVisibility
+	}
+	// Check the fields that are displayable
+	for _, field := range g.PageFields[pageId] {
+		fieldVisibilityErrs := g.evaluateFieldVisibility(field)
+		if fieldVisibilityErrs == nil {
+			result[field] = g.Values[field]
+		}
+	}
+	// Returning the data
+	jsonBytes, err := json.Marshal(result)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
 }
 
 // TODO:
@@ -195,8 +218,22 @@ func (g *FormGraph) GetPageFormValue(pageId string) (string, error) {
 //			"field_name_2": "value",
 //			"field_name_3": "value",
 //	}
+//
+// Status: DONE
 func (g *FormGraph) SetFormValue(formValue map[string]any) (success bool, errs []error) {
-	return false, nil
+	// Assuming that the input is the formValue entirely, approach it by iterating instead
+	for fieldId := range formValue {
+		// Validate the page visibility
+		pageId := g.FieldPage[fieldId]
+		if errs := g.evaluatePageVisibility(pageId); errs != nil {
+			return false, errs
+		}
+		// Validate the field visibility
+		if errs := g.evaluateFieldVisibility(fieldId); errs != nil {
+			return false, errs
+		}
+	}
+	return true, nil
 }
 
 // SetFieldValue updates fieldId's value in the graph's live form-value
@@ -215,7 +252,8 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (success bool, err 
 	}
 
 	/*
-		TODO: move this into g.ValidateField and call it here
+		TODO: move this into g.ValidateField and call it
+		Status: DONE
 
 		if g.Validations[fieldId] == nil {
 			g.Values[fieldId] = value
@@ -230,6 +268,11 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (success bool, err 
 		}
 	*/
 
+	errs := g.ValidateField(fieldId, value.(string))
+	if errs != nil {
+		return false, handleError("SetFieldValue", incorrectValue)
+	}
+
 	// Writing to g.Values
 	g.Values[fieldId] = value
 
@@ -239,6 +282,8 @@ func (g *FormGraph) SetFieldValue(fieldId string, value any) (success bool, err 
 		call g.evaluateFieldVisibility
 		call g.evaluatePageVisibility
 	*/
+	g.evaluateFieldVisibility(fieldId)
+	g.evaluatePageVisibility(fieldId)
 
 	// // TODO: add the condition to change the visibility of the field
 	// // Use the listenDep function to check whether it is true and then
@@ -276,7 +321,21 @@ func (g *FormGraph) GetFormValue() (string, error) {
 
 	// TODO: filter out hidden fields. so the form values
 	// should only include the fields that are visible
-	jsonData, err := json.Marshal(g.Values)
+	// Status: DONE
+	formValue := make(map[string]any)
+	for fieldId, value := range g.Values {
+		// Check the fields in hidden page
+		pageId := g.FieldPage[fieldId]
+		pageErrs := g.evaluatePageVisibility(pageId)
+		// Check visibility of the fields
+		fieldErrs := g.evaluateFieldVisibility(fieldId)
+
+		if pageErrs == nil && fieldErrs == nil {
+			formValue[fieldId] = value
+		}
+	}
+
+	jsonData, err := json.Marshal(formValue)
 	if err != nil {
 		return "", handleError("GetFormValue", internalError)
 	}
