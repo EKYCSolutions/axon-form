@@ -56,6 +56,7 @@ const (
 	NodeFieldTypeFile
 	NodeFieldTypePassword
 	NodeFieldTypeAddressDropdown
+	NodeFieldTypePhoneNumber
 	NodeFieldTypeNone
 )
 
@@ -70,6 +71,7 @@ var nodeFieldType = map[NodeFieldType]string{
 	NodeFieldTypeCheckbox:        "checkbox",
 	NodeFieldTypeFile:            "file",
 	NodeFieldTypePassword:        "password",
+	NodeFieldTypePhoneNumber:     "phone_number",
 	NodeFieldTypeNone:            "",
 }
 
@@ -104,7 +106,8 @@ func (nft *NodeFieldType) UnmarshalJSON(data []byte) error {
 		*nft = NodeFieldTypeFile
 	case "password":
 		*nft = NodeFieldTypePassword
-
+	case "phone_number":
+		*nft = NodeFieldTypePhoneNumber
 	default:
 		*nft = NodeFieldTypeNone
 	}

@@ -17,6 +17,7 @@ import {
   createNode as createNodeService,
   createPage as createPageService,
   deleteCondition as deleteConditionService,
+  deleteEdge as deleteEdgeService,
   deleteForm as deleteFormService,
   deleteNode as deleteNodeService,
   deletePage as deletePageService,
@@ -376,21 +377,66 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
     [],
   );
 
-  const createFilterByEdges = useCallback(
+  const syncFilterByEdges = useCallback(
     async (
       fields: NodeFormSchemaData[],
       resolveNodeId: (field: NodeFormSchemaData) => string | undefined,
+      existingFields: Node[] = [],
     ) => {
       await Promise.all(
-        fields.map((field) => {
+        fields.map(async (field) => {
           const childNodeId = resolveNodeId(field);
           const parentNodeId = (
             field.config as Record<string, unknown> | undefined
           )?.parent_field_id as string | undefined;
-          if (!parentNodeId) return Promise.resolve();
-          if (!childNodeId || !parentNodeId) return Promise.resolve();
+          if (!childNodeId) return;
 
-          return createEdgeService({
+          const existingFilterByEdges =
+            existingFields
+              .find((existingField) => existingField.id === childNodeId)
+              ?.edges?.filter(
+                (edge) =>
+                  edge.edgeType === EdgeType.FilterBy &&
+                  edge.sourceNode === childNodeId,
+              ) ?? [];
+
+          if (!parentNodeId) {
+            await Promise.all(
+              existingFilterByEdges.map((edge) => deleteEdgeService(edge.id)),
+            );
+            return;
+          }
+
+          const matchingEdge = existingFilterByEdges.find(
+            (edge) => edge.targetNode === parentNodeId,
+          );
+
+          if (matchingEdge) {
+            await Promise.all(
+              existingFilterByEdges
+                .filter((edge) => edge.id !== matchingEdge.id)
+                .map((edge) => deleteEdgeService(edge.id)),
+            );
+            return;
+          }
+
+          const edgeToUpdate = existingFilterByEdges[0];
+          if (edgeToUpdate) {
+            await updateEdgeService(edgeToUpdate.id, {
+              label: '',
+              source_node: childNodeId,
+              target_node: parentNodeId,
+              type: EdgeType.FilterBy,
+            });
+            await Promise.all(
+              existingFilterByEdges
+                .slice(1)
+                .map((edge) => deleteEdgeService(edge.id)),
+            );
+            return;
+          }
+
+          await createEdgeService({
             label: '',
             source_node: childNodeId,
             target_node: parentNodeId,
@@ -707,7 +753,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
         const nodeIdMap = createNodeIdMap(data.fields, nodeIds);
         await processFieldConditions(data.fields, nodeIdMap);
-        await createFilterByEdges(
+        await syncFilterByEdges(
           data.fields,
           (field) => nodeIdMap[field.id as string],
         );
@@ -726,7 +772,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         handleError(error);
       }
     },
-    [addNode, pages, processFieldConditions, refreshPages],
+    [addNode, pages, processFieldConditions, refreshPages, syncFilterByEdges],
   );
 
   // API: Get page by ID
@@ -764,7 +810,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
 
               if (!initialFieldData) return;
 
-              updateNode(id, field.id!, initialFieldData, field);
+              return updateNode(id, field.id!, initialFieldData, field);
             }),
           );
           fieldIds.push(...existingFields.map((field) => field.id!));
@@ -788,12 +834,16 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           fieldIds.push(...newFieldIdsRes);
         }
 
-        await createFilterByEdges(data.fields, (field) => {
-          if (validate(field.id!)) {
-            return newFieldIdMap[field.id as string];
-          }
-          return field.id;
-        });
+        await syncFilterByEdges(
+          data.fields,
+          (field) => {
+            if (validate(field.id!)) {
+              return newFieldIdMap[field.id as string];
+            }
+            return field.id;
+          },
+          selectedPageData?.fields,
+        );
 
         const updatePageBody: PageBody = {
           order: undefined,
@@ -815,7 +865,8 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
       addNode,
       updateNode,
       processFieldConditions,
-      createFilterByEdges,
+      syncFilterByEdges,
+      selectedPageData?.fields,
       refreshPages,
       refreshSinglePage,
       refreshFieldConditions,

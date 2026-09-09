@@ -60,4 +60,9 @@ export const inputFieldTypes: InputFieldTypeSelectItem[] = [
     value: 'password',
     type: NodeFieldType.Password,
   },
+  {
+    label: 'Phone Number',
+    value: 'phone_number',
+    type: NodeFieldType.PhoneNumber,
+  },
 ];

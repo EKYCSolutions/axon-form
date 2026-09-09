@@ -17,6 +17,7 @@ export enum NodeFieldType {
   Checkbox = 'checkbox',
   File = 'file',
   Password = 'password',
+  PhoneNumber = 'phone_number',
 }
 
 export const NodeFieldTypeWithOptions = [
@@ -25,6 +26,7 @@ export const NodeFieldTypeWithOptions = [
   NodeFieldType.Radio,
   NodeFieldType.Dropdown,
   NodeFieldType.AddressDropdown,
+  NodeFieldType.PhoneNumber,
 ];
 
 export enum EdgeType {
