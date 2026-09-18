@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile.pb
+    environment:
+      PB_SUPERUSER_EMAIL: ${PB_SUPERUSER_EMAIL}
+      PB_SUPERUSER_PASSWORD: ${PB_SUPERUSER_PASSWORD}
     ports:
       - 8080:8080
     volumes:

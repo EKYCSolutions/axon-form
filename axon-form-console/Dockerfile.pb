@@ -11,8 +11,10 @@ RUN unzip /tmp/pb.zip -d /pb/
 
 COPY ./pocketbase/pb_migrations /pb/pb_migrations
 COPY ./pocketbase/pb_hooks /pb/pb_hooks
+COPY ./pocketbase/entrypoint.sh /pb/entrypoint.sh
+RUN chmod +x /pb/entrypoint.sh
 
 EXPOSE 8080
 
-# start PocketBase
-CMD ["/pb/pocketbase", "serve", "--http=0.0.0.0:8080"]
+# seed the superuser (if configured) then start PocketBase
+ENTRYPOINT ["/pb/entrypoint.sh"]
