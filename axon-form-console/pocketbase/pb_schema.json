@@ -1199,7 +1199,8 @@
           "checkbox",
           "file",
           "password",
-          "address_dropdown"
+          "address_dropdown",
+          "phone_number"
         ]
       },
       {
