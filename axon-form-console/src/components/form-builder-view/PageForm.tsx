@@ -32,7 +32,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 interface IProps {
   form: UseFormReturn<PageFormSchemaData>;
-  onSubmit: (data: PageFormSchemaData) => void;
+  onSubmit: (data: PageFormSchemaData) => void | Promise<void>;
   //
 }
 

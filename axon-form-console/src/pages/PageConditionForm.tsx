@@ -365,6 +365,9 @@ export default function PageConditionForm() {
     resolver: zodResolver(PageConditionFormSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
+    defaultValues: {
+      conditions: [],
+    },
   });
 
   useEffect(() => {

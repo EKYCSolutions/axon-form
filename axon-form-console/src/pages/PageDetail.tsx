@@ -23,6 +23,12 @@ export default function PageDetail() {
     resolver: zodResolver(PageFormSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
+    defaultValues: {
+      form: id ?? '',
+      title: '',
+      description: '',
+      fields: [],
+    },
   });
 
   useEffect(() => {

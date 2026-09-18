@@ -31,6 +31,8 @@ import {
   getPageById as getPageByIdService,
   getPageNode as getPageNodeService,
   getValueNodes as getValueNodesService,
+  isSuperuserAuthenticated,
+  client,
   updateCondition as updateConditionService,
   updateEdge as updateEdgeService,
   updateForm as updateFormService,
@@ -57,7 +59,7 @@ import type { PageFormSchemaData } from '@/validations/PageFormValidation';
 import type { SelectOptionFormSchemaData } from '@/validations/SelectOptionValidation';
 import type { ValidationRuleSchemaData } from '@/validations/ValidationRulesValidation';
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { useCallback, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { validate } from 'uuid';
 
 interface FormBuilderProviderProps {
@@ -126,11 +128,19 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
   const [selectedFormId, setSelectedFormId] = useState<string>();
   const [fetchInputFieldNodes, setFetchInputFieldNodes] =
     useState<boolean>(false);
+  const [isAuthed, setIsAuthed] = useState(isSuperuserAuthenticated());
+
+  useEffect(() => {
+    return client.authStore.onChange(() => {
+      setIsAuthed(isSuperuserAuthenticated());
+    }, true);
+  }, []);
 
   // Query: Fetch all pages
   const { data: formsData, refetch: refreshForms } = useQuery({
     queryKey: ['forms'],
     queryFn: () => getAllFormsService(),
+    enabled: isAuthed,
   });
 
   // Query: Fetch single page details
@@ -1101,7 +1111,6 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
         // Create pages
         for (const page of layoutPages) {
           const pageRes = await createPageService({
-            id: page.id,
             form: createdForm.id,
             title: page.title,
             description: page.description,
@@ -1122,7 +1131,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           }
 
           const pageNodeRes = await createNodeService({
-            id: page.id,
+            id: newPageId,
             page: newPageId,
             order: undefined,
             type: NodeType.Page,
@@ -1159,7 +1168,7 @@ export function FormBuilderProvider({ children }: FormBuilderProviderProps) {
           if (!newPageId) continue;
 
           const nodeRes = await createNodeService({
-            id: node.id,
+            id: undefined,
             page: newPageId,
             order: node.order,
             type: node.type as NodeType,

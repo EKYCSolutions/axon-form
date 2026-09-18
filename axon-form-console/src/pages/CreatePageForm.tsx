@@ -19,6 +19,12 @@ export default function CreatePageForm() {
     resolver: zodResolver(PageFormSchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
+    defaultValues: {
+      form: id ?? '',
+      title: '',
+      description: '',
+      fields: [],
+    },
   });
 
   useMemo(() => {
@@ -27,8 +33,8 @@ export default function CreatePageForm() {
     form.setValue('form', id);
   }, [id]);
 
-  function onSubmit(data: PageFormSchemaData) {
-    addPage(data);
+  async function onSubmit(data: PageFormSchemaData) {
+    await addPage(data);
     //
     form.reset(data);
     navigate(-1);
